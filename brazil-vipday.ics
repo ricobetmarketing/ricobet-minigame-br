@@ -14,6 +14,7 @@ TZNAME:-03
 DTSTART:19700101T000000
 END:STANDARD
 END:VTIMEZONE
+
 BEGIN:VEVENT
 DTSTART;TZID=America/Sao_Paulo:20250815T000000
 DTEND;TZID=America/Sao_Paulo:20250815T235900
@@ -22,4 +23,21 @@ SUMMARY:VIP Day - Rico.bet Brasil
 DESCRIPTION:Participe do VIP Day Rico.bet! Missão simples, grandes recompensas. Disponível apenas no dia 15 de cada mês, das 00:00 às 23:59 (horário de Brasília).
 LOCATION:Online em Rico.bet
 END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;TZID=America/Sao_Paulo:20250816T000000
+DTEND;TZID=America/Sao_Paulo:20250816T235900
+SUMMARY:Weekend Warriors - Rico.bet Brasil
+DESCRIPTION:Complete sua missão de Weekend Warriors para desbloquear prêmios especiais! Disponível apenas neste sábado (00:00–23:59, horário de Brasília).
+LOCATION:Online em Rico.bet
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;TZID=America/Sao_Paulo:20250817T000000
+DTEND;TZID=America/Sao_Paulo:20250817T235900
+SUMMARY:Weekend Warriors - Rico.bet Brasil
+DESCRIPTION:Complete sua missão de Weekend Warriors para desbloquear prêmios especiais! Disponível apenas neste domingo (00:00–23:59, horário de Brasília).
+LOCATION:Online em Rico.bet
+END:VEVENT
+
 END:VCALENDAR
