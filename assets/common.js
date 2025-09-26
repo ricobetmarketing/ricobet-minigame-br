@@ -1,4 +1,4 @@
-<script>
+<script> 
 window.MG_LOCK_KEY = 'mg_game_choice_v1';
 
 window.getChoice = () => localStorage.getItem(window.MG_LOCK_KEY);
