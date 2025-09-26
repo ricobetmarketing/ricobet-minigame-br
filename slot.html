@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Slot Realm — 6-Reel “6D” Slot</title>
+<style>
+  :root{
+    --bg:#0a0f1e; --panel:#121a33; --ink:#eaf2ff; --muted:#a6b4d6;
+    --neon:#74f1ff; --neon2:#ff7bd3; --gold:#ffd76a; --lime:#8EFF98;
+    --shadow: rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    background:radial-gradient(1200px 800px at 70% -10%, #18244d 0%, #0a0f1e 55%, #05070d 100%);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .wrap{width:min(1100px,96vw); margin:0 auto; padding:28px 0 40px;}
+  a.back{
+    position:fixed; left:12px; top:12px; z-index:10; text-decoration:none;
+    background:rgba(0,0,0,.5); padding:8px 12px; border-radius:10px; color:#fff; font-weight:700;
+  }
+  .card3d{
+    position:relative; border-radius:22px; padding:18px;
+    background:linear-gradient(180deg, #1b2a56, #0f1832);
+    outline:1px solid rgba(255,255,255,.08); box-shadow: 0 16px 60px var(--shadow);
+  }
+  .gloss:before{
+    content:""; position:absolute; inset:0; border-radius:22px; pointer-events:none;
+    background:conic-gradient(from 210deg at 50% 0%, rgba(255,255,255,.18), rgba(255,255,255,0) 30%),
+               linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%);
+  }
+  h1{margin:0 0 8px; font-size:20px; font-weight:800; text-transform:uppercase}
+  p.sub{margin:0 0 14px; color:var(--muted)}
+  .slot-shell{position:relative; border-radius:26px; padding:18px; background:linear-gradient(180deg,#071226,#030813);
+    outline:1px solid rgba(255,255,255,.06); box-shadow: inset 0 0 50px rgba(116,241,255,.1), 0 18px 50px var(--shadow);
+  }
+  .slot-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px}
+  .meter{display:flex; gap:8px}
+  .badge{padding:8px 12px; border-radius:12px; background:linear-gradient(180deg,#0d1832,#0a1226);
+    outline:1px solid rgba(255,255,255,.08); font-weight:700}
+  .badge .v{color:var(--gold)}
+  .reelbox{position:relative; border-radius:18px; padding:14px; background:linear-gradient(180deg,#0e1a3a,#0b142c);
+    outline:1px solid rgba(255,255,255,.08); box-shadow: inset 0 -6px 0 rgba(0,0,0,.35), inset 0 30px 60px rgba(0,0,0,.45)}
+  .reels{display:grid; grid-template-columns: repeat(6, 1fr); gap:10px; height:180px; perspective:900px}
+  .reel{position:relative; border-radius:14px; overflow:hidden; background:linear-gradient(180deg,#101b3a,#0c142b);
+    outline:1px solid rgba(255,255,255,.06); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -4px 0 rgba(0,0,0,.45)}
+  .col{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; gap:14px; padding:14px;
+    transform-style:preserve-3d;}
+  .sym{width:100%; height:56px; display:grid; place-items:center; font-size:32px; font-weight:900; color:#fff;
+    text-shadow:0 4px 14px rgba(0,0,0,.6); background:linear-gradient(180deg,#1b2a56,#0f1832);
+    border-radius:12px; outline:1px solid rgba(255,255,255,.06)}
+  .glow{position:absolute; inset:-20px; background:radial-gradient(200px 100px at 50% 0%, rgba(116,241,255,.15), transparent 70%); pointer-events:none}
+  .controls{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px}
+  .lever{flex:1; display:flex; gap:10px}
+  .btn{cursor:pointer; border:0; border-radius:16px; padding:14px 18px; font-weight:900; letter-spacing:.5px; text-transform:uppercase;
+    background:linear-gradient(180deg,#1d2a52,#0e1935); color:var(--ink); outline:1px solid rgba(255,255,255,.1);
+    box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .btn.primary{background:linear-gradient(to right, #71e1ff, #25c3ff)}
+  .btn:active{transform:translateY(1px)}
+  .hint{font-size:12px; color:var(--muted)}
+  .payout{margin-left:auto; font-weight:800; color:var(--lime)}
+  .winflash{position:absolute; inset:0; border-radius:26px; pointer-events:none; opacity:0; transition:opacity .3s ease; background:
+    radial-gradient(500px 200px at 50% -10%, rgba(255,255,255,.15), transparent 60%),
+    radial-gradient(500px 200px at 50% 110%, rgba(255,235,140,.25), transparent 60%)}
+  .slot-shell.win .winflash{opacity:1}
+  #confetti{position:absolute; inset:0; pointer-events:none}
+</style>
+</head>
+<body>
+  <a class="back" href="index.html">← Back</a>
+
+  <div class="wrap">
+    <div class="card3d gloss">
+      <h1>6-Reel “6D” Slot</h1>
+      <p class="sub">Cinematic depth, cascading stops, and neon glow. Click SPIN to start.</p>
+
+      <div class="slot-shell" id="slot">
+        <div class="winflash"></div>
+        <canvas id="confetti"></canvas>
+
+        <div class="slot-top">
+          <div class="meter">
+            <div class="badge">Balance: <span class="v" id="bal">1000</span></div>
+            <div class="badge">Bet: <span class="v" id="bet">10</span></div>
+          </div>
+          <div class="badge">Last Win: <span class="v" id="lastWin">0</span></div>
+        </div>
+
+        <div class="reelbox">
+          <div class="reels" id="reels"></div>
+          <div class="glow"></div>
+        </div>
+
+        <div class="controls">
+          <div class="lever">
+            <button class="btn" id="minus">−</button>
+            <button class="btn" id="plus">+</button>
+            <button class="btn primary" id="spin">Spin</button>
+            <span class="hint">Tip: hold SPIN for turbo.</span>
+          </div>
+          <div class="payout" id="payout"> </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="assets/common.js"></script>
+<script>
+/* --- Lock gate: if player started LIVE already, boot them back --- */
+const existingChoice = getChoice();
+if (existingChoice && existingChoice !== 'slot') {
+  alert('You already started Live. Slot is locked for this event.');
+  location.replace('index.html');
+}
+
+/*** SLOT MACHINE ***/
+const SYMBOLS=["🍒","💎","7️⃣","⭐","🔔","BAR"];
+const reelsEl=document.getElementById('reels');
+const balEl=document.getElementById('bal');
+const betEl=document.getElementById('bet');
+const lastWinEl=document.getElementById('lastWin');
+const payoutEl=document.getElementById('payout');
+const spinBtn=document.getElementById('spin');
+const minusBtn=document.getElementById('minus');
+const plusBtn=document.getElementById('plus');
+const slotShell=document.getElementById('slot');
+
+let BAL=1000, BET=10, spinning=false, turbo=false, started=false;
+function fmt(n){return Number(n).toLocaleString()}
+function setBet(v){BET=Math.max(1, Math.min(100, v)); betEl.textContent=BET}
+setBet(BET); balEl.textContent=fmt(BAL);
+
+function makeReel(){
+  const reel=document.createElement('div'); reel.className='reel';
+  const col=document.createElement('div'); col.className='col';
+  const pool=[]; for(let i=0;i<16;i++){ pool.push(SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]) }
+  pool.forEach(s=>{ const d=document.createElement('div'); d.className='sym'; d.textContent=s; col.appendChild(d); });
+  reel.appendChild(col); return reel;
+}
+for(let i=0;i<6;i++){ reelsEl.appendChild(makeReel()); }
+
+function spinOnce(){
+  if(spinning) return;
+  if(BAL < BET){ payoutEl.textContent='Insufficient balance'; return; }
+  if(!started){ setChoice('slot'); started=true; } // LOCK HERE on first spin
+
+  spinning=true; BAL-=BET; balEl.textContent=fmt(BAL); payoutEl.textContent=''; slotShell.classList.remove('win');
+  const cols=[...document.querySelectorAll('.reel .col')];
+  const results=[];
+  cols.forEach((col,idx)=>{
+    const dur=(turbo? 600: 1400) + idx*120;
+    const start=performance.now();
+    const anim=()=>{
+      const t=performance.now()-start; const p=Math.min(1,t/dur);
+      const offset= -(p * 14 * 56);
+      col.style.transform=`translateY(${offset}px) rotateX(${p*15}deg)`;
+      if(t<dur){ requestAnimationFrame(anim); }
+      else{
+        const s=SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+        const d=document.createElement('div'); d.className='sym'; d.textContent=s; col.appendChild(d);
+        col.style.transform='translateY(0)';
+        while(col.children.length>16){ col.removeChild(col.firstChild) }
+        results[idx]=s;
+        if(results.filter(Boolean).length===cols.length){ evaluate(results) }
+      }
+    };
+    requestAnimationFrame(anim);
+  });
+}
+
+function evaluate(arr){
+  const freq={}; arr.forEach(s=>freq[s]=(freq[s]||0)+1);
+  let bestSym=null, best=0; for(const k in freq){ if(freq[k]>best){best=freq[k]; bestSym=k} }
+  let win=0;
+  if(best>=3){ win = Math.round(BET * (best===3? 3 : best===4? 8 : best===5? 16 : 32)); }
+  BAL += win; balEl.textContent=fmt(BAL); lastWinEl.textContent=fmt(win);
+  if(win>0){ payoutEl.textContent=`WIN ${fmt(win)} — ${best}× ${bestSym}`; slotShell.classList.add('win'); burstConfetti(); }
+  else{ payoutEl.textContent='No win — try again'; }
+  spinning=false;
+}
+
+spinBtn.addEventListener('mousedown',()=>{ turbo=true; })
+spinBtn.addEventListener('mouseup',()=>{ turbo=false; })
+spinBtn.addEventListener('mouseleave',()=>{ turbo=false; })
+spinBtn.addEventListener('click',spinOnce);
+minusBtn.addEventListener('click',()=>setBet(BET-1));
+plusBtn.addEventListener('click',()=>setBet(BET+1));
+
+/*** Confetti ***/
+const canvas=document.getElementById('confetti'), ctx=canvas.getContext('2d');
+function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight }
+addEventListener('resize',resize); resize();
+function burstConfetti(){
+  const parts=[]; const N=80; for(let i=0;i<N;i++){ parts.push({x:Math.random()*canvas.width,y:-10,vx:(Math.random()-0.5)*2,vy:Math.random()*2+1,r:Math.random()*3+2,life:120+Math.random()*40}); }
+  let t=0; (function loop(){
+    t++; ctx.clearRect(0,0,canvas.width,canvas.height);
+    parts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.02; p.life--; ctx.globalAlpha=Math.max(0,p.life/160); ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=`hsl(${(p.x+p.y)%360},100%,70%)`; ctx.fill(); });
+    ctx.globalAlpha=1; if(t<170) requestAnimationFrame(loop); else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+</script>
+</body>
+</html>
