@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Live Realm — Poker Voucher Flip</title>
+<style>
+  :root{ --bg:#0a0f1e; --ink:#eaf2ff; --muted:#a6b4d6; --shadow:rgba(0,0,0,.55); }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    background:radial-gradient(1200px 800px at 70% -10%, #18244d 0%, #0a0f1e 55%, #05070d 100%);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .wrap{width:min(1000px,96vw); padding:28px 0 40px}
+  a.back{
+    position:fixed; left:12px; top:12px; z-index:10; text-decoration:none;
+    background:rgba(0,0,0,.5); padding:8px 12px; border-radius:10px; color:#fff; font-weight:700;
+  }
+  .card3d{
+    position:relative; border-radius:22px; padding:18px;
+    background:linear-gradient(180deg, #1b2a56, #0f1832);
+    outline:1px solid rgba(255,255,255,.08); box-shadow: 0 16px 60px var(--shadow);
+  }
+  .gloss:before{
+    content:""; position:absolute; inset:0; border-radius:22px; pointer-events:none;
+    background:conic-gradient(from 210deg at 50% 0%, rgba(255,255,255,.18), rgba(255,255,255,0) 30%),
+               linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%);
+  }
+  h1{margin:0 0 8px; font-size:20px; font-weight:800; text-transform:uppercase}
+  p.sub{margin:0 16px 18px; color:var(--muted)}
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; padding:0 16px}
+  @media (max-width:820px){ .grid{grid-template-columns:1fr 1fr} .grid .voucher:nth-child(3){grid-column:1/-1} }
+  .voucher{position:relative; perspective:1200px}
+  .card{position:relative; width:100%; aspect-ratio:5/7; transform-style:preserve-3d;
+        transition: transform .8s cubic-bezier(.2,.8,.2,1); border-radius:18px; cursor:pointer}
+  .card.is-flipped{transform: rotateY(180deg)}
+  .face{position:absolute; inset:0; backface-visibility:hidden; border-radius:18px; display:grid; place-items:center}
+  .front{background:radial-gradient(200px 120px at 50% -20%, #ffffff, #e9eefc 40%, #c8d4f3 100%); outline:2px solid #e5ecff}
+  .back{transform:rotateY(180deg); background:linear-gradient(180deg,#0e1a3a,#0a1329); color:#fff; outline:1px solid rgba(255,255,255,.08)}
+  .pip{font-size:48px}
+  .seal{position:absolute; inset:auto 12px 12px 12px; display:flex; justify-content:space-between; align-items:center; padding:10px 12px;
+        border-radius:12px; background:rgba(0,0,0,.5); color:#fff; font-weight:800; letter-spacing:.4px}
+  .copy{cursor:pointer; border:0; border-radius:10px; padding:8px 10px; font-weight:800; background:linear-gradient(to right,#71e1ff,#25c3ff)}
+  .lock{position:absolute; top:8px; right:8px; background:rgba(0,0,0,.5); padding:6px 8px; border-radius:10px; font-size:12px}
+  .note{margin:14px 16px 4px; color:var(--muted); font-size:12px}
+</style>
+</head>
+<body>
+  <a class="back" href="index.html">← Back</a>
+
+  <div class="wrap">
+    <div class="card3d gloss">
+      <h1>Poker Voucher Flip</h1>
+      <p class="sub">Flip exactly one card to reveal your voucher code. You can go back before you flip; once flipped, you’re locked to Live for this event.</p>
+
+      <div class="grid" id="voucherGrid"><!-- injected --></div>
+      <div class="note">Admin: change <code>VOUCHER_CODES</code> in this file. For production, validate on your backend.</div>
+    </div>
+  </div>
+
+<script src="assets/common.js"></script>
+<script>
+/* --- Lock gate: if player started SLOT already, boot them back --- */
+const existingChoice = getChoice();
+if (existingChoice && existingChoice !== 'live') {
+  alert('You already started Slot. Live is locked for this event.');
+  location.replace('index.html');
+}
+
+/*** Voucher logic ***/
+const VOUCHER_CODES = [
+  {label:'Poker Bonus',  code:'POKER-ACE-9X5'},
+  {label:'Live Cashback',code:'LIVE-CASH-15'},
+  {label:'VIP Ticket',    code:'VIP-TICKET-01'}
+];
+// Local “already flipped” flag for the game (separate from path lock)
+const FLIP_KEY='live_voucher_claimed_v1';
+
+const grid=document.getElementById('voucherGrid');
+const deck=['♠','♥','♦'];
+
+// shuffle
+const codes=[...VOUCHER_CODES].sort(()=>Math.random()-.5);
+
+const claimedRaw = localStorage.getItem(FLIP_KEY);
+const alreadyFlipped = !!claimedRaw;
+
+for(let i=0;i<3;i++){
+  const voucher=document.createElement('div'); voucher.className='voucher';
+  const card=document.createElement('div'); card.className='card';
+  const front=document.createElement('div'); front.className='face front';
+  const back=document.createElement('div'); back.className='face back';
+
+  front.innerHTML = `<div class="pip" aria-hidden>🂠</div>`;
+  back.innerHTML  = `
+    <div style="text-align:center">
+      <div style="font-size:46px; margin-bottom:8px">${deck[i]}</div>
+      <div style="font-weight:800; font-size:18px; margin-bottom:8px">${codes[i].label}</div>
+      <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:16px; letter-spacing:.6px">${codes[i].code}</div>
+    </div>
+    <div class="seal"><span>Voucher</span><button class="copy" data-code="${codes[i].code}">Copy</button></div>
+  `;
+
+  card.appendChild(front); card.appendChild(back); voucher.appendChild(card);
+
+  if (alreadyFlipped) {
+    const locked=document.createElement('div'); locked.className='lock'; locked.textContent='Claimed';
+    voucher.appendChild(locked); card.classList.add('is-flipped'); card.style.pointerEvents='none';
+  } else {
+    card.addEventListener('click',()=> claim(card, codes[i].code));
+  }
+
+  grid.appendChild(voucher);
+}
+
+// Copy handler
+grid.addEventListener('click',e=>{
+  const btn=e.target.closest('.copy'); if(!btn) return;
+  navigator.clipboard.writeText(btn.dataset.code).then(()=>{ btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy',1200) });
+});
+
+let started=false;
+function claim(card, code){
+  if (localStorage.getItem(FLIP_KEY)) return;
+  card.classList.add('is-flipped');
+
+  // On first flip, lock the path and set local “flipped” state
+  if(!started){ setChoice('live'); started=true; }
+  localStorage.setItem(FLIP_KEY, JSON.stringify({code, ts: Date.now()}));
+
+  // disable others
+  document.querySelectorAll('.voucher .card').forEach(c=>{
+    if(c!==card){ c.style.pointerEvents='none'; c.parentElement.insertAdjacentHTML('beforeend','<div class="lock">Locked</div>'); }
+  });
+}
+</script>
+</body>
+</html>
