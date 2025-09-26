@@ -3,12 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Slot Realm — 6-Reel “6D” Slot</title>
+<title>Slot Realm — Mega Slots (5 Spins)</title>
 <style>
   :root{
     --bg:#0a0f1e; --panel:#121a33; --ink:#eaf2ff; --muted:#a6b4d6;
-    --neon:#74f1ff; --neon2:#ff7bd3; --gold:#ffd76a; --lime:#8EFF98;
-    --shadow: rgba(0,0,0,.55);
+    --neon:#74f1ff; --gold:#ffd76a; --lime:#8EFF98; --shadow:rgba(0,0,0,.55);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -18,28 +17,27 @@
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     display:flex; align-items:center; justify-content:center;
   }
-  .wrap{width:min(1100px,96vw); margin:0 auto; padding:28px 0 40px;}
   a.back{
     position:fixed; left:12px; top:12px; z-index:10; text-decoration:none;
     background:rgba(0,0,0,.5); padding:8px 12px; border-radius:10px; color:#fff; font-weight:700;
   }
+  .wrap{width:min(1100px,96vw); margin:0 auto; padding:28px 0 40px;}
   .card3d{
     position:relative; border-radius:22px; padding:18px;
     background:linear-gradient(180deg, #1b2a56, #0f1832);
-    outline:1px solid rgba(255,255,255,.08); box-shadow: 0 16px 60px var(--shadow);
+    outline:1px solid rgba(255,255,255,.08); box-shadow:0 16px 60px var(--shadow);
   }
-  .gloss:before{
-    content:""; position:absolute; inset:0; border-radius:22px; pointer-events:none;
+  .card3d:before{content:""; position:absolute; inset:0; border-radius:22px; pointer-events:none;
     background:conic-gradient(from 210deg at 50% 0%, rgba(255,255,255,.18), rgba(255,255,255,0) 30%),
-               linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%);
-  }
+               linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%);}
   h1{margin:0 0 8px; font-size:20px; font-weight:800; text-transform:uppercase}
   p.sub{margin:0 0 14px; color:var(--muted)}
+
+  /* Machine */
   .slot-shell{position:relative; border-radius:26px; padding:18px; background:linear-gradient(180deg,#071226,#030813);
-    outline:1px solid rgba(255,255,255,.06); box-shadow: inset 0 0 50px rgba(116,241,255,.1), 0 18px 50px var(--shadow);
-  }
+    outline:1px solid rgba(255,255,255,.06); box-shadow: inset 0 0 50px rgba(116,241,255,.1), 0 18px 50px var(--shadow)}
   .slot-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px}
-  .meter{display:flex; gap:8px}
+  .meter{display:flex; gap:8px; flex-wrap:wrap}
   .badge{padding:8px 12px; border-radius:12px; background:linear-gradient(180deg,#0d1832,#0a1226);
     outline:1px solid rgba(255,255,255,.08); font-weight:700}
   .badge .v{color:var(--gold)}
@@ -48,19 +46,16 @@
   .reels{display:grid; grid-template-columns: repeat(6, 1fr); gap:10px; height:180px; perspective:900px}
   .reel{position:relative; border-radius:14px; overflow:hidden; background:linear-gradient(180deg,#101b3a,#0c142b);
     outline:1px solid rgba(255,255,255,.06); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -4px 0 rgba(0,0,0,.45)}
-  .col{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; gap:14px; padding:14px;
-    transform-style:preserve-3d;}
+  .col{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; gap:14px; padding:14px; transform-style:preserve-3d}
   .sym{width:100%; height:56px; display:grid; place-items:center; font-size:32px; font-weight:900; color:#fff;
-    text-shadow:0 4px 14px rgba(0,0,0,.6); background:linear-gradient(180deg,#1b2a56,#0f1832);
-    border-radius:12px; outline:1px solid rgba(255,255,255,.06)}
+    text-shadow:0 4px 14px rgba(0,0,0,.6); background:linear-gradient(180deg,#1b2a56,#0f1832); border-radius:12px; outline:1px solid rgba(255,255,255,.06)}
   .glow{position:absolute; inset:-20px; background:radial-gradient(200px 100px at 50% 0%, rgba(116,241,255,.15), transparent 70%); pointer-events:none}
   .controls{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px}
   .lever{flex:1; display:flex; gap:10px}
   .btn{cursor:pointer; border:0; border-radius:16px; padding:14px 18px; font-weight:900; letter-spacing:.5px; text-transform:uppercase;
-    background:linear-gradient(180deg,#1d2a52,#0e1935); color:var(--ink); outline:1px solid rgba(255,255,255,.1);
-    box-shadow:0 12px 30px rgba(0,0,0,.35)}
+    background:linear-gradient(180deg,#1d2a52,#0e1935); color:var(--ink); outline:1px solid rgba(255,255,255,.1); box-shadow:0 12px 30px rgba(0,0,0,.35)}
   .btn.primary{background:linear-gradient(to right, #71e1ff, #25c3ff)}
-  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.5; pointer-events:none}
   .hint{font-size:12px; color:var(--muted)}
   .payout{margin-left:auto; font-weight:800; color:var(--lime)}
   .winflash{position:absolute; inset:0; border-radius:26px; pointer-events:none; opacity:0; transition:opacity .3s ease; background:
@@ -68,15 +63,29 @@
     radial-gradient(500px 200px at 50% 110%, rgba(255,235,140,.25), transparent 60%)}
   .slot-shell.win .winflash{opacity:1}
   #confetti{position:absolute; inset:0; pointer-events:none}
+
+  /* Voucher modal */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; place-items:center; z-index:9999}
+  .overlay.show{display:grid}
+  .modal{width:min(520px,92vw); border-radius:20px; background:linear-gradient(180deg,#0e1a3a,#0a1329); color:#fff; padding:22px;
+         outline:1px solid rgba(255,255,255,.1); box-shadow:0 18px 60px rgba(0,0,0,.6)}
+  .modal h3{margin:0 0 8px}
+  .voucher{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:18px; letter-spacing:.6px; padding:10px 12px; border-radius:10px;
+           background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.25); text-align:center}
+  .row{display:flex; gap:10px; margin-top:12px}
+  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:800}
+  .copy{background:linear-gradient(to right,#71e1ff,#25c3ff)}
+  .close{background:#fff; color:#061018}
+  .small{font-size:12px; color:#cdd6f6; margin-top:6px}
 </style>
 </head>
 <body>
   <a class="back" href="index.html">← Back</a>
 
   <div class="wrap">
-    <div class="card3d gloss">
-      <h1>6-Reel “6D” Slot</h1>
-      <p class="sub">Cinematic depth, cascading stops, and neon glow. Click SPIN to start.</p>
+    <div class="card3d">
+      <h1>Mega Slots — 5 Spins</h1>
+      <p class="sub">Spin up to 5 times. A voucher appears randomly but is guaranteed by the last spin. After the voucher pops, the game ends.</p>
 
       <div class="slot-shell" id="slot">
         <div class="winflash"></div>
@@ -84,7 +93,7 @@
 
         <div class="slot-top">
           <div class="meter">
-            <div class="badge">Balance: <span class="v" id="bal">1000</span></div>
+            <div class="badge">Spins Left: <span class="v" id="spinsLeft">5</span></div>
             <div class="badge">Bet: <span class="v" id="bet">10</span></div>
           </div>
           <div class="badge">Last Win: <span class="v" id="lastWin">0</span></div>
@@ -100,7 +109,7 @@
             <button class="btn" id="minus">−</button>
             <button class="btn" id="plus">+</button>
             <button class="btn primary" id="spin">Spin</button>
-            <span class="hint">Tip: hold SPIN for turbo.</span>
+            <span class="hint">You will get a voucher within 5 spins.</span>
           </div>
           <div class="payout" id="payout"> </div>
         </div>
@@ -108,32 +117,73 @@
     </div>
   </div>
 
+  <!-- Voucher Modal -->
+  <div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3>🎉 Congratulations! Your Voucher</h3>
+      <div class="voucher" id="voucherCode">CODE-XXXX-1234</div>
+      <div class="row">
+        <button class="copy" id="copyBtn">Copy Code</button>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+      <div class="small">This game is complete. Come back from the landing page for other events.</div>
+    </div>
+  </div>
+
 <script src="assets/common.js"></script>
 <script>
-/* --- Lock gate: if player started LIVE already, boot them back --- */
+/* ========= Guard: lock to SLOT path ========= */
 const existingChoice = getChoice();
 if (existingChoice && existingChoice !== 'slot') {
   alert('You already started Live. Slot is locked for this event.');
   location.replace('index.html');
 }
+/* ========= Config ========= */
+const MAX_SPINS = 5;
+const SLOT_STATE_KEY   = 'slot_spins_state_v1';   // {left:number, claimed:boolean}
+const SLOT_VOUCHER_KEY = 'slot_voucher_code_v1';
+const VOUCHER_CODES    = ['MEGA-777-10FS', 'MEGA-777-20FS', 'MEGA-777-BOOST']; // <-- EDIT YOUR CODES
 
-/*** SLOT MACHINE ***/
+/* ========= UI refs ========= */
+const reelsEl   = document.getElementById('reels');
+const betEl     = document.getElementById('bet');
+const lastWinEl = document.getElementById('lastWin');
+const payoutEl  = document.getElementById('payout');
+const spinBtn   = document.getElementById('spin');
+const minusBtn  = document.getElementById('minus');
+const plusBtn   = document.getElementById('plus');
+const slotShell = document.getElementById('slot');
+const spinsLeftEl = document.getElementById('spinsLeft');
+
+/* ========= State ========= */
 const SYMBOLS=["🍒","💎","7️⃣","⭐","🔔","BAR"];
-const reelsEl=document.getElementById('reels');
-const balEl=document.getElementById('bal');
-const betEl=document.getElementById('bet');
-const lastWinEl=document.getElementById('lastWin');
-const payoutEl=document.getElementById('payout');
-const spinBtn=document.getElementById('spin');
-const minusBtn=document.getElementById('minus');
-const plusBtn=document.getElementById('plus');
-const slotShell=document.getElementById('slot');
+let BET=10, spinning=false, turbo=false, started=false;
 
-let BAL=1000, BET=10, spinning=false, turbo=false, started=false;
 function fmt(n){return Number(n).toLocaleString()}
 function setBet(v){BET=Math.max(1, Math.min(100, v)); betEl.textContent=BET}
-setBet(BET); balEl.textContent=fmt(BAL);
+setBet(BET);
 
+/* Load/save progress */
+function loadState(){
+  const raw = localStorage.getItem(SLOT_STATE_KEY);
+  if (!raw) return { left: MAX_SPINS, claimed:false };
+  try { return JSON.parse(raw); } catch { return { left: MAX_SPINS, claimed:false }; }
+}
+function saveState(s){ localStorage.setItem(SLOT_STATE_KEY, JSON.stringify(s)); }
+function setVoucher(code){
+  localStorage.setItem(SLOT_VOUCHER_KEY, code);
+}
+
+/* init */
+let state = loadState();
+spinsLeftEl.textContent = state.left;
+
+/* if already claimed, end game */
+if (state.claimed) {
+  finishGame(localStorage.getItem(SLOT_VOUCHER_KEY) || 'VOUCHER-CLAIMED');
+}
+
+/* build reels */
 function makeReel(){
   const reel=document.createElement('div'); reel.className='reel';
   const col=document.createElement('div'); col.className='col';
@@ -143,12 +193,15 @@ function makeReel(){
 }
 for(let i=0;i<6;i++){ reelsEl.appendChild(makeReel()); }
 
+/* spin flow */
 function spinOnce(){
   if(spinning) return;
-  if(BAL < BET){ payoutEl.textContent='Insufficient balance'; return; }
-  if(!started){ setChoice('slot'); started=true; } // LOCK HERE on first spin
+  if(state.claimed) return;
+  if(state.left <= 0) { maybeRevealVoucher(); return; }
+  if(!started){ setChoice('slot'); started=true; } // Lock path on first real spin
 
-  spinning=true; BAL-=BET; balEl.textContent=fmt(BAL); payoutEl.textContent=''; slotShell.classList.remove('win');
+  spinning=true; payoutEl.textContent=''; slotShell.classList.remove('win');
+
   const cols=[...document.querySelectorAll('.reel .col')];
   const results=[];
   cols.forEach((col,idx)=>{
@@ -173,16 +226,53 @@ function spinOnce(){
 }
 
 function evaluate(arr){
+  // fun non-monetary “win text”
   const freq={}; arr.forEach(s=>freq[s]=(freq[s]||0)+1);
-  let bestSym=null, best=0; for(const k in freq){ if(freq[k]>best){best=freq[k]; bestSym=k} }
-  let win=0;
-  if(best>=3){ win = Math.round(BET * (best===3? 3 : best===4? 8 : best===5? 16 : 32)); }
-  BAL += win; balEl.textContent=fmt(BAL); lastWinEl.textContent=fmt(win);
-  if(win>0){ payoutEl.textContent=`WIN ${fmt(win)} — ${best}× ${bestSym}`; slotShell.classList.add('win'); burstConfetti(); }
-  else{ payoutEl.textContent='No win — try again'; }
-  spinning=false;
+  let best=0; for(const k in freq){ if(freq[k]>best) best=freq[k]; }
+  const msg = (best>=3) ? `Nice! ${best} of a kind` : `No line — keep going`;
+  payoutEl.textContent = msg;
+  if(best>=3){ slotShell.classList.add('win'); burstConfetti(); }
+
+  // reduce spins and maybe reveal voucher
+  state.left = Math.max(0, state.left - 1);
+  saveState(state);
+  spinsLeftEl.textContent = state.left;
+  maybeRevealVoucher();
 }
 
+function maybeRevealVoucher(){
+  if(state.claimed) return;
+  // Always reveal on last spin. Before that, ~30% chance per spin.
+  const shouldReveal = (state.left === 0) || (Math.random() < 0.3);
+  if(!shouldReveal) {
+    spinning=false;
+    if(state.left === 0) { // safety
+      revealVoucher();
+    }
+    return;
+  }
+  revealVoucher();
+}
+
+function revealVoucher(){
+  const code = VOUCHER_CODES[Math.floor(Math.random()*VOUCHER_CODES.length)];
+  setVoucher(code);
+  state.claimed = true;
+  saveState(state);
+  finishGame(code);
+}
+
+function finishGame(code){
+  // Disable spin permanently
+  spinBtn.disabled = true;
+  minusBtn.disabled = true;
+  plusBtn.disabled = true;
+  // Show voucher modal
+  document.getElementById('voucherCode').textContent = code;
+  document.getElementById('voucherOverlay').classList.add('show');
+}
+
+/* UI events */
 spinBtn.addEventListener('mousedown',()=>{ turbo=true; })
 spinBtn.addEventListener('mouseup',()=>{ turbo=false; })
 spinBtn.addEventListener('mouseleave',()=>{ turbo=false; })
@@ -190,7 +280,7 @@ spinBtn.addEventListener('click',spinOnce);
 minusBtn.addEventListener('click',()=>setBet(BET-1));
 plusBtn.addEventListener('click',()=>setBet(BET+1));
 
-/*** Confetti ***/
+/* Confetti */
 const canvas=document.getElementById('confetti'), ctx=canvas.getContext('2d');
 function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight }
 addEventListener('resize',resize); resize();
@@ -202,7 +292,19 @@ function burstConfetti(){
     ctx.globalAlpha=1; if(t<170) requestAnimationFrame(loop); else ctx.clearRect(0,0,canvas.width,canvas.height);
   })();
 }
+
+/* Modal buttons */
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  const code = document.getElementById('voucherCode').textContent.trim();
+  navigator.clipboard.writeText(code).then(()=>{
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(()=>btn.textContent='Copy Code',1200);
+  });
+});
+document.getElementById('closeBtn').addEventListener('click',()=>{
+  document.getElementById('voucherOverlay').classList.remove('show');
+});
 </script>
 </body>
 </html>
- 
