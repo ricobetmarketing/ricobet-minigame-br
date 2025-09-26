@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Multi‑Theme Slot — 5 Spins → Voucher</title>
+<style>
+  /* ===== Base + Theme Tokens ===== */
+  :root{
+    --bg:#0a0f1e; --ink:#eef4ff; --muted:#a9b7d8;
+    --frame1:#ffea9a; --frame2:#ffc94d; --frame3:#d88f00; --frame4:#8a5600; /* default gold */
+    --accent:#ff3b3b; --panel1:#151c36; --panel2:#0c142a; --bulb:rgba(255,220,120,1);
+    --glow:rgba(255,180,50,.7); --title1:#3d0a06; --titleShadow:rgba(255,140,40,.6);
+    --chip:#1c2a52; --chip2:#0e1936; --note:#a9b7d8; --voucherInk:#2c0c00; --voucherBg:rgba(255,255,255,.35);
+  }
+  body[data-theme="neon"]{
+    --bg:#040813; --ink:#eaffff; --muted:#a9e6ff;
+    --frame1:#1b1f3a; --frame2:#141a33; --frame3:#0f162c; --frame4:#0a1126;
+    --accent:#00ffe6; --panel1:#0a1226; --panel2:#071021; --bulb:rgba(120,240,255,1);
+    --glow:rgba(0,255,230,.8); --title1:#eaffff; --titleShadow:rgba(0,255,230,.8);
+    --chip:#0c2144; --chip2:#08162f; --note:#a9e6ff; --voucherInk:#001a1a; --voucherBg:rgba(180,255,255,.35);
+  }
+  body[data-theme="treasure"]{
+    --bg:#0b0a06; --ink:#fffceb; --muted:#e6d8a5;
+    --frame1:#ffe9a3; --frame2:#e8b948; --frame3:#b67d1e; --frame4:#6d4412;
+    --accent:#ff5d00; --panel1:#2a1e0b; --panel2:#1b1307; --bulb:rgba(255,215,130,1);
+    --glow:rgba(255,180,60,.75); --title1:#3b1d00; --titleShadow:rgba(255,180,60,.7);
+    --chip:#3b2a0f; --chip2:#1f1507; --note:#e6d8a5; --voucherInk:#2a1400; --voucherBg:rgba(255,235,180,.45);
+  }
+  body[data-theme="candy"]{
+    --bg:#fffbff; --ink:#221722; --muted:#775e77;
+    --frame1:#ffd1e8; --frame2:#ff9ed1; --frame3:#ff6fb3; --frame4:#c74f8b;
+    --accent:#ff3bb9; --panel1:#fff1f7; --panel2:#ffe6f2; --bulb:rgba(255,180,230,1);
+    --glow:rgba(255,120,220,.8); --title1:#5c1044; --titleShadow:rgba(255,120,220,.8);
+    --chip:#ffd6ea; --chip2:#ffc1df; --note:#775e77; --voucherInk:#4a0e36; --voucherBg:rgba(255,220,240,.7);
+  }
+  body[data-theme="space"]{
+    --bg:#050612; --ink:#e9f0ff; --muted:#a9b7ff;
+    --frame1:#b0c5ff; --frame2:#7aa5ff; --frame3:#466bd8; --frame4:#1f2c77;
+    --accent:#7af0ff; --panel1:#0d1230; --panel2:#0a0f26; --bulb:rgba(160,210,255,1);
+    --glow:rgba(120,180,255,.85); --title1:#e9f0ff; --titleShadow:rgba(120,180,255,.9);
+    --chip:#13205c; --chip2:#0b153e; --note:#a9b7ff; --voucherInk:#081226; --voucherBg:rgba(190,220,255,.35);
+  }
+  body[data-theme="royale"]{
+    --bg:#0a0a0f; --ink:#f4f4f6; --muted:#bdbdd0;
+    --frame1:#c8b46b; --frame2:#a89240; --frame3:#6a5a2e; --frame4:#35311f;
+    --accent:#f9cc3d; --panel1:#161616; --panel2:#0e0e0e; --bulb:rgba(250,220,120,1);
+    --glow:rgba(250,210,80,.75); --title1:#f7f7f7; --titleShadow:rgba(250,210,80,.75);
+    --chip:#1f1f1f; --chip2:#151515; --note:#bdbdd0; --voucherInk:#0e0e0e; --voucherBg:rgba(255,255,255,.2);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    background: radial-gradient(1400px 900px at 70% -10%, #1b2550 0%, var(--bg) 55%, #04070d 100%), var(--bg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    display:flex; align-items:center; justify-content:center; padding:20px; flex-direction:column; gap:14px;
+  }
+
+  /* Theme picker */
+  .themes{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+  .themes button{cursor:pointer; border:0; padding:8px 12px; border-radius:999px; font-weight:800; background:var(--panel1); color:var(--ink); outline:1px solid rgba(255,255,255,.1)}
+  .themes button.active{background:linear-gradient(90deg,var(--frame1),var(--frame2)); color:#111}
+
+  .stage{position:relative; width:min(520px, 96vw)}
+  .top-glow{position:absolute; inset:-30px -30px auto -30px; height:140px; z-index:0; pointer-events:none; background:radial-gradient(250px 120px at 50% 100%, rgba(255,230,150,.25), transparent 70%); filter:blur(10px)}
+
+  .machine{position:relative; z-index:1; border-radius:26px; padding:18px 18px 22px;
+    background: linear-gradient(180deg, var(--frame1), var(--frame2) 26%, var(--frame3) 70%, var(--frame4) 100%);
+    box-shadow: 0 40px 80px rgba(0,0,0,.6), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -6px 0 rgba(0,0,0,.35);
+    outline:2px solid rgba(255,255,255,.18);
+  }
+  .bevel{position:absolute; inset:10px; border-radius:20px; pointer-events:none; background:linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 30%); mix-blend-mode:screen}
+
+  .marquee{position:absolute; inset:6px; border-radius:22px; pointer-events:none; z-index:2; display:grid; grid-template: repeat(1, 1fr) / repeat(28, 1fr)}
+  .marquee i{width:10px; height:10px; border-radius:50%; background:radial-gradient(circle at 40% 35%, #fff, var(--bulb) 60%, rgba(255,255,180,.2) 100%); box-shadow:0 0 6px var(--glow), 0 0 18px var(--glow); animation:twinkle 2.2s infinite}
+  .marquee i:nth-child(odd){animation-delay:.6s} .marquee i:nth-child(3n){animation-delay:1.2s}
+  @keyframes twinkle { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.4)} }
+
+  .header{text-align:center; padding-top:6px; margin-bottom:10px; text-transform:uppercase; font-weight:900; letter-spacing:.5px; color:var(--title1); text-shadow:0 1px 0 rgba(255,255,255,.7), 0 4px 18px var(--titleShadow), 0 0 40px var(--titleShadow)}
+  .mega{font-size:18px; display:block}
+  .title{font-size:34px; display:block}
+
+  .window{position:relative; border-radius:18px; background:linear-gradient(180deg, var(--panel1), var(--panel2)); outline:1px solid rgba(255,255,255,.14); padding:14px; box-shadow: inset 0 0 30px rgba(0,0,0,.65), inset 0 20px 60px rgba(0,0,0,.5)}
+  .glass{content:""; position:absolute; inset:0; pointer-events:none; border-radius:18px; background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 30%), radial-gradient(400px 160px at 50% -20%, rgba(255,255,255,.25), transparent 60%), linear-gradient( to right, rgba(255,255,255,.04), rgba(255,255,255,0) 20%, rgba(255,255,255,.04) 80%, rgba(255,255,255,0) 100%); mix-blend-mode:screen}
+
+  .reels{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; height:180px; perspective:900px}
+  .reel{position:relative; border-radius:12px; overflow:hidden; background:linear-gradient(180deg, #0d1832, #091126); outline:1px solid rgba(255,255,255,.08); box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 -6px 0 rgba(0,0,0,.6)}
+  .col{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; gap:16px; padding:12px}
+  .sym{width:100%; height:64px; display:grid; place-items:center; font-size:36px; font-weight:900; color:#fff; text-shadow:0 4px 14px rgba(0,0,0,.6); background:linear-gradient(180deg,#192a56,#102047); border-radius:10px; outline:1px solid rgba(255,255,255,.08)}
+
+  .panel{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; flex-wrap:wrap}
+  .badge{padding:9px 12px; border-radius:12px; font-weight:800; background:linear-gradient(180deg,#0f1832,#0a1226); outline:1px solid rgba(255,255,255,.08)}
+  .badge .v{color:var(--frame1)}
+  .jackpot{flex:1 1 100%; text-align:center; margin-top:6px; font-weight:900; letter-spacing:2px; color:var(--frame1); text-shadow:0 0 10px var(--frame2), 0 0 24px var(--frame2)}
+
+  .bottom{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px}
+  .spin{flex:1; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .btn{cursor:pointer; border:0; border-radius:16px; padding:14px 18px; font-weight:900; text-transform:uppercase; letter-spacing:.5px; background:linear-gradient(180deg,var(--chip),var(--chip2)); color:var(--ink); outline:1px solid rgba(255,255,255,.08); box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .btn.primary{background:radial-gradient(60% 100% at 50% 0%, var(--accent), #b00 70%); box-shadow: 0 0 20px var(--accent), inset 0 -4px 0 rgba(0,0,0,.45)}
+  .btn:disabled{opacity:.5; pointer-events:none}
+
+  .leverWrap{position:relative; width:70px; height:90px}
+  .leverBase{position:absolute; left:24px; bottom:6px; width:22px; height:70px; border-radius:12px; background:linear-gradient(180deg, #bdbdbd, #6f6f6f); box-shadow:inset 0 2px 0 #fff}
+  .knob{position:absolute; left:12px; top:-6px; width:46px; height:46px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff, #ffe9e9 40%, #ff9a9a 70%, #cd1515 100%); box-shadow:0 0 20px rgba(255,60,60,.8); transform-origin:50% 80%; transition: transform .15s ease}
+  .leverWrap.pull .knob{ transform: rotate(18deg) translateY(6px) }
+
+  .payout{margin-left:auto; font-weight:900}
+  .note{font-size:12px; color:var(--note)}
+  .winflash{position:absolute; inset:0; border-radius:26px; pointer-events:none; opacity:0; transition:opacity .3s ease; background: radial-gradient(600px 260px at 50% -10%, rgba(255,255,255,.18), transparent 60%), radial-gradient(600px 260px at 50% 110%, rgba(255,235,140,.25), transparent 60%)}
+  .machine.win .winflash{opacity:1}
+
+  /* Voucher Modal */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; place-items:center; z-index:9999}
+  .overlay.show{display:grid}
+  .modal{width:min(540px,92vw); border-radius:20px; color:var(--voucherInk); background:linear-gradient(180deg, var(--frame1), var(--frame2) 40%, var(--frame3) 80%); outline:2px solid rgba(255,255,255,.25); box-shadow:0 22px 80px rgba(0,0,0,.65); padding:20px}
+  .modal h3{margin:0 0 8px; text-transform:uppercase; letter-spacing:.5px}
+  .voucher{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:18px; letter-spacing:.6px; padding:12px 14px; border-radius:12px; text-align:center; background:var(--voucherBg); border:1px dashed rgba(60,30,0,.45)}
+  .row{display:flex; gap:10px; margin-top:12px}
+  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900}
+  .copy{background:#2b2b2b; color:#fff}
+  .close{background:#fff; color:#111}
+  .tiny{font-size:12px; opacity:.8; margin-top:6px}
+
+  /* Decorative per-theme extras */
+  .space-stars{position:absolute; inset:-10% -10% -10% -10%; pointer-events:none; z-index:0; display:none}
+  body[data-theme="space"] .space-stars{display:block}
+</style>
+</head>
+<body data-theme="royale">
+  <div class="themes">
+    <button data-t="royale" class="active">Casino Royale</button>
+    <button data-t="neon">Futuristic Neon</button>
+    <button data-t="treasure">Treasure Chest</button>
+    <button data-t="space">Space Galaxy</button>
+    <button data-t="candy">Candy Land</button>
+  </div>
+
+  <div class="stage">
+    <canvas class="space-stars" id="stars"></canvas>
+
+    <div class="machine" id="machine">
+      <div class="winflash"></div>
+      <div class="bevel"></div>
+      <div class="marquee" aria-hidden="true">
+        <!-- 28 bulbs -->
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+
+      <div class="header">
+        <span class="mega">Mega</span>
+        <span class="title">SLOTS</span>
+      </div>
+
+      <div class="window">
+        <div class="reels" id="reels"></div>
+        <div class="glass" aria-hidden="true"></div>
+      </div>
+
+      <div class="panel">
+        <div class="badge">Spins Left: <span class="v" id="spinsLeft">5</span></div>
+        <div class="badge">Bet: <span class="v" id="bet">10</span></div>
+        <div class="badge">Last: <span class="v" id="lastWin">—</span></div>
+        <div class="jackpot">JACKPOT</div>
+      </div>
+
+      <div class="bottom">
+        <div class="spin">
+          <button class="btn" id="minus">−</button>
+          <button class="btn" id="plus">+</button>
+          <button class="btn primary" id="spin">Spin</button>
+          <span class="note">Voucher appears within 5 spins.</span>
+        </div>
+        <div class="leverWrap" id="lever"><div class="leverBase"></div><div class="knob"></div></div>
+      </div>
+
+      <div class="payout" id="payout" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- Voucher Modal -->
+  <div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3>🎉 Congratulations! Your Voucher</h3>
+      <div class="voucher" id="voucherCode">CODE-XXXX-1234</div>
+      <div class="row">
+        <button class="copy" id="copyBtn">Copy Code</button>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+      <div class="tiny">Game complete. Return to the landing page for other events.</div>
+    </div>
+  </div>
+
+<script src="assets/common.js"></script>
+<script>
+/* ===== Guard: path lock ===== */
+const choice = getChoice();
+if (choice && choice !== 'slot') { alert('You already started Live. Slot is locked for this event.'); location.replace('index.html'); }
+
+/* ===== Theme switcher ===== */
+const themeBtns=[...document.querySelectorAll('.themes button')];
+function setTheme(t){ document.body.setAttribute('data-theme', t); themeBtns.forEach(b=>b.classList.toggle('active', b.dataset.t===t)); drawStars(); }
+
+themeBtns.forEach(b=>b.addEventListener('click',()=>setTheme(b.dataset.t)));
+
+/* ===== Config & State ===== */
+const MAX_SPINS=5; const SYMBOLS=["7️⃣","🍒","🍇","💎","⭐","BAR"]; const VOUCHERS=['MEGA-777-10FS','MEGA-777-20FS','MEGA-777-BONUS'];
+const STATE_KEY='slot_multi_theme_state_v1'; const VOUCHER_KEY='slot_multi_theme_voucher_v1';
+
+let state = load();
+let BET=10, turbo=false, started=false, spinning=false;
+
+const reelsEl=document.getElementById('reels');
+const machine=document.getElementById('machine');
+const spinBtn=document.getElementById('spin');
+const minusBtn=document.getElementById('minus');
+const plusBtn=document.getElementById('plus');
+const lever=document.getElementById('lever');
+const payoutEl=document.getElementById('payout');
+const lastWinEl=document.getElementById('lastWin');
+const betEl=document.getElementById('bet');
+const spinsLeftEl=document.getElementById('spinsLeft');
+
+function setBet(v){ BET=Math.max(1,Math.min(100,v)); betEl.textContent=BET }
+setBet(BET);
+
+function load(){ const raw=localStorage.getItem(STATE_KEY); if(!raw) return {left:MAX_SPINS,claimed:false}; try{ return JSON.parse(raw) }catch{ return {left:MAX_SPINS,claimed:false} } }
+function save(){ localStorage.setItem(STATE_KEY, JSON.stringify(state)) }
+function setVoucher(code){ localStorage.setItem(VOUCHER_KEY, code) }
+
+spinsLeftEl.textContent=state.left;
+if(state.claimed){ finish(localStorage.getItem(VOUCHER_KEY)||'VOUCHER-CLAIMED') }
+
+/* Build reels */
+function makeReel(){ const reel=document.createElement('div'); reel.className='reel'; const col=document.createElement('div'); col.className='col'; const pool=[]; for(let i=0;i<18;i++){ pool.push(SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]) } pool.forEach(s=>{ const it=document.createElement('div'); it.className='sym'; it.textContent=s; col.appendChild(it) }); reel.appendChild(col); return reel }
+for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()) }
+
+/* Spin */
+function pull(on){ lever.classList.toggle('pull', !!on) }
+function spin(){
+  if(spinning||state.claimed) return; if(state.left<=0){ maybeReveal(); return }
+  if(!started){ setChoice('slot'); started=true }
+  spinning=true; payoutEl.textContent=''; machine.classList.remove('win'); pull(true);
+  const cols=[...document.querySelectorAll('.reel .col')]; const results=[];
+  cols.forEach((col,idx)=>{ const dur=(turbo?600:1400)+idx*180; const t0=performance.now(); const anim=()=>{ const t=performance.now()-t0; const p=Math.min(1,t/dur); const e=1-Math.pow(1-p,3); const offset=-(e*15*64); col.style.transform=`translateY(${offset}px) rotateX(${e*20}deg)`; if(t<dur){ requestAnimationFrame(anim) } else { const s=SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]; const d=document.createElement('div'); d.className='sym'; d.textContent=s; col.appendChild(d); col.style.transform='translateY(0)'; while(col.children.length>18){ col.removeChild(col.firstChild) } results[idx]=s; if(results.filter(Boolean).length===cols.length){ evalSpin(results); pull(false) } } }; requestAnimationFrame(anim) })
+}
+
+function evalSpin(arr){ const freq={}; arr.forEach(s=>freq[s]=(freq[s]||0)+1); let best=0; for(const k in freq){ if(freq[k]>best) best=freq[k] } lastWinEl.textContent=(best>=3)?`${best}×`:'—'; payoutEl.textContent=(best>=3)?'Nice hit!':'Spin again'; if(best>=3){ machine.classList.add('win') }
+  state.left=Math.max(0,state.left-1); save(); spinsLeftEl.textContent=state.left; maybeReveal() }
+
+function maybeReveal(){ if(state.claimed){ spinning=false; return } const reveal=(state.left===0)||(Math.random()<0.32); if(reveal){ const code=VOUCHERS[Math.floor(Math.random()*VOUCHERS.length)]; setVoucher(code); state.claimed=true; save(); finish(code) } spinning=false }
+
+function finish(code){ spinBtn.disabled=true; minusBtn.disabled=true; plusBtn.disabled=true; document.getElementById('voucherCode').textContent=code; document.getElementById('voucherOverlay').classList.add('show') }
+
+spinBtn.addEventListener('mousedown',()=>{ turbo=true; pull(true) })
+spinBtn.addEventListener('mouseup',()=>{ turbo=false; pull(false) })
+spinBtn.addEventListener('mouseleave',()=>{ turbo=false; pull(false) })
+spinBtn.addEventListener('click',spin)
+minusBtn.addEventListener('click',()=>setBet(BET-1))
+plusBtn.addEventListener('click',()=>setBet(BET+1))
+
+document.getElementById('copyBtn').addEventListener('click',()=>{ const code=document.getElementById('voucherCode').textContent.trim(); navigator.clipboard.writeText(code).then(()=>{ const b=document.getElementById('copyBtn'); b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy Code',1200) }) })
+document.getElementById('closeBtn').addEventListener('click',()=>{ document.getElementById('voucherOverlay').classList.remove('show') })
+
+/* Space theme stars */
+function drawStars(){ const canvas=document.getElementById('stars'); const ctx=canvas.getContext('2d'); const show=document.body.getAttribute('data-theme')==='space'; if(!show){ canvas.width=0; canvas.height=0; return } const w=canvas.width=canvas.clientWidth; const h=canvas.height=canvas.clientHeight; ctx.clearRect(0,0,w,h); for(let i=0;i<140;i++){ const x=Math.random()*w; const y=Math.random()*h; const r=Math.random()*1.8+0.2; ctx.globalAlpha=Math.random()*0.8+0.2; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill() } ctx.globalAlpha=1 }
+window.addEventListener('resize',drawStars); drawStars();
+
+/* Default theme from URL (?theme=neon|treasure|candy|space|royale) */
+const urlT=new URLSearchParams(location.search).get('theme'); if(urlT) setTheme(urlT);
+</script>
+</body>
+</html>
