@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Choose Your Adventure</title>
 
-<!-- (Optional) Preload island images -->
+<!-- Preload (optional) -->
 <link rel="preload" href="https://ricomx.ft-crm.com/media-api/serve/a450b16e-9310-4e83-ae66-ea71822a218b_9.png" as="image">
 <link rel="preload" href="https://ricomx.ft-crm.com/media-api/serve/6959ee62-92fa-4192-a2d6-f678a4934b4f_8.png" as="image">
 
 <style>
   :root{
-    --ink:#eaf2ff; --muted:#a6b4d6;
-    --pad: clamp(10px, 3.2vw, 24px);
+    --ink:#eaf2ff; --muted:#9fb0d9;
+    --pad: clamp(12px, 3.5vw, 28px);
     --radius: clamp(14px, 3vw, 22px);
-    --island: clamp(120px, 36vw, 180px); /* island size */
+    --island: clamp(128px, 34vw, 188px); /* island size */
   }
   *{ box-sizing:border-box }
   html,body{ height:100% }
@@ -22,22 +22,33 @@
     margin:0; min-height:100dvh; color:var(--ink);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     display:flex; align-items:center; justify-content:center;
+    /* Background: adjust the two alpha values to control darkness */
     background:
-      linear-gradient(rgba(6,9,18,.5), rgba(6,9,18,.52)),
+      linear-gradient(rgba(10,12,28,.72), rgba(6,9,18,.82)),
       url("https://ricomx.ft-crm.com/media-api/serve/41e1e16f-8c13-4213-8ee1-028ce7951380_BG_GIF") center/cover no-repeat;
   }
 
   .wrap{
     position:relative;
-    height:100dvh; width:100%; max-width:980px;
+    height:100dvh; width:100%; max-width:1100px;
     padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
-    display:grid; grid-template-rows:auto 1fr auto; gap: clamp(10px, 2.8vw, 22px);
+    display:grid; grid-template-rows:auto 1fr auto; gap: clamp(10px, 2.5vw, 22px);
     overflow:hidden; margin:0 auto;
   }
 
-  header{ text-align:center }
-  h1{ margin:0; font-weight:900; letter-spacing:.3px; font-size:clamp(18px,4.2vw,28px); line-height:1.1 }
-  p.sub{ margin:.35em 0 0; color:var(--muted); font-size:clamp(11px,2.7vw,14px) }
+  /* Neon headline */
+  header{ text-align:center; position:relative; z-index:2 }
+  h1{
+    margin:0 0 6px; text-transform:uppercase; font-weight:900; letter-spacing:.6px;
+    font-size:clamp(22px,5.4vw,40px);
+    background:linear-gradient(to right,#71e1ff,#25c3ff);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    text-shadow:0 0 8px #25c3ff, 0 0 22px #71e1ff, 0 0 42px rgba(113,225,255,.5);
+  }
+  p.sub{
+    margin:0; color:var(--muted); font-size:clamp(11px,2.6vw,14px);
+    opacity:.9;
+  }
 
   /* ROAD layer */
   .road { position:absolute; inset:0; z-index:0; pointer-events:none }
@@ -47,33 +58,53 @@
   /* ISLANDS (clickable) */
   .island{
     position:absolute; z-index:1; width:var(--island); aspect-ratio:1/1; border-radius:50%;
-    overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,.55);
+    overflow:hidden; box-shadow:0 12px 28px rgba(0,0,0,.55);
     display:block; text-decoration:none; color:inherit;
+    transition:transform .18s ease, box-shadow .18s ease;
   }
-  #slotIsland{ top:10%; right:6%; }        /* TOP RIGHT */
-  #liveIsland{ bottom:10%; left:6%; }       /* BOTTOM LEFT */
+  .island:hover{ transform:translateY(-4px); box-shadow:0 16px 36px rgba(0,0,0,.6) }
+  #slotIsland{ top:12%; right:6%; }      /* TOP RIGHT */
+  #liveIsland{ bottom:12%; left:6%; }    /* BOTTOM LEFT */
 
-  .island img{ width:100%; height:100%; object-fit:cover; display:block }
+  /* Make both islands uniform & background-friendly */
+  .island img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    /* Tone: same for both so background affects them equally */
+    filter: brightness(.88) saturate(1.08) contrast(1.05);
+    opacity:.9;
+  }
+  /* Add a subtle inner vignette so text over it is legible */
+  .island::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(75% 75% at 50% 55%, rgba(0,0,0,.0), rgba(0,0,0,.25) 70%, rgba(0,0,0,.38) 100%);
+  }
 
-  /* Label badge on each island */
+  /* Label badge — peek effect (partially hidden) */
   .label{
     position:absolute; left:8px; right:8px; bottom:8px;
     display:flex; justify-content:space-between; align-items:center; gap:8px;
     padding:8px 10px; border-radius:12px;
-    background:rgba(6,9,18,.68); backdrop-filter: blur(6px);
-    border:1px solid rgba(255,255,255,.09);
-    font-weight:800; font-size:clamp(11px, 2.6vw, 14px);
+    /* Dim + blur so it doesn’t overpower the artwork */
+    background:rgba(6,9,18,.62); backdrop-filter: blur(6px);
+    border:1px solid rgba(255,255,255,.08);
+    font-weight:800; font-size:clamp(10px,2.3vw,13px);
+    opacity:.78;
+    transform:translateY(16%); /* <— hide a little */
+    transition: transform .18s ease, opacity .18s ease;
   }
+  .island:hover .label{ transform:translateY(0); opacity:.95 }
   .cta{
     border:0; border-radius:999px; padding:6px 12px;
     background:linear-gradient(to right,#71e1ff,#25c3ff); color:#061018; font-weight:900;
   }
 
-  .disabled{ filter:grayscale(1) brightness(.75); pointer-events:none }
+  /* Disabled when locked to the other realm */
+  .disabled{ filter:grayscale(1) brightness(.78); pointer-events:none }
+  .disabled .label{ opacity:.4 }
 
-  .note{ text-align:center; color:var(--muted); font-size:clamp(10px,2.5vw,12px); margin:0 }
+  .note{ text-align:center; color:var(--muted); font-size:clamp(10px,2.5vw,12px); margin:0; z-index:2 }
 
-  /* If screen is very short, hide subtitle to avoid scroll */
+  /* Very short screens: tuck subtitle to avoid scroll */
   @media (max-height: 620px){ p.sub{ display:none } }
 </style>
 </head>
@@ -95,7 +126,7 @@
           <stop offset="0%" stop-color="#71e1ff"/><stop offset="100%" stop-color="#25c3ff"/>
         </linearGradient>
       </defs>
-      <path id="roadBase" fill="none" stroke="rgba(10,20,35,.92)" stroke-width="12" stroke-linecap="round"/>
+      <path id="roadBase" fill="none" stroke="rgba(10,20,35,.9)" stroke-width="12" stroke-linecap="round"/>
       <path id="roadDash" fill="none" stroke="url(#rg)" stroke-width="2.8" stroke-linecap="round"
             stroke-dasharray="10 12" stroke-dashoffset="0" filter="url(#glow)"
             style="animation:dash 7s linear infinite;"/>
@@ -106,14 +137,20 @@
 
     <!-- TOP RIGHT: SLOT -->
     <a id="slotIsland" class="island" href="slot.html" aria-label="Enter Slot Realm">
-      <img src="https://ricomx.ft-crm.com/media-api/serve/a450b16e-9310-4e83-ae66-ea71822a218b_9.png" alt="">
-      <div class="label"><span>QUICKSAND • Slot</span><span class="cta">Enter</span></div>
+      <img src="https://ricomx.ft-crm.com/media-api/serve/53d0e66f-83b1-41be-8af8-56f3276ccfcd_3.png" alt="">
+      <div class="label">
+        <span>QUICKSAND • Slot</span>
+        <span class="cta">Enter</span>
+      </div>
     </a>
 
     <!-- BOTTOM LEFT: LIVE -->
     <a id="liveIsland" class="island" href="live.html" aria-label="Enter Live Realm">
-      <img src="https://ricomx.ft-crm.com/media-api/serve/6959ee62-92fa-4192-a2d6-f678a4934b4f_8.png" alt="">
-      <div class="label"><span>HOTSTONE • Live</span><span class="cta">Enter</span></div>
+      <img src="https://ricomx.ft-crm.com/media-api/serve/21e2d774-ba12-4cf7-8a44-cec54ff7b4b7_4.png" alt="">
+      <div class="label">
+        <span>HOTSTONE • Live</span>
+        <span class="cta">Enter</span>
+      </div>
     </a>
 
     <p id="lockMsg" class="note" aria-live="polite"></p>
@@ -121,7 +158,7 @@
 
   <script src="assets/common.js"></script>
   <script>
-    // Lock logic (same behavior you had before)
+    // Lock logic (same behavior)
     const chosen = typeof getChoice==="function" ? getChoice() : null;
     const msg = document.getElementById('lockMsg');
     if (chosen) {
@@ -132,7 +169,7 @@
       msg.textContent = 'No lock yet — you can enter either realm.';
     }
 
-    // --- ROAD: connect exact centers of the two islands ---
+    // ROAD: connect exact centers of the two islands
     const wrap  = document.getElementById('wrap');
     const road  = document.getElementById('road');
     const base  = document.getElementById('roadBase');
@@ -148,8 +185,6 @@
       const wb = wrap.getBoundingClientRect();
       const a  = center(aEl.getBoundingClientRect());
       const b  = center(bEl.getBoundingClientRect());
-
-      // convert to wrap-local coordinates
       const ax = a.x - wb.left, ay = a.y - wb.top;
       const bx = b.x - wb.left, by = b.y - wb.top;
 
@@ -157,7 +192,7 @@
 
       // Smooth S curve tuned for top-right -> bottom-left
       const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
-      const lift = Math.max(90, Math.min(220, len * 0.55));
+      const lift = Math.max(90, Math.min(240, len * 0.55));
       const cx1 = ax - lift * 0.7, cy1 = ay + lift;
       const cx2 = bx + lift * 0.7, cy2 = by - lift;
 
@@ -169,7 +204,6 @@
       padB.setAttribute('cx', bx); padB.setAttribute('cy', by);
     }
 
-    // Redraw when layout changes
     const ro = new ResizeObserver(drawRoad);
     ro.observe(wrap); ro.observe(aEl); ro.observe(bEl);
     window.addEventListener('load', drawRoad, { once:true });
