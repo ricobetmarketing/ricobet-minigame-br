@@ -107,70 +107,40 @@
   .cab.shake{animation:shake .28s ease}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 
-  /* ===== VOUCHER POPUP — 6D Gift Reveal ===== */
-  .overlay{position:fixed; inset:0; background:rgba(0,0,12,.86); display:none; place-items:center; z-index:9999;
-           backdrop-filter: blur(4px)}
-  .overlay.show{display:grid}
-  .giftModal{
-    width:min(580px,92vw); border-radius:22px; padding:22px; text-align:center;
-    background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
-    outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75);
-    transform:scale(.96); animation:popIn .35s ease forwards;
-  }
-  @keyframes popIn{to{transform:scale(1)}}
-  .giftModal h3{margin:0 0 10px; color:#ffe3ff; text-shadow:0 0 12px #b86cff}
+/* ===== Voucher popup — GIF reveal ===== */
+.overlay{
+  position:fixed; inset:0; background:rgba(0,0,12,.86);
+  display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px);
+}
+.overlay.show{display:grid}
 
-  .stage{position:relative; width:220px; height:210px; margin:0 auto 6px; perspective:900px}
-  /* rotating rays */
-  .rays{position:absolute; inset:-14px; border-radius:20px; filter:blur(8px); z-index:0;
-        background:conic-gradient(from 0deg, rgba(255,86,214,.25), rgba(86,208,255,.25), rgba(255,86,214,.25));
-        animation:spin 5s linear infinite}
-  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.gifModal{
+  width:min(560px,92vw); border-radius:22px; padding:18px; text-align:center;
+  background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
+  outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75);
+  transform:scale(.96); animation:popIn .28s ease forwards;
+}
+@keyframes popIn{to{transform:scale(1)}}
 
-  .giftBox{position:absolute; left:50%; top:46%; transform:translate(-50%,-50%) rotateX(8deg); width:180px; height:150px; z-index:2}
-  .giftBox .box{
-    position:absolute; left:0; right:0; bottom:0; height:110px; border-radius:16px;
-    background:linear-gradient(180deg,#7c3cff,#5a2bd6);
-    outline:1px solid rgba(255,255,255,.15); box-shadow:0 16px 60px rgba(0,0,0,.4);
-    animation:float 2.2s ease-in-out infinite;
-  }
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-  .giftBox .lid{
-    position:absolute; left:-10px; right:-10px; top:-4px; height:60px; border-radius:16px;
-    background:linear-gradient(180deg,#ff66c7,#6d2df7);
-    outline:1px solid rgba(255,255,255,.25);
-    transform-origin:50% 110%;
-    box-shadow:0 12px 18px rgba(0,0,0,.35);
-    transition:transform .5s cubic-bezier(.16,.9,.2,1.1), filter .3s ease;
-  }
-  .giftBox.open .lid{ transform:rotateX(78deg) translateY(-8px); filter:brightness(1.2) }
+.giftGif{
+  width:100%; max-width:420px; height:auto; display:block; margin:0 auto 10px;
+  border-radius:14px; outline:1px solid rgba(255,255,255,.12);
+  box-shadow:0 10px 40px rgba(120,80,255,.35);
+}
 
-  .bow{position:absolute; top:-14px; left:50%; transform:translateX(-50%); z-index:3}
-  .bow:before,.bow:after{content:""; position:absolute; width:86px; height:36px; border-radius:24px/16px;
-    background:radial-gradient(circle at 30% 40%,#fff,#ffd9ff 40%,#ff9af2 70%,#6a2dd1); box-shadow:0 0 18px #b86cff}
-  .bow:before{transform:translateX(-60%)} .bow:after{transform:translateX(-40%)}
-
-  /* volumetric glow cone */
-  .cone{position:absolute; left:50%; bottom:18px; transform:translateX(-50%); width:200px; height:160px; z-index:1;
-        background:radial-gradient(ellipse at 50% 0%, rgba(173,132,255,.55), rgba(173,132,255,0) 70%);
-        filter:blur(2px); opacity:0; transition:opacity .35s ease}
-  .giftBox.open ~ .cone{opacity:1}
-
-  /* ribbon burst */
-  .ribbon{position:absolute; left:50%; top:35%; width:4px; height:4px; background:#fff; border-radius:50%; opacity:0; z-index:3}
-  .ribbon.burst{opacity:1; animation:ribbon 800ms ease-out forwards}
-  @keyframes ribbon{
-    0%{transform:translate(-50%,-50%) scale(0)}
-    60%{transform:translate(calc(-50% + (var(--dx)*1px)), calc(-50% + (var(--dy)*1px))) scale(1)}
-    100%{transform:translate(calc(-50% + (var(--dx)*1px)), calc(-50% + (var(--dy)*1px))) scale(0); opacity:0}
-  }
-
-  .voucher{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:clamp(14px,3.6vw,18px);
-           letter-spacing:.6px; padding:12px 14px; border-radius:12px; color:#d8b6ff; background:#0a0d1a; display:inline-block;
-           outline:1px dashed rgba(160,220,255,.4); margin-top:8px}
-  .row{display:flex; gap:10px; justify-content:center; margin-top:12px}
-  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900; font-size:clamp(13px,3.6vw,14px)}
-  .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
+.voucher{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:clamp(14px,3.6vw,18px);
+  letter-spacing:.6px; padding:12px 14px; border-radius:12px;
+  color:#d8b6ff; background:#0a0d1a; display:inline-block;
+  outline:1px dashed rgba(160,220,255,.4);
+}
+.row{display:flex; gap:10px; justify-content:center; margin-top:12px}
+.copy,.close{
+  cursor:pointer; border:0; border-radius:12px; padding:10px 14px;
+  font-weight:900; font-size:clamp(13px,3.6vw,14px)
+}
+.copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
 
   #fx{position:absolute; inset:0; pointer-events:none} /* confetti/coins inside cabinet */
 </style>
@@ -220,30 +190,24 @@
   <div class="winflash"></div>
 </div>
 
-<!-- Cinematic Gift Reveal -->
+<!-- Voucher popup — GIF reveal -->
 <div class="overlay" id="giftOverlay" role="dialog" aria-modal="true">
-  <div class="giftModal">
-    <h3>🎁 Surprise! Your Voucher</h3>
-
-    <div class="stage">
-      <div class="rays"></div>
-      <div class="giftBox" id="giftBox">
-        <div class="lid"></div>
-        <div class="bow"></div>
-        <div class="box"></div>
-      </div>
-      <div class="cone"></div>
-      <!-- ribbons created dynamically -->
-    </div>
+  <div class="gifModal">
+    <img class="giftGif"
+         src="https://ricomx.ft-crm.com/media-api/serve/64ae8b79-831d-4b08-80e9-6fbbc37e2e80_Surprise_GIF"
+         alt="Surprise gift animation" />
 
     <div class="voucher" id="voucherText">VOUCHER-XXXX</div>
+
     <div class="row">
       <button class="copy" id="copyBtn">Copy Code</button>
       <button class="close" id="closeBtn">Close</button>
     </div>
-    <div class="small" style="color:#a9b7d8;margin-top:8px">Redeem this code in your account.</div>
+
+    <div class="small" style="color:#a9b7d8;margin-top:8px">
+      Redeem this code in your account.
+    </div>
   </div>
-</div>
 
 <!-- Optional SFX -->
 <audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
@@ -437,6 +401,39 @@ function ribbonBurst(){
   }
 }
 function shake(){ cab.classList.add('shake'); setTimeout(()=>cab.classList.remove('shake'),300) }
+
+
+  /* … keep your existing variables and code … */
+
+/* Find these elements (keep names as below) */
+const giftOverlay = document.getElementById('giftOverlay');
+const voucherText = document.getElementById('voucherText');
+const copyBtn     = document.getElementById('copyBtn');
+const closeBtn    = document.getElementById('closeBtn');
+
+/* Show the GIF modal + confetti */
+function openGift(code){
+  voucherText.textContent = code;
+  giftOverlay.classList.add('show');
+  // fire some celebration fx
+  confetti();
+}
+
+/* Copy/Close handlers (same as before) */
+copyBtn.addEventListener('click', ()=>{
+  const t=voucherText.textContent.trim(); if(!t) return;
+  navigator.clipboard.writeText(t).then(()=>{
+    copyBtn.textContent='Copied!';
+    setTimeout(()=>copyBtn.textContent='Copy Code',1200);
+  });
+});
+closeBtn.addEventListener('click', ()=> giftOverlay.classList.remove('show'));
+
+/* On load: if already claimed, show it */
+if(state.claimed){
+  openGift(localStorage.getItem(VOUCHER_KEY) || 'CLAIMED');
+  disableControls();
+}
 </script>
 </body>
 </html>
