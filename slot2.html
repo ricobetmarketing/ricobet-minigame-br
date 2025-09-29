@@ -26,12 +26,61 @@
   }
   @supports (-webkit-touch-callout:none){ body{ background-attachment:scroll } }
 
+  /* ===== 6D depth: back halo + spotlight + ground shadow ===== */
+  .cabWrap{
+    position: relative;
+    width: min(640px,96vw);
+  }
+  /* Big neon halo + color glows behind the cabinet */
+  .cabWrap::before{
+    content:"";
+    position:absolute; inset:-8% -10% -14% -10%;
+    z-index:-2; pointer-events:none;
+    background:
+      radial-gradient(closest-side at 50% 15%, rgba(113,225,255,.35), rgba(113,225,255,0) 70%),
+      radial-gradient(closest-side at 60% 50%, rgba(192,107,255,.25), rgba(192,107,255,0) 72%),
+      radial-gradient(closest-side at 40% 85%, rgba(255,216,106,.18), rgba(255,216,106,0) 70%);
+    filter: blur(18px);
+    opacity:.9;
+    transform: translateZ(0);
+  }
+  /* Moving spotlight sweep for extra life */
+  .cabWrap::after{
+    content:"";
+    position:absolute; inset:-6% -8% -12% -8%;
+    z-index:-2; pointer-events:none;
+    background: radial-gradient(120% 100% at var(--sx,40%) var(--sy,10%),
+                rgba(255,255,255,.16), rgba(255,255,255,0) 60%);
+    filter: blur(10px);
+    mix-blend-mode:screen;
+    animation: sweep 7.5s ease-in-out infinite;
+  }
+  @keyframes sweep{
+    0%   { --sx:35%; --sy:12%; opacity:.5; }
+    50%  { --sx:65%; --sy:18%; opacity:.9; }
+    100% { --sx:35%; --sy:12%; opacity:.5; }
+  }
+  /* Soft ground shadow */
+  .cabWrap .groundShadow{
+    position:absolute; left:50%; bottom:-20px;
+    width:78%; height:44px; transform:translateX(-50%);
+    z-index:-1; pointer-events:none;
+    background: radial-gradient(50% 100% at 50% 50%,
+                rgba(0,0,0,.55) 0%, rgba(0,0,0,.22) 55%, rgba(0,0,0,0) 100%);
+    filter: blur(6px);
+  }
+
+  /* ===== MACHINE ===== */
   .cab{
-    position:relative; overflow:hidden; width:min(640px,96vw);
+    position:relative; overflow:hidden; width:100%;
     border-radius:clamp(18px,3vw,30px);
     padding:clamp(14px,2.8vw,24px) clamp(12px,2.5vw,22px) clamp(10px,2.2vw,18px);
     background:linear-gradient(180deg,#151733,#0c0f25);
-    box-shadow:0 40px 90px rgba(0,0,0,.65), inset 0 2px 0 rgba(255,255,255,.07);
+    box-shadow:
+      0 40px 90px rgba(0,0,0,.65),
+      inset 0 2px 0 rgba(255,255,255,.07),
+      0 0 60px rgba(113,225,255,.18),
+      0 0 80px rgba(192,107,255,.16);
   }
   .tubes,.tubes:before,.tubes:after{content:""; position:absolute; inset:10px; border-radius:28px; pointer-events:none}
   .tubes{border:10px solid transparent}
@@ -141,47 +190,52 @@
 </head>
 <body>
 
-<div class="cab" id="cab">
-  <canvas id="fx"></canvas>
-  <div class="tubes"></div>
+<div class="cabWrap">
+  <div class="cab" id="cab">
+    <canvas id="fx"></canvas>
+    <div class="tubes"></div>
 
-  <div class="marquee" aria-hidden="true">
-    <!-- bulbs -->
-    <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
-    <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
-    <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
-    <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
-    <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
-  </div>
-
-  <div class="brand"><span class="mega">Purple Neon</span><span class="title">SLOTS</span></div>
-
-  <div class="bezel">
-    <div class="shine"></div>
-    <div class="window">
-      <div class="reels" id="reels"></div>
-      <div class="glass"></div>
+    <div class="marquee" aria-hidden="true">
+      <!-- bulbs -->
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
     </div>
-  </div>
 
-  <div class="panel">
-    <div class="badge">Spins Left: <span class="v" id="spinsLeft">5</span></div>
-    <div class="meters">
-      <div class="ring" id="ring"><span id="ringNum">0</span></div>
-      <div class="jack" id="jack"></div>
+    <div class="brand"><span class="mega">RicoBet</span><span class="title">SLOTS</span></div>
+
+    <div class="bezel">
+      <div class="shine"></div>
+      <div class="window">
+        <div class="reels" id="reels"></div>
+        <div class="glass"></div>
+      </div>
     </div>
-    <div class="jackpot">JACKPOT</div>
-  </div>
 
-  <div class="controls">
-    <button class="btn primary" id="spin">Spin</button>
-    <div class="lever" id="lever" role="button" aria-label="Pull lever to spin" tabindex="0">
-      <div class="stem"></div><div class="knob"></div>
+    <div class="panel">
+      <div class="badge">Spins Left: <span class="v" id="spinsLeft">5</span></div>
+      <div class="meters">
+        <div class="ring" id="ring"><span id="ringNum">0</span></div>
+        <div class="jack" id="jack"></div>
+      </div>
+      <div class="jackpot">JACKPOT</div>
     </div>
-  </div>
-  <div class="payout" id="payout"></div>
 
-  <div class="winflash"></div>
+    <div class="controls">
+      <button class="btn primary" id="spin">Spin</button>
+      <div class="lever" id="lever" role="button" aria-label="Pull lever to spin" tabindex="0">
+        <div class="stem"></div><div class="knob"></div>
+      </div>
+    </div>
+    <div class="payout" id="payout"></div>
+
+    <div class="winflash"></div>
+  </div>
+
+  <!-- soft ground shadow -->
+  <div class="groundShadow"></div>
 </div>
 
 <!-- Voucher popup — GIF reveal -->
@@ -197,22 +251,14 @@
     </div>
     <div class="small" style="color:#a9b7d8;margin-top:8px">Redeem this code in your account.</div>
   </div>
-</div><!-- ✅ overlay closed -->
+</div>
 
 <!-- Optional SFX -->
 <audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
 <audio id="sStop" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3" preload="auto"></audio>
 <audio id="sWin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
 
-<script src="assets/common.js"></script>
 <script>
-/* ===== Path lock ===== */
-const lock = typeof getChoice === 'function' ? getChoice() : null;
-if (lock && lock !== 'slot') {
-  alert('You already started Live. Slot is locked for this event.');
-  location.replace('index.html');
-}
-
 /* ===== Config ===== */
 const MAX_SPINS=5;
 const SYMBOLS=["🍒","🍊","🍋","💎","⭐","7️⃣","BAR"];
@@ -258,7 +304,6 @@ for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()); }
 function spin(){
   if(spinning || state.claimed) return;
   if(state.left<=0){ maybeVoucher(); return; }
-  if(!started && typeof setChoice === 'function'){ setChoice('slot'); started=true; }
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
   sSpin && sSpin.play().catch(()=>{});
