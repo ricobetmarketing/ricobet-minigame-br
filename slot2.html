@@ -15,19 +15,17 @@
   }
   *{box-sizing:border-box} html,body{height:100%}
 
-  /* PAGE BACKGROUND — adjust overlay alpha or replace image path */
   body{
     margin:0; color:var(--ink);
     background:
-      linear-gradient(rgba(18,8,38,.80), rgba(8,7,20,.90)),
-      url("images/slot-bg.jpg") center/cover no-repeat fixed;
+      linear-gradient(rgba(18,8,38,.10), rgba(8,7,20,.50)),
+      url("https://ricomx.ft-crm.com/media-api/serve/26890e14-9350-4117-8174-b0a2e39c6c62_BG2.jpg") center/cover no-repeat fixed;
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
     display:flex; align-items:center; justify-content:center;
     padding:clamp(10px,4vw,18px);
   }
-  @supports (-webkit-touch-callout:none){ body{ background-attachment:scroll } } /* iOS fix */
+  @supports (-webkit-touch-callout:none){ body{ background-attachment:scroll } }
 
-  /* ===== MACHINE ===== */
   .cab{
     position:relative; overflow:hidden; width:min(640px,96vw);
     border-radius:clamp(18px,3vw,30px);
@@ -66,7 +64,6 @@
                     linear-gradient(to right, rgba(255,255,255,.06), rgba(255,255,255,0) 25%, rgba(255,255,255,.06) 75%, rgba(255,255,255,0) 100%);
          mix-blend-mode:screen}
 
-  /* reels */
   .reels{display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(8px,2.2vw,14px); height:clamp(140px,30vw,200px); perspective:1200px}
   .reel{position:relative; border-radius:12px; overflow:hidden; background:#0b1230; outline:1px solid rgba(255,255,255,.12);
         box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 -8px 0 rgba(0,0,0,.6)}
@@ -107,42 +104,39 @@
   .cab.shake{animation:shake .28s ease}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 
-/* ===== Voucher popup — GIF reveal ===== */
-.overlay{
-  position:fixed; inset:0; background:rgba(0,0,12,.86);
-  display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px);
-}
-.overlay.show{display:grid}
+  /* Voucher modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,12,.86);
+    display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px);
+  }
+  .overlay.show{display:grid}
+  .gifModal{
+    width:min(560px,92vw); border-radius:22px; padding:18px; text-align:center;
+    background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
+    outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75);
+    transform:scale(.96); animation:popIn .28s ease forwards;
+  }
+  @keyframes popIn{to{transform:scale(1)}}
+  .giftGif{
+    width:100%; max-width:420px; height:auto; display:block; margin:0 auto 10px;
+    border-radius:14px; outline:1px solid rgba(255,255,255,.12);
+    box-shadow:0 10px 40px rgba(120,80,255,.35);
+  }
+  .voucher{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:clamp(14px,3.6vw,18px);
+    letter-spacing:.6px; padding:12px 14px; border-radius:12px;
+    color:#d8b6ff; background:#0a0d1a; display:inline-block;
+    outline:1px dashed rgba(160,220,255,.4);
+  }
+  .row{display:flex; gap:10px; justify-content:center; margin-top:12px}
+  .copy,.close{
+    cursor:pointer; border:0; border-radius:12px; padding:10px 14px;
+    font-weight:900; font-size:clamp(13px,3.6vw,14px)
+  }
+  .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
 
-.gifModal{
-  width:min(560px,92vw); border-radius:22px; padding:18px; text-align:center;
-  background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
-  outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75);
-  transform:scale(.96); animation:popIn .28s ease forwards;
-}
-@keyframes popIn{to{transform:scale(1)}}
-
-.giftGif{
-  width:100%; max-width:420px; height:auto; display:block; margin:0 auto 10px;
-  border-radius:14px; outline:1px solid rgba(255,255,255,.12);
-  box-shadow:0 10px 40px rgba(120,80,255,.35);
-}
-
-.voucher{
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:clamp(14px,3.6vw,18px);
-  letter-spacing:.6px; padding:12px 14px; border-radius:12px;
-  color:#d8b6ff; background:#0a0d1a; display:inline-block;
-  outline:1px dashed rgba(160,220,255,.4);
-}
-.row{display:flex; gap:10px; justify-content:center; margin-top:12px}
-.copy,.close{
-  cursor:pointer; border:0; border-radius:12px; padding:10px 14px;
-  font-weight:900; font-size:clamp(13px,3.6vw,14px)
-}
-.copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
-
-  #fx{position:absolute; inset:0; pointer-events:none} /* confetti/coins inside cabinet */
+  #fx{position:absolute; inset:0; pointer-events:none}
 </style>
 </head>
 <body>
@@ -196,18 +190,14 @@
     <img class="giftGif"
          src="https://ricomx.ft-crm.com/media-api/serve/64ae8b79-831d-4b08-80e9-6fbbc37e2e80_Surprise_GIF"
          alt="Surprise gift animation" />
-
     <div class="voucher" id="voucherText">VOUCHER-XXXX</div>
-
     <div class="row">
       <button class="copy" id="copyBtn">Copy Code</button>
       <button class="close" id="closeBtn">Close</button>
     </div>
-
-    <div class="small" style="color:#a9b7d8;margin-top:8px">
-      Redeem this code in your account.
-    </div>
+    <div class="small" style="color:#a9b7d8;margin-top:8px">Redeem this code in your account.</div>
   </div>
+</div><!-- ✅ overlay closed -->
 
 <!-- Optional SFX -->
 <audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
@@ -217,13 +207,16 @@
 <script src="assets/common.js"></script>
 <script>
 /* ===== Path lock ===== */
-const lock = getChoice();
-if (lock && lock !== 'slot') { alert('You already started Live. Slot is locked for this event.'); location.replace('index.html'); }
+const lock = typeof getChoice === 'function' ? getChoice() : null;
+if (lock && lock !== 'slot') {
+  alert('You already started Live. Slot is locked for this event.');
+  location.replace('index.html');
+}
 
 /* ===== Config ===== */
 const MAX_SPINS=5;
 const SYMBOLS=["🍒","🍊","🍋","💎","⭐","7️⃣","BAR"];
-const CODES   =["PURPLE-10FS","PURPLE-20FS","PURPLE-30FS","PURPLE-BONUS"]; // your voucher codes
+const CODES   =["PURPLE-10FS","PURPLE-20FS","PURPLE-30FS","PURPLE-BONUS"];
 const STATE_KEY='slot_purple_state_fx1';
 const VOUCHER_KEY='slot_purple_voucher_fx1';
 
@@ -231,6 +224,7 @@ const VOUCHER_KEY='slot_purple_voucher_fx1';
 let state=loadState(); // {left,claimed,spun,wins,hit3}
 let spinning=false, started=false, turbo=false;
 
+/* ===== Elements ===== */
 const reelsEl=document.getElementById('reels');
 const spinBtn=document.getElementById('spin');
 const lever=document.getElementById('lever');
@@ -241,7 +235,12 @@ const ring=document.getElementById('ring'); const ringNum=document.getElementByI
 const jack=document.getElementById('jack');
 const sSpin=document.getElementById('sSpin'); const sStop=document.getElementById('sStop'); const sWin=document.getElementById('sWin');
 
-/* init UI */
+const giftOverlay = document.getElementById('giftOverlay');
+const voucherText = document.getElementById('voucherText');
+const copyBtn     = document.getElementById('copyBtn');
+const closeBtn    = document.getElementById('closeBtn');
+
+/* ===== Init UI ===== */
 spinsLeftEl.textContent=state.left; updateMeters();
 if(state.claimed){ openGift(localStorage.getItem(VOUCHER_KEY)||'CLAIMED'); disableControls(); }
 
@@ -255,17 +254,16 @@ function makeReel(){
 }
 for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()); }
 
-/* ===== SPIN with precomputed targets (no mismatch on stop) ===== */
+/* ===== SPIN ===== */
 function spin(){
   if(spinning || state.claimed) return;
   if(state.left<=0){ maybeVoucher(); return; }
-  if(!started){ setChoice('slot'); started=true; }
+  if(!started && typeof setChoice === 'function'){ setChoice('slot'); started=true; }
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
   sSpin && sSpin.play().catch(()=>{});
 
   const cols=[...document.querySelectorAll('.reel .col')];
-  /** precompute end symbols so the last visible equals the final */
   const targets = cols.map(() => SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]);
   const results=[];
 
@@ -281,14 +279,10 @@ function spin(){
 
       if(t<dur){ requestAnimationFrame(anim); }
       else{
-        /* snap: ensure the last child equals target BEFORE presenting it */
         const last = col.lastElementChild;
         if(last){ last.textContent = targets[idx]; }
         col.style.transform='translateY(0)'; col.classList.remove('spinblur');
-
-        // keep pool length manageable
         while(col.children.length>20){ col.removeChild(col.firstChild) }
-
         results[idx]=targets[idx];
         if(results.filter(Boolean).length===cols.length){
           lever.classList.remove('pull');
@@ -327,7 +321,7 @@ function updateMeters(){
   jack.style.setProperty('--fill', Math.min(1,(state.wins||0)/3));
 }
 
-/* ===== Voucher logic: guarantee within 5 spins ===== */
+/* ===== Voucher logic ===== */
 function maybeVoucher(){
   if(state.claimed){ spinning=false; return; }
   const reveal=(state.left===0)||(Math.random()<0.32);
@@ -340,29 +334,19 @@ function maybeVoucher(){
   spinning=false;
 }
 
-/* ===== Cinematic Gift ===== */
-const giftOverlay=document.getElementById('giftOverlay');
-const giftBox=document.getElementById('giftBox');
-const voucherText=document.getElementById('voucherText');
-const copyBtn=document.getElementById('copyBtn');
-const closeBtn=document.getElementById('closeBtn');
-
+/* ===== Modal helpers ===== */
 function openGift(code){
-  voucherText.textContent=code;
+  voucherText.textContent = code;
   giftOverlay.classList.add('show');
-
-  // small delay then open + fx
-  setTimeout(()=>{
-    giftBox.classList.add('open');
-    confetti();
-    ribbonBurst(); // extra 6D ribbon particles
-  }, 380);
+  confetti();
 }
 copyBtn.addEventListener('click',()=>{
   const t=voucherText.textContent.trim(); if(!t) return;
-  navigator.clipboard.writeText(t).then(()=>{ copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200); });
+  navigator.clipboard.writeText(t).then(()=>{
+    copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);
+  });
 });
-closeBtn.addEventListener('click',()=>giftOverlay.classList.remove('show'));
+closeBtn.addEventListener('click',()=> giftOverlay.classList.remove('show'));
 
 /* ===== Controls ===== */
 function disableControls(){ spinBtn.disabled=true; lever.style.pointerEvents='none' }
@@ -377,7 +361,7 @@ spinBtn.addEventListener('mouseleave',()=>{ turbo=false; lever.classList.remove(
 function loadState(){ try{ return JSON.parse(localStorage.getItem(STATE_KEY)) || {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } catch{ return {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } }
 function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)) }
 
-/* ===== FX: coins + confetti + shake + ribbons ===== */
+/* ===== FX: coins + confetti + shake ===== */
 const fx=document.getElementById('fx'); const ctx=fx.getContext('2d');
 function resize(){ fx.width=cab.clientWidth; fx.height=cab.clientHeight } addEventListener('resize',resize); addEventListener('orientationchange',()=>setTimeout(resize,250)); resize();
 
@@ -389,51 +373,7 @@ function confetti(){
   const p=[]; for(let i=0;i<180;i++) p.push({x:fx.width/2,y:fx.height/2-80,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6-2,life:140+Math.random()*50,r:2+Math.random()*3,h:Math.random()*360});
   (function loop(){ ctx.clearRect(0,0,fx.width,fx.height); p.forEach(o=>{ o.x+=o.vx; o.y+=o.vy; o.vy+=0.05; o.life--; ctx.globalAlpha=Math.max(0,o.life/180); ctx.fillStyle=`hsl(${o.h},100%,60%)`; ctx.fillRect(o.x,o.y,o.r,o.r);}); ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop); })();
 }
-function ribbonBurst(){
-  const stage=document.querySelector('.stage');
-  for(let i=0;i<20;i++){
-    const r=document.createElement('div'); r.className='ribbon burst';
-    const angle=Math.random()*2*Math.PI, dist=80+Math.random()*90;
-    r.style.setProperty('--dx', Math.cos(angle)*dist);
-    r.style.setProperty('--dy', Math.sin(angle)*dist);
-    r.style.background = `hsl(${Math.floor(Math.random()*360)},100%,60%)`;
-    stage.appendChild(r); setTimeout(()=>stage.removeChild(r), 800);
-  }
-}
 function shake(){ cab.classList.add('shake'); setTimeout(()=>cab.classList.remove('shake'),300) }
-
-
-  /* … keep your existing variables and code … */
-
-/* Find these elements (keep names as below) */
-const giftOverlay = document.getElementById('giftOverlay');
-const voucherText = document.getElementById('voucherText');
-const copyBtn     = document.getElementById('copyBtn');
-const closeBtn    = document.getElementById('closeBtn');
-
-/* Show the GIF modal + confetti */
-function openGift(code){
-  voucherText.textContent = code;
-  giftOverlay.classList.add('show');
-  // fire some celebration fx
-  confetti();
-}
-
-/* Copy/Close handlers (same as before) */
-copyBtn.addEventListener('click', ()=>{
-  const t=voucherText.textContent.trim(); if(!t) return;
-  navigator.clipboard.writeText(t).then(()=>{
-    copyBtn.textContent='Copied!';
-    setTimeout(()=>copyBtn.textContent='Copy Code',1200);
-  });
-});
-closeBtn.addEventListener('click', ()=> giftOverlay.classList.remove('show'));
-
-/* On load: if already claimed, show it */
-if(state.claimed){
-  openGift(localStorage.getItem(VOUCHER_KEY) || 'CLAIMED');
-  disableControls();
-}
 </script>
 </body>
 </html>
