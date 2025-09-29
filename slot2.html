@@ -2,23 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Purple Neon Slots — 5 Spins</title>
 <style>
   :root{
     /* PURPLE NEON PALETTE */
-    --bgDark:#0a0718;
-    --bgDeep:#090a16;
+    --bgDark:#0a0718; --bgDeep:#090a16;
     --ink:#eef4ff; --muted:#a9b7d8;
 
-    --tubeA:#8a5dff;    /* outer neon */
-    --tubeB:#ff4de1;    /* inner neon */
-    --tubeC:#56d0ff;    /* cycle accent */
+    --tubeA:#8a5dff; --tubeB:#ff4de1; --tubeC:#56d0ff;
 
     --panel1:#171a3f; --panel2:#0c1230;
     --bezel1:#ffe39a; --bezel2:#ffc54d; --bezel3:#d48a07; --bezel4:#7a4e05;
 
-    --accent:#c06bff;   /* meter ring */
+    --accent:#c06bff;   /* ring */
     --accent2:#ffd86a;  /* jackpot fill */
 
     --bulb:rgba(255,235,160,1); 
@@ -27,27 +24,34 @@
     --green:#8EFF98;
   }
 
-  *{box-sizing:border-box} html,body{height:100%}
+  *{box-sizing:border-box}
+  html,body{height:100%}
 
-  /* ===== PAGE BACKGROUND =====
-     Replace images/slot-bg.jpg with your file.
-     The gradient keeps the machine readable. */
+  /* ===== PAGE BACKGROUND ===== */
   body{
     margin:0; color:var(--ink);
     background:
       linear-gradient(rgba(18,8,38,.85), rgba(8,7,20,.92)),
       url("https://ricomx.ft-crm.com/media-api/serve/26890e14-9350-4117-8174-b0a2e39c6c62_BG2.jpg") center/cover no-repeat fixed;
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    display:flex; align-items:center; justify-content:center; padding:18px;
+    display:flex; align-items:center; justify-content:center;
+    padding:clamp(10px,4vw,18px);
+  }
+  @supports (-webkit-touch-callout: none) {
+    /* iOS: avoid janky fixed backgrounds */
+    body{ background-attachment: scroll; }
   }
 
   /* ===== MACHINE WRAPPER ===== */
   .cab{
-    position:relative; border-radius:30px; padding:24px 22px 18px; overflow:hidden;
-    background: linear-gradient(180deg,#151733,#0c0f25);
-    box-shadow: 0 60px 120px rgba(0,0,0,.65), inset 0 2px 0 rgba(255,255,255,.07);
+    position:relative; overflow:hidden;
     width:min(640px,96vw);
+    border-radius:clamp(18px,3vw,30px);
+    padding:clamp(14px,2.8vw,24px) clamp(12px,2.5vw,22px) clamp(10px,2.2vw,18px);
+    background: linear-gradient(180deg,#151733,#0c0f25);
+    box-shadow: 0 40px 90px rgba(0,0,0,.65), inset 0 2px 0 rgba(255,255,255,.07);
   }
+
   /* animated neon tubes around the cabinet */
   .tubes, .tubes:before, .tubes:after{content:""; position:absolute; inset:10px; border-radius:28px; pointer-events:none}
   .tubes{border:10px solid transparent}
@@ -57,7 +61,7 @@
     0%{border-color:var(--tubeA)} 33%{border-color:var(--tubeB)} 66%{border-color:var(--tubeC)} 100%{border-color:var(--tubeA)}
   }
 
-  /* header + bulbs */
+  /* bulbs */
   .marquee{position:absolute; left:18px; right:18px; top:18px; height:20px; display:flex; gap:10px; justify-content:center; z-index:3}
   .bulb{width:12px;height:12px;border-radius:50%;
         background:radial-gradient(circle at 40% 35%,#fff,var(--bulb) 55%,rgba(255,255,180,.2) 100%);
@@ -65,57 +69,74 @@
   .bulb:nth-child(odd){animation-delay:.2s} .bulb:nth-child(3n){animation-delay:.45s}
   @keyframes chase{0%{opacity:.25}12%{opacity:1}24%,100%{opacity:.25}}
 
-  .brand{text-align:center;margin-top:6px;margin-bottom:8px;text-transform:uppercase;font-weight:900;letter-spacing:.5px;color:#ffd9ff;
-    text-shadow:0 0 12px #ff52e4, 0 0 28px #7e61ff, 0 0 60px #56d0ff}
-  .brand .mega{font-size:20px;display:block}
-  .brand .title{font-size:40px;display:block}
+  .brand{
+    text-align:center; margin:6px 0 8px;
+    text-transform:uppercase; font-weight:900; letter-spacing:.5px; color:#ffd9ff;
+    text-shadow:0 0 12px #ff52e4, 0 0 28px #7e61ff, 0 0 60px #56d0ff
+  }
+  .brand .mega{font-size:clamp(16px,3.6vw,20px); display:block}
+  .brand .title{font-size:clamp(28px,6.7vw,40px); display:block}
 
   /* bezel + window */
-  .bezel{position:relative;border-radius:24px;padding:14px;
+  .bezel{
+    position:relative; border-radius:24px; padding:clamp(10px,2.4vw,14px);
     background:linear-gradient(180deg,var(--bezel1),var(--bezel2) 30%,var(--bezel3) 75%,var(--bezel4) 100%);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 -6px 0 rgba(0,0,0,.35); outline:2px solid rgba(255,255,255,.15)}
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 -6px 0 rgba(0,0,0,.35); outline:2px solid rgba(255,255,255,.15)
+  }
   .shine{position:absolute; inset:10px; border-radius:18px; pointer-events:none;
     background:linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 32%); mix-blend-mode:screen}
-  .window{position:relative;border-radius:18px;background:linear-gradient(180deg,var(--panel1),var(--panel2));
-    outline:1px solid rgba(255,255,255,.15); padding:16px 18px; box-shadow: inset 0 0 30px rgba(0,0,0,.65), inset 0 22px 60px rgba(0,0,0,.55)}
+  .window{
+    position:relative; border-radius:18px;
+    background:linear-gradient(180deg,var(--panel1),var(--panel2));
+    outline:1px solid rgba(255,255,255,.15);
+    padding:clamp(12px,2.6vw,16px) clamp(12px,2.8vw,18px);
+    box-shadow: inset 0 0 30px rgba(0,0,0,.65), inset 0 22px 60px rgba(0,0,0,.55)
+  }
   .glass{position:absolute; inset:0; pointer-events:none; border-radius:18px;
     background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 35%), radial-gradient(420px 180px at 50% -25%, rgba(255,255,255,.22), transparent 65%), linear-gradient(to right, rgba(255,255,255,.06), rgba(255,255,255,0) 25%, rgba(255,255,255,.06) 75%, rgba(255,255,255,0) 100%); mix-blend-mode:screen}
 
   /* reels */
-  .reels{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; height:200px; perspective:1200px}
+  .reels{display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(8px,2.2vw,14px); height:clamp(140px,30vw,200px); perspective:1200px}
   .reel{position:relative; border-radius:12px; overflow:hidden; background:#0b1230; outline:1px solid rgba(255,255,255,.12);
         box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 -8px 0 rgba(0,0,0,.6)}
   .col{position:absolute; inset:-40px 0 -40px 0; display:flex; flex-direction:column; align-items:center; gap:18px; padding:14px 12px; transform-style:preserve-3d}
-  .sym{width:100%; height:72px; display:grid; place-items:center; font-size:40px; font-weight:900; color:#fff;
-       text-shadow:0 4px 14px rgba(0,0,0,.6); background:linear-gradient(180deg,#24307a,#191f56); border-radius:12px; outline:1px solid rgba(255,255,255,.12)}
+  .sym{
+    width:100%; height:clamp(54px,11vw,72px);
+    display:grid; place-items:center; font-size:clamp(28px,6vw,40px); font-weight:900; color:#fff;
+    text-shadow:0 4px 14px rgba(0,0,0,.6); background:linear-gradient(180deg,#24307a,#191f56); border-radius:12px; outline:1px solid rgba(255,255,255,.12)
+  }
   .col.spinblur .sym{filter:drop-shadow(0 8px 6px rgba(0,0,0,.35)) blur(.18px)}
 
   /* meters */
   .panel{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; flex-wrap:wrap}
-  .badge{padding:9px 12px; border-radius:12px; font-weight:800; background:linear-gradient(180deg,#141c3b,#0f1732); outline:1px solid rgba(255,255,255,.1)}
+  .badge{padding:8px 12px; border-radius:12px; font-weight:800; background:linear-gradient(180deg,#141c3b,#0f1732); outline:1px solid rgba(255,255,255,.1)}
   .badge .v{color:#d8b6ff}
-  .jackpot{flex:1 1 100%; text-align:center; margin-top:6px; font-weight:900; letter-spacing:2px; color:#ffe16a;
-           text-shadow:0 0 12px #ff5fdb, 0 0 24px #7af0ff}
+  .jackpot{flex:1 1 100%; text-align:center; margin-top:6px; font-weight:900; letter-spacing:2px;
+           font-size:clamp(14px,3.2vw,20px); color:#ffe16a; text-shadow:0 0 12px #ff5fdb, 0 0 24px #7af0ff}
   .meters{display:flex; gap:12px; align-items:center}
-  .ring{--p:0; width:46px; height:46px; border-radius:50%; background:conic-gradient(var(--accent) calc(var(--p)*1%), #222 0); display:grid; place-items:center; font-size:12px; font-weight:900; box-shadow:0 0 18px rgba(192,107,255,.35)}
-  .ring span{background:#0a0d1a; color:#fff; width:32px; height:32px; display:grid; place-items:center; border-radius:50%}
-  .jack{height:8px; width:160px; border-radius:999px; background:#2a2a2a; position:relative; overflow:hidden; box-shadow:0 0 18px rgba(255,96,216,.25)}
+  .ring{--p:0; width:clamp(38px,8vw,46px); height:clamp(38px,8vw,46px); border-radius:50%; background:conic-gradient(var(--accent) calc(var(--p)*1%), #222 0); display:grid; place-items:center; font-size:12px; font-weight:900; box-shadow:0 0 18px rgba(192,107,255,.35)}
+  .ring span{background:#0a0d1a; color:#fff; width:clamp(26px,6vw,32px); height:clamp(26px,6vw,32px); display:grid; place-items:center; border-radius:50%}
+  .jack{height:8px; width:clamp(120px,34vw,160px); border-radius:999px; background:#2a2a2a; position:relative; overflow:hidden; box-shadow:0 0 18px rgba(255,96,216,.25)}
   .jack:before{content:""; position:absolute; inset:0; background:linear-gradient(90deg,#ff62ff,#65f0ff); transform-origin:left; transform:scaleX(var(--fill,0)); transition:transform .25s ease}
 
   /* controls + lever */
   .controls{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px}
-  .btn.primary{cursor:pointer; border:0; border-radius:16px; padding:14px 18px; font-weight:900; text-transform:uppercase; letter-spacing:.5px;
+  .btn.primary{
+    cursor:pointer; border:0; border-radius:16px; padding:clamp(12px,2.8vw,14px) clamp(16px,4.6vw,18px);
+    font-weight:900; text-transform:uppercase; letter-spacing:.5px;
     background:radial-gradient(60% 100% at 50% 0%, #ff66c7, #6d2df7 70%); color:#fff;
-    box-shadow:0 0 22px #b86cff, inset 0 -4px 0 rgba(0,0,0,.45)}
+    box-shadow:0 0 22px #b86cff, inset 0 -4px 0 rgba(0,0,0,.45)
+  }
   .btn.primary:disabled{opacity:.55; pointer-events:none}
-  .payout{min-height:18px; font-size:12px; color:var(--muted)}
 
-  .lever{position:relative; width:76px; height:96px; cursor:pointer}
-  .lever .stem{position:absolute; left:28px; bottom:8px; width:22px; height:72px; border-radius:12px; background:linear-gradient(180deg,#cfcfcf,#7a7a7a); box-shadow:inset 0 2px 0 #fff}
-  .lever .knob{position:absolute; left:14px; top:-4px; width:48px; height:48px; border-radius:50%;
+  .lever{position:relative; width:clamp(64px,12vw,76px); height:clamp(82px,16vw,96px); cursor:pointer; touch-action:manipulation}
+  .lever .stem{position:absolute; left:calc(50% - 11px); bottom:8px; width:22px; height:calc(100% - 24px); border-radius:12px; background:linear-gradient(180deg,#cfcfcf,#7a7a7a); box-shadow:inset 0 2px 0 #fff}
+  .lever .knob{position:absolute; left:50%; transform:translateX(-50%); top:-4px; width:clamp(44px,9vw,48px); height:clamp(44px,9vw,48px); border-radius:50%;
     background:radial-gradient(circle at 30% 30%, #fff, #ffe9ff 40%, #ff9af2 70%, #6a2dd1 100%);
     box-shadow:0 0 24px #b86cff; transform-origin:50% 80%; transition: transform .16s ease}
-  .lever.pull .knob{transform: rotate(18deg) translateY(6px)}
+  .lever.pull .knob{transform: translateX(-50%) rotate(18deg) translateY(6px)}
+
+  .payout{min-height:18px; font-size:clamp(12px,2.8vw,14px); color:var(--muted); margin-top:6px}
 
   /* win flash & shake */
   .winflash{position:absolute; inset:0; border-radius:30px; pointer-events:none; opacity:0; transition:opacity .25s ease;
@@ -124,30 +145,36 @@
   .cab.shake{animation:shake .28s ease}
   @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)} }
 
-  /* Surprise voucher popup (pick 1 of 3 cards) */
+  /* voucher popup */
   .overlay{position:fixed; inset:0; background:rgba(0,0,0,.82); display:none; place-items:center; z-index:9999}
   .overlay.show{display:grid}
   .vault{width:min(720px,94vw); border-radius:18px; padding:18px;
     background:linear-gradient(180deg,#141a3a,#0d1230); outline:1px solid rgba(180,220,255,.2); box-shadow:0 24px 90px rgba(0,0,0,.7); text-align:center}
-  .vault h3{margin:0 0 8px; color:#ffe3ff; text-shadow:0 0 12px #b86cff}
+  .vault h3{margin:0 0 8px; color:#ffe3ff; text-shadow:0 0 12px #b86cff; font-size:clamp(18px,4.8vw,22px)}
   .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0}
   .card{
-    position:relative; height:120px; border-radius:14px; cursor:pointer;
+    position:relative; height:clamp(96px,22vw,120px); border-radius:14px; cursor:pointer;
     background:radial-gradient(circle at 50% 30%, #3b1a68, #10082a 70%);
     outline:1px solid rgba(255,255,255,.12);
     box-shadow:0 0 16px rgba(184,108,255,.45), inset 0 0 40px rgba(255,255,255,.06);
     display:grid; place-items:center; color:#fff; font-weight:900; letter-spacing:.5px;
-    transition: transform .15s ease, box-shadow .15s ease;
+    transition: transform .15s ease, box-shadow .15s ease; font-size:clamp(22px,6vw,28px)
   }
   .card:hover{ transform:translateY(-4px); box-shadow:0 0 26px rgba(102,240,255,.55), inset 0 0 40px rgba(255,255,255,.08) }
   .card.revealed{cursor:default}
-  .voucher{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:18px; letter-spacing:.6px; margin-top:10px; padding:10px 12px; border-radius:10px; text-align:center; background:#0a0d1a; color:#d8b6ff; outline:1px dashed rgba(160,220,255,.4)}
+  .voucher{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:clamp(14px,3.6vw,18px); letter-spacing:.6px; margin-top:10px; padding:10px 12px; border-radius:10px; text-align:center; background:#0a0d1a; color:#d8b6ff; outline:1px dashed rgba(160,220,255,.4)}
   .row{display:flex; gap:10px; justify-content:center; margin-top:10px}
-  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900}
+  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900; font-size:clamp(13px,3.6vw,14px)}
   .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
 
-  /* confetti canvas */
+  /* confetti canvas lives inside cab for proper scaling */
   #fx{position:absolute; inset:0; pointer-events:none}
+  
+  /* === Small screens tweaks === */
+  @media (max-width: 640px){
+    .marquee{top:12px}
+    .bulb{width:10px;height:10px}
+  }
 </style>
 </head>
 <body>
@@ -165,7 +192,7 @@
     <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
   </div>
 
-  <div class="brand"><span class="mega">RicoBet</span><span class="title">SLOTS</span></div>
+  <div class="brand"><span class="mega">Purple Neon</span><span class="title">SLOTS</span></div>
 
   <div class="bezel">
     <div class="shine"></div>
@@ -228,8 +255,8 @@ if (lock && lock !== 'slot') { alert('You already started Live. Slot is locked f
 const MAX_SPINS=5;
 const SYMBOLS=["🍒","🍊","🍋","💎","⭐","7️⃣","BAR"];
 const VOUCHERS=["PURPLE-10FS","PURPLE-20FS","PURPLE-BONUS"]; // change to your codes
-const STATE_KEY='slot_purple_state_v1';
-const VOUCHER_KEY='slot_purple_voucher_v1';
+const STATE_KEY='slot_purple_state_v2';
+const VOUCHER_KEY='slot_purple_voucher_v2';
 
 /* ===== State ===== */
 let state=loadState(); // {left,claimed,spun,wins,hit3}
@@ -274,6 +301,7 @@ function spin(){
   const cols=[...document.querySelectorAll('.reel .col')];
   const results=[];
   cols.forEach((col,idx)=>{
+    const itemH = parseFloat(getComputedStyle(document.documentElement).fontSize) * 4.5; // approx height via clamp()
     const dur=(turbo? 600: 1450)+idx*220;
     const t0=performance.now();
     col.classList.add('spinblur');
@@ -281,7 +309,7 @@ function spin(){
       const t=performance.now()-t0;
       const p=Math.min(1, t/dur);
       const e=1-Math.pow(1-p,3);
-      const offset=-(e*16*72);
+      const offset=-(e*16*itemH);
       col.style.transform=`translateY(${offset}px) rotateX(${e*20}deg)`;
       if(t<dur){ requestAnimationFrame(anim); }
       else{
@@ -371,7 +399,7 @@ closeBtn.addEventListener('click',()=>overlay.classList.remove('show'));
 
 function disableControls(){ spinBtn.disabled=true; lever.style.pointerEvents='none' }
 
-/* lever + button all spin */
+/* lever + button triggers */
 spinBtn.addEventListener('click',spin);
 lever.addEventListener('click',spin);
 lever.addEventListener('keydown',e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); spin(); }});
@@ -385,7 +413,9 @@ function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)) }
 
 /* FX: coins + confetti + shake */
 const fx=document.getElementById('fx'); const ctx=fx.getContext('2d');
-function resize(){ fx.width=cab.clientWidth; fx.height=cab.clientHeight } addEventListener('resize',resize); resize();
+function resize(){ fx.width=cab.clientWidth; fx.height=cab.clientHeight }
+addEventListener('resize',resize); addEventListener('orientationchange',()=>setTimeout(resize,250)); resize();
+
 function coinBurst(){
   const parts=[]; for(let i=0;i<90;i++) parts.push({x:fx.width/2, y:fx.height/2+40, vx:(Math.random()-0.5)*4, vy:-Math.random()*3-2, r:Math.random()*3+2, g:0.06+Math.random()*0.02, life:120+Math.random()*40});
   let t=0; (function loop(){ t++; ctx.clearRect(0,0,fx.width,fx.height); parts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.life--; ctx.globalAlpha=Math.max(0,p.life/160); ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='gold'; ctx.fill(); }); ctx.globalAlpha=1; if(t<170) requestAnimationFrame(loop); })();
