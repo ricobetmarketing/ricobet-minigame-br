@@ -1,71 +1,179 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Choose Your Path</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Choose Your Adventure</title>
+
+<!-- (Optional) Preload island images -->
 <link rel="preload" href="https://ricomx.ft-crm.com/media-api/serve/a450b16e-9310-4e83-ae66-ea71822a218b_9.png" as="image">
 <link rel="preload" href="https://ricomx.ft-crm.com/media-api/serve/6959ee62-92fa-4192-a2d6-f678a4934b4f_8.png" as="image">
+
 <style>
-  :root{ --bg:#0b1020; --ink:#eaf2ff; --muted:#a6b4d6; --ring:#25c3ff; }
-  *{box-sizing:border-box}
-  body{margin:0; min-height:100dvh; display:flex; align-items:center; justify-content:center;
-       background: radial-gradient(1200px 800px at 70% -10%, #16213e 0%, #0b1020 55%, #060912 100%);
-       color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;}
-  .wrap{width:min(920px,94vw); padding:24px}
-  h1{margin:0 0 6px; text-align:center; font-weight:900; letter-spacing:.3px}
-  p.sub{margin:0 0 22px; text-align:center; color:var(--muted)}
-  .grid{display:grid; gap:22px; grid-template-columns:1fr; }
-  .card{
-    position:relative; border-radius:22px; overflow:hidden; cursor:pointer;
-    background:linear-gradient(180deg, #1a2747, #10192f);
-    outline:1px solid rgba(255,255,255,.08);
-    box-shadow:0 12px 36px rgba(0,0,0,.45); transition:transform .18s ease, box-shadow .18s ease;
+  :root{
+    --ink:#eaf2ff; --muted:#a6b4d6;
+    --pad: clamp(10px, 3.2vw, 24px);
+    --radius: clamp(14px, 3vw, 22px);
+    --island: clamp(120px, 36vw, 180px); /* island size */
   }
-  .card:hover{ transform:translateY(-4px) }
-  .card img{width:100%; display:block}
-  .label{position:absolute; left:14px; right:14px; bottom:14px; display:flex; justify-content:space-between; align-items:center;
-         padding:12px 14px; border-radius:14px; background:rgba(6,9,18,.65); backdrop-filter: blur(6px);
-         border:1px solid rgba(255,255,255,.08); font-weight:800}
-  .cta{ border:0; border-radius:999px; padding:8px 14px; background:linear-gradient(to right,#71e1ff,#25c3ff); color:#061018 }
-  .disabled{ filter:grayscale(1) brightness(.7); pointer-events:none }
-  .note{margin-top:12px; text-align:center; color:var(--muted); font-size:12px}
+  *{ box-sizing:border-box }
+  html,body{ height:100% }
+  body{
+    margin:0; min-height:100dvh; color:var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      linear-gradient(rgba(6,9,18,.5), rgba(6,9,18,.52)),
+      url("https://ricomx.ft-crm.com/media-api/serve/41e1e16f-8c13-4213-8ee1-028ce7951380_BG_GIF") center/cover no-repeat;
+  }
+
+  .wrap{
+    position:relative;
+    height:100dvh; width:100%; max-width:980px;
+    padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
+    display:grid; grid-template-rows:auto 1fr auto; gap: clamp(10px, 2.8vw, 22px);
+    overflow:hidden; margin:0 auto;
+  }
+
+  header{ text-align:center }
+  h1{ margin:0; font-weight:900; letter-spacing:.3px; font-size:clamp(18px,4.2vw,28px); line-height:1.1 }
+  p.sub{ margin:.35em 0 0; color:var(--muted); font-size:clamp(11px,2.7vw,14px) }
+
+  /* ROAD layer */
+  .road { position:absolute; inset:0; z-index:0; pointer-events:none }
+  @keyframes dash { to { stroke-dashoffset: -220; } }
+  @media (prefers-reduced-motion: reduce){ .road path { animation:none !important } }
+
+  /* ISLANDS (clickable) */
+  .island{
+    position:absolute; z-index:1; width:var(--island); aspect-ratio:1/1; border-radius:50%;
+    overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,.55);
+    display:block; text-decoration:none; color:inherit;
+  }
+  #slotIsland{ top:10%; right:6%; }        /* TOP RIGHT */
+  #liveIsland{ bottom:10%; left:6%; }       /* BOTTOM LEFT */
+
+  .island img{ width:100%; height:100%; object-fit:cover; display:block }
+
+  /* Label badge on each island */
+  .label{
+    position:absolute; left:8px; right:8px; bottom:8px;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:8px 10px; border-radius:12px;
+    background:rgba(6,9,18,.68); backdrop-filter: blur(6px);
+    border:1px solid rgba(255,255,255,.09);
+    font-weight:800; font-size:clamp(11px, 2.6vw, 14px);
+  }
+  .cta{
+    border:0; border-radius:999px; padding:6px 12px;
+    background:linear-gradient(to right,#71e1ff,#25c3ff); color:#061018; font-weight:900;
+  }
+
+  .disabled{ filter:grayscale(1) brightness(.75); pointer-events:none }
+
+  .note{ text-align:center; color:var(--muted); font-size:clamp(10px,2.5vw,12px); margin:0 }
+
+  /* If screen is very short, hide subtitle to avoid scroll */
+  @media (max-height: 620px){ p.sub{ display:none } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Choose Your Adventure</h1>
-  <p class="sub">Pick your realm. You can go back here until you start a game. After starting, you’re locked to that realm.</p>
+  <div class="wrap" id="wrap">
+    <header>
+      <h1>Choose Your Adventure</h1>
+      <p class="sub">Pick your realm. After starting, you’re locked to that realm.</p>
+    </header>
 
-  <div class="grid">
-    <!-- SLOT -->
-    <a id="slotLink" class="card" href="slot.html">
-      <img src="https://ricomx.ft-crm.com/media-api/serve/a450b16e-9310-4e83-ae66-ea71822a218b_9.png" alt="Slot realm island">
-      <div class="label"><span>QUICKSAND • Slot Realm</span><button class="cta" type="button" aria-hidden="true">Enter</button></div>
+    <!-- SVG ROAD -->
+    <svg class="road" id="road" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.8" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#71e1ff"/><stop offset="100%" stop-color="#25c3ff"/>
+        </linearGradient>
+      </defs>
+      <path id="roadBase" fill="none" stroke="rgba(10,20,35,.92)" stroke-width="12" stroke-linecap="round"/>
+      <path id="roadDash" fill="none" stroke="url(#rg)" stroke-width="2.8" stroke-linecap="round"
+            stroke-dasharray="10 12" stroke-dashoffset="0" filter="url(#glow)"
+            style="animation:dash 7s linear infinite;"/>
+      <!-- dock pads -->
+      <circle id="padA" r="6" fill="url(#rg)" opacity=".95" filter="url(#glow)"/>
+      <circle id="padB" r="6" fill="url(#rg)" opacity=".95" filter="url(#glow)"/>
+    </svg>
+
+    <!-- TOP RIGHT: SLOT -->
+    <a id="slotIsland" class="island" href="slot.html" aria-label="Enter Slot Realm">
+      <img src="https://ricomx.ft-crm.com/media-api/serve/a450b16e-9310-4e83-ae66-ea71822a218b_9.png" alt="">
+      <div class="label"><span>QUICKSAND • Slot</span><span class="cta">Enter</span></div>
     </a>
 
-    <!-- LIVE -->
-    <a id="liveLink" class="card" href="live.html">
-      <img src="https://ricomx.ft-crm.com/media-api/serve/6959ee62-92fa-4192-a2d6-f678a4934b4f_8.png" alt="Live realm island">
-      <div class="label"><span>HOTSTONE • Live Realm</span><button class="cta" type="button" aria-hidden="true">Enter</button></div>
+    <!-- BOTTOM LEFT: LIVE -->
+    <a id="liveIsland" class="island" href="live.html" aria-label="Enter Live Realm">
+      <img src="https://ricomx.ft-crm.com/media-api/serve/6959ee62-92fa-4192-a2d6-f678a4934b4f_8.png" alt="">
+      <div class="label"><span>HOTSTONE • Live</span><span class="cta">Enter</span></div>
     </a>
+
+    <p id="lockMsg" class="note" aria-live="polite"></p>
   </div>
 
-  <div id="lockMsg" class="note"></div>
-</div>
+  <script src="assets/common.js"></script>
+  <script>
+    // Lock logic (same behavior you had before)
+    const chosen = typeof getChoice==="function" ? getChoice() : null;
+    const msg = document.getElementById('lockMsg');
+    if (chosen) {
+      if (chosen === 'slot') document.getElementById('liveIsland').classList.add('disabled');
+      if (chosen === 'live') document.getElementById('slotIsland').classList.add('disabled');
+      msg.textContent = `Locked to: ${chosen.toUpperCase()} — You can keep playing that realm. (Add ?reset=1 to URL for testing reset)`;
+    } else {
+      msg.textContent = 'No lock yet — you can enter either realm.';
+    }
 
-<script src="assets/common.js"></script>
-<script>
-  // If already chosen, grey out the other card
-  const chosen = getChoice();
-  const lockMsg = document.getElementById('lockMsg');
-  if (chosen) {
-    if (chosen === 'slot') document.getElementById('liveLink').classList.add('disabled');
-    if (chosen === 'live') document.getElementById('slotLink').classList.add('disabled');
-    lockMsg.textContent = `Locked to: ${chosen.toUpperCase()} — You can keep playing that realm. (Add ?reset=1 to URL for testing reset)`;
-  } else {
-    lockMsg.textContent = 'No lock yet — you can enter either realm.';
-  }
-</script>
+    // --- ROAD: connect exact centers of the two islands ---
+    const wrap  = document.getElementById('wrap');
+    const road  = document.getElementById('road');
+    const base  = document.getElementById('roadBase');
+    const dash  = document.getElementById('roadDash');
+    const padA  = document.getElementById('padA');
+    const padB  = document.getElementById('padB');
+    const aEl   = document.getElementById('slotIsland');  // top-right
+    const bEl   = document.getElementById('liveIsland');  // bottom-left
+
+    function center(rect){ return { x:(rect.left+rect.right)/2, y:(rect.top+rect.bottom)/2 }; }
+
+    function drawRoad(){
+      const wb = wrap.getBoundingClientRect();
+      const a  = center(aEl.getBoundingClientRect());
+      const b  = center(bEl.getBoundingClientRect());
+
+      // convert to wrap-local coordinates
+      const ax = a.x - wb.left, ay = a.y - wb.top;
+      const bx = b.x - wb.left, by = b.y - wb.top;
+
+      road.setAttribute('viewBox', `0 0 ${wb.width} ${wb.height}`);
+
+      // Smooth S curve tuned for top-right -> bottom-left
+      const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
+      const lift = Math.max(90, Math.min(220, len * 0.55));
+      const cx1 = ax - lift * 0.7, cy1 = ay + lift;
+      const cx2 = bx + lift * 0.7, cy2 = by - lift;
+
+      const d = `M ${ax} ${ay} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${bx} ${by}`;
+      base.setAttribute('d', d);
+      dash.setAttribute('d', d);
+
+      padA.setAttribute('cx', ax); padA.setAttribute('cy', ay);
+      padB.setAttribute('cx', bx); padB.setAttribute('cy', by);
+    }
+
+    // Redraw when layout changes
+    const ro = new ResizeObserver(drawRoad);
+    ro.observe(wrap); ro.observe(aEl); ro.observe(bEl);
+    window.addEventListener('load', drawRoad, { once:true });
+    window.addEventListener('orientationchange', drawRoad);
+  </script>
 </body>
 </html>
