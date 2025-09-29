@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Neon Vegas — Advanced Slot (5 Spins)</title>
+<style>
+  :root{
+    --bg1:#0b0620; --bg2:#0a0d1a; --ink:#eef4ff; --muted:#9fb0ff;
+    --tube1:#43e6ff; --tube2:#9b4dff; --tube3:#ff3bd1;
+    --panel1:#171d3c; --panel2:#0c122a;
+    --accent:#66ffda; --accent2:#ffd86a; --good:#8EFF98;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    background:
+      radial-gradient(1200px 800px at 70% -10%, #231258 0%, var(--bg1) 55%, #040615 100%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    display:flex; align-items:center; justify-content:center; padding:18px;
+  }
+
+  /* ========== LAYOUT ========== */
+  .app{display:grid; grid-template-columns:min(640px,96vw) 300px; gap:18px; align-items:start}
+  @media (max-width:980px){ .app{grid-template-columns:min(640px,96vw)} }
+
+  /* ========== NEON CABINET ========== */
+  .cab{
+    position:relative; border-radius:26px; padding:22px; overflow:hidden;
+    background: linear-gradient(180deg,#17193a,#0c0f24);
+    box-shadow: 0 40px 120px rgba(0,0,0,.7), inset 0 0 40px rgba(0,0,0,.6);
+  }
+  /* glowing tubes */
+  .tube, .tube:before, .tube:after{content:""; position:absolute; border-radius:40px; pointer-events:none}
+  .tube{inset:10px; border:8px solid transparent; }
+  .tube:before{inset:-8px; border:8px solid; border-color:var(--tube1); filter:blur(6px); opacity:.85; animation:tubeCycle 6s linear infinite}
+  .tube:after {inset:-18px; border:12px solid; border-color:var(--tube2); filter:blur(16px); opacity:.35; animation:tubeCycle 6s linear reverse infinite}
+  @keyframes tubeCycle{
+    0%{border-color:var(--tube1)}
+    33%{border-color:var(--tube2)}
+    66%{border-color:var(--tube3)}
+    100%{border-color:var(--tube1)}
+  }
+  .topSign{
+    text-align:center; margin-bottom:8px; text-transform:uppercase; font-weight:900;
+    letter-spacing:.5px; color:#ffeaff;
+    text-shadow:
+      0 0 10px var(--tube3), 0 0 20px var(--tube3),
+      0 0 40px var(--tube2), 0 0 70px var(--tube1);
+  }
+  .topSign .mega{font-size:20px; display:block}
+  .topSign .title{font-size:40px; display:block}
+
+  /* ========== WINDOW + REELS ========== */
+  .window{
+    position:relative; border-radius:16px; padding:14px 16px;
+    background:linear-gradient(180deg,var(--panel1),var(--panel2));
+    outline:1px solid rgba(255,255,255,.15);
+    box-shadow: inset 0 0 40px rgba(0,0,0,.7), inset 0 24px 70px rgba(0,0,0,.55);
+  }
+  .glass{position:absolute; inset:0; pointer-events:none; border-radius:16px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 35%),
+      radial-gradient(500px 200px at 50% -25%, rgba(255,255,255,.22), transparent 65%),
+      linear-gradient(to right, rgba(255,255,255,.06), rgba(255,255,255,0) 25%, rgba(255,255,255,.06) 75%, rgba(255,255,255,0) 100%);
+    mix-blend-mode:screen}
+  .reels{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; height:200px; perspective:1200px}
+  .reel{position:relative; border-radius:12px; overflow:hidden; background:#0b1230;
+        outline:1px solid rgba(255,255,255,.12); box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 -6px 0 rgba(0,0,0,.6)}
+  .col{position:absolute; inset:-40px 0 -40px 0; display:flex; flex-direction:column; align-items:center; gap:18px; padding:14px 12px; transform-style:preserve-3d}
+  .sym{width:100%; height:72px; display:grid; place-items:center; font-size:40px; font-weight:900; color:#fff;
+       text-shadow:0 4px 14px rgba(0,0,0,.6);
+       background:linear-gradient(180deg,#24307a,#191f56);
+       border-radius:12px; outline:1px solid rgba(255,255,255,.12)}
+  .col.spinblur .sym{filter:drop-shadow(0 8px 6px rgba(0,0,0,.35)) blur(.18px)}
+
+  /* ========== METERS ========== */
+  .panel{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:10px}
+  .badge{padding:9px 12px; border-radius:12px; font-weight:800; background:linear-gradient(180deg,#141c3b,#0f1732); outline:1px solid rgba(255,255,255,.1)}
+  .badge .v{color:#9cf3ff}
+  .jackpot{flex:1 1 100%; text-align:center; margin-top:6px; font-weight:900; letter-spacing:2px; color:#ffe16a;
+           text-shadow:0 0 12px #ff5fdb, 0 0 24px #7af0ff}
+  .meters{display:flex; gap:12px; align-items:center}
+  .ring{--p:0; width:46px; height:46px; border-radius:50%; background:conic-gradient(var(--accent) calc(var(--p)*1%), #222 0); display:grid; place-items:center; font-size:12px; font-weight:900; box-shadow:0 0 18px rgba(102,255,218,.3)}
+  .ring span{background:#0a0d1a; color:#fff; width:32px; height:32px; display:grid; place-items:center; border-radius:50%}
+  .jack{height:8px; width:160px; border-radius:999px; background:#2a2a2a; position:relative; overflow:hidden; box-shadow:0 0 18px rgba(255,96,216,.25)}
+  .jack:before{content:""; position:absolute; inset:0; background:linear-gradient(90deg,#ff62ff,#65f0ff); transform-origin:left; transform:scaleX(var(--fill,0)); transition:transform .25s ease}
+
+  /* ========== CONTROLS & LEVER ========== */
+  .controls{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px}
+  .left{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .btn{cursor:pointer; border:0; border-radius:16px; padding:14px 18px; font-weight:900; text-transform:uppercase; letter-spacing:.5px;
+       background:linear-gradient(180deg,#18265c,#0f1f4c); color:#e9f2ff; outline:1px solid rgba(180,220,255,.25); box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  .btn.primary{background:radial-gradient(60% 100% at 50% 0%, #ff66c7, #b40fd1 70%); box-shadow:0 0 22px #ff66c7, inset 0 -4px 0 rgba(0,0,0,.45)}
+  .btn:disabled{opacity:.55; pointer-events:none}
+  .payout{min-height:18px; font-size:12px; color:var(--muted)}
+  .lever{position:relative; width:76px; height:96px}
+  .lever .stem{position:absolute; left:28px; bottom:8px; width:22px; height:72px; border-radius:12px; background:linear-gradient(180deg,#c9c9c9,#7a7a7a); box-shadow:inset 0 2px 0 #fff}
+  .lever .knob{position:absolute; left:14px; top:-4px; width:48px; height:48px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff, #ffe9e9 40%, #ff9aee 70%, #6a0fd1 100%); box-shadow:0 0 24px #ff66c7; transform-origin:50% 80%; transition: transform .16s ease}
+  .lever.pull .knob{transform: rotate(18deg) translateY(6px)}
+  .cab.win{animation:flash 1s ease}
+  @keyframes flash{0%,100%{filter:none}50%{filter:brightness(1.2) saturate(1.1)}}
+
+  /* ========== SIDE: missions ========== */
+  .side{border-radius:16px; padding:14px; background:linear-gradient(180deg,#121738,#0b112b); outline:1px solid rgba(180,220,255,.2); box-shadow:0 16px 60px rgba(0,0,0,.5)}
+  .side h3{margin:0 0 10px}
+  .mission{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.05); margin-bottom:8px; outline:1px solid rgba(255,255,255,.06)}
+  .badgeOk{background:#1aff9c; color:#001; padding:4px 8px; border-radius:999px; font-weight:900; font-size:12px}
+  .badgeTodo{background:#1a203f; color:#a6b3ff; padding:4px 8px; border-radius:999px; font-weight:900; font-size:12px}
+  .small{color:var(--muted); font-size:12px}
+
+  /* ========== SURPRISE VOUCHER POPUP (Pick 1 of 3) ========== */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; place-items:center; z-index:9999}
+  .overlay.show{display:grid}
+  .vault{width:min(720px,94vw); border-radius:18px; padding:18px;
+         background:linear-gradient(180deg,#141a3a,#0d1230); outline:1px solid rgba(180,220,255,.2); box-shadow:0 24px 90px rgba(0,0,0,.7); text-align:center}
+  .vault h3{margin:0 0 8px}
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0}
+  .card{
+    position:relative; height:120px; border-radius:14px; cursor:pointer;
+    background:radial-gradient(circle at 50% 30%, #3b1a68, #10082a 70%);
+    outline:1px solid rgba(255,255,255,.12);
+    box-shadow:0 0 16px rgba(255,102,199,.45), inset 0 0 40px rgba(255,255,255,.06);
+    display:grid; place-items:center; color:#fff; font-weight:900; letter-spacing:.5px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 0 26px rgba(102,240,255,.55), inset 0 0 40px rgba(255,255,255,.08) }
+  .card.revealed{cursor:default}
+  .voucher{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:18px; letter-spacing:.6px; margin-top:10px; padding:10px 12px; border-radius:10px; text-align:center; background:#0a0d1a; color:#9bf6ff; outline:1px dashed rgba(160,220,255,.4)}
+  .row{display:flex; gap:10px; justify-content:center; margin-top:10px}
+  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900}
+  .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
+
+  /* confetti canvas */
+  #fx{position:fixed; inset:0; pointer-events:none; z-index:9998}
+  .toast{position:fixed; right:14px; bottom:14px; background:linear-gradient(180deg,#14233f,#0e1a35); color:#fff; border-radius:12px; padding:12px 14px; outline:1px solid rgba(255,255,255,.08); box-shadow:0 10px 30px rgba(0,0,0,.4); transform:translateY(20px); opacity:0; pointer-events:none; transition:.25s ease}
+  .toast.show{transform:translateY(0); opacity:1}
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+
+<div class="app">
+  <!-- MACHINE -->
+  <div class="cab" id="cab">
+    <div class="tube"></div>
+
+    <div class="topSign"><span class="mega">Neon</span><span class="title">SLOT 7</span></div>
+
+    <div class="window">
+      <div class="reels" id="reels"></div>
+      <div class="glass"></div>
+    </div>
+
+    <div class="panel">
+      <div class="badge">Spins Left: <span class="v" id="spinsLeft">5</span></div>
+      <div class="badge">Bet: <span class="v" id="bet">10</span></div>
+      <div class="meters">
+        <div class="ring" id="ring"><span id="ringNum">0</span></div>
+        <div class="jack" id="jack"></div>
+      </div>
+      <div class="jackpot">JACKPOT</div>
+    </div>
+
+    <div class="controls">
+      <div class="left">
+        <button class="btn" id="minus">−</button>
+        <button class="btn" id="plus">+</button>
+        <button class="btn primary" id="spin">Spin</button>
+      </div>
+      <div class="lever" id="lever"><div class="stem"></div><div class="knob"></div></div>
+    </div>
+    <div class="payout" id="payout"></div>
+  </div>
+
+  <!-- SIDE: Missions -->
+  <div class="side">
+    <h3>🎖 Missions</h3>
+    <div class="mission"><span>Complete 1 spin</span><span id="m1" class="badgeTodo">0/1</span></div>
+    <div class="mission"><span>Hit any 3-of-a-kind</span><span id="m2" class="badgeTodo">0/1</span></div>
+    <div class="mission"><span>Use all 5 spins</span><span id="m3" class="badgeTodo">0/5</span></div>
+    <div class="small">Daily streak: <b id="streak">Day 1</b></div>
+    <div class="small">Wins: <b id="wins">0</b></div>
+  </div>
+</div>
+
+<!-- Surprise Voucher Popup: pick 1 of 3 neon cards -->
+<div class="overlay" id="vaultOverlay" role="dialog" aria-modal="true">
+  <div class="vault">
+    <h3>🎁 Surprise! Pick a Neon Card</h3>
+    <div class="cards">
+      <div class="card" data-i="0">?</div>
+      <div class="card" data-i="1">?</div>
+      <div class="card" data-i="2">?</div>
+    </div>
+    <div class="voucher" id="voucherText" style="display:none"></div>
+    <div class="row">
+      <button class="copy" id="copyBtn" style="display:none">Copy Code</button>
+      <button class="close" id="closeBtn" style="display:none">Close</button>
+    </div>
+    <div class="small">One pick only. The others will fade away…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast">🏆 Achievement</div>
+
+<!-- Optional SFX (remove/replace if you want) -->
+<audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
+<audio id="sStop" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3"  preload="auto"></audio>
+<audio id="sWin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"   preload="auto"></audio>
+
+<script src="assets/common.js"></script>
+<script>
+/* ---------- Guard: lock to Slot ---------- */
+const choice = getChoice();
+if (choice && choice !== 'slot') { alert('You already started Live. Slot is locked for this event.'); location.replace('index.html'); }
+
+/* ---------- Config ---------- */
+const MAX_SPINS=5;
+const SYMBOLS=["🍒","🍊","🍋","💎","⭐","7️⃣","BAR"]; // neon fruit
+const VOUCHERS=["NEON-10FS","NEON-20FS","NEON-BONUS"]; // edit me
+const STATE_KEY='neon_slot_state_v1';
+const VOUCHER_KEY='neon_slot_voucher_v1';
+const STREAK_KEY='neon_slot_streak_v1';
+
+/* ---------- State ---------- */
+let state=loadState(); // {left,claimed,spun,wins,hit3}
+let BET=10, turbo=false, started=false, spinning=false;
+
+const reelsEl=document.getElementById('reels');
+const spinBtn=document.getElementById('spin');
+const minusBtn=document.getElementById('minus');
+const plusBtn=document.getElementById('plus');
+const lever=document.getElementById('lever');
+const payoutEl=document.getElementById('payout');
+const spinsLeftEl=document.getElementById('spinsLeft');
+const betEl=document.getElementById('bet');
+const ring=document.getElementById('ring');
+const ringNum=document.getElementById('ringNum');
+const jack=document.getElementById('jack');
+const winsEl=document.getElementById('wins');
+const sSpin=document.getElementById('sSpin');
+const sStop=document.getElementById('sStop');
+const sWin=document.getElementById('sWin');
+const toast=document.getElementById('toast');
+
+const m1=document.getElementById('m1'), m2=document.getElementById('m2'), m3=document.getElementById('m3');
+const streakEl=document.getElementById('streak');
+
+/* ---------- UI init ---------- */
+function setBet(v){ BET=Math.max(1,Math.min(100,v)); betEl.textContent=BET } setBet(BET);
+spinsLeftEl.textContent=state.left; updateRing(); updateMissions(); updateWins(); updateStreak();
+if(state.claimed){ openVaultWithVoucher(localStorage.getItem(VOUCHER_KEY)||'CLAIMED'); disableControls(); }
+
+/* ---------- Build reels ---------- */
+function makeReel(){
+  const reel=document.createElement('div'); reel.className='reel';
+  const col=document.createElement('div'); col.className='col';
+  const pool=[]; for(let i=0;i<20;i++){ pool.push(SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]) }
+  pool.forEach(s=>{ const it=document.createElement('div'); it.className='sym'; it.textContent=s; col.appendChild(it) });
+  reel.appendChild(col); return reel;
+}
+for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()); }
+
+/* ---------- Spin flow ---------- */
+function pull(on){ lever.classList.toggle('pull', !!on) }
+function spin(){
+  if(spinning || state.claimed) return;
+  if(state.left<=0){ maybeVoucher(); return; }
+  if(!started){ setChoice('slot'); started=true; }
+
+  spinning=true; payoutEl.textContent=''; pull(true);
+  sSpin && sSpin.play().catch(()=>{});
+
+  const cols=[...document.querySelectorAll('.reel .col')];
+  const results=[];
+  cols.forEach((col,idx)=>{
+    const dur=(turbo? 600: 1450)+idx*220;
+    const t0=performance.now();
+    col.classList.add('spinblur');
+    (function anim(){
+      const t=performance.now()-t0;
+      const p=Math.min(1, t/dur);
+      const e=1-Math.pow(1-p,3);
+      const offset=-(e*16*72);
+      col.style.transform=`translateY(${offset}px) rotateX(${e*20}deg)`;
+      if(t<dur){ requestAnimationFrame(anim); }
+      else{
+        const s=SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+        const d=document.createElement('div'); d.className='sym'; d.textContent=s; col.appendChild(d);
+        col.style.transform='translateY(0)'; col.classList.remove('spinblur');
+        while(col.children.length>20){ col.removeChild(col.firstChild) }
+        results[idx]=s;
+        if(results.filter(Boolean).length===cols.length){ onStop(results); pull(false); sStop && sStop.play().catch(()=>{}); }
+      }
+    })();
+  });
+}
+
+function onStop(arr){
+  state.spun = (state.spun||0)+1;
+  const freq={}; arr.forEach(s=>freq[s]=(freq[s]||0)+1);
+  let best=0; for(const k in freq){ if(freq[k]>best) best=freq[k] }
+  if(best>=3){ state.wins=(state.wins||0)+1; state.hit3=true; payoutEl.innerHTML='<span style="color:var(--good);font-weight:900">WIN!</span>'; sWin && sWin.play().catch(()=>{}); sparkles(); }
+  else{ payoutEl.textContent='Spin again'; }
+
+  state.left=Math.max(0,state.left-1); saveState(state);
+  spinsLeftEl.textContent=state.left; updateRing(); updateMissions(); updateWins();
+  maybeVoucher();
+}
+
+/* ---------- Voucher (surprise) ---------- */
+function maybeVoucher(){
+  if(state.claimed){ spinning=false; return; }
+  const reveal=(state.left===0)||(Math.random()<0.32);
+  if(reveal){
+    const code=VOUCHERS[Math.floor(Math.random()*VOUCHERS.length)];
+    localStorage.setItem(VOUCHER_KEY, code);
+    state.claimed=true; saveState(state);
+    openVaultWithVoucher(code);
+    disableControls();
+  }
+  spinning=false;
+}
+
+const overlay=document.getElementById('vaultOverlay');
+const cards=[...document.querySelectorAll('.card')];
+const voucherText=document.getElementById('voucherText');
+const copyBtn=document.getElementById('copyBtn');
+const closeBtn=document.getElementById('closeBtn');
+
+function openVaultWithVoucher(code){
+  // randomize which card holds code
+  const winner = Math.floor(Math.random()*3);
+  cards.forEach((c,i)=>{
+    c.classList.remove('revealed');
+    c.textContent='?';
+    c.onclick = () => {
+      if(c.classList.contains('revealed')) return;
+      cards.forEach((k,j)=>{ if(j!==i){ k.style.opacity='.2'; k.style.transform='translateY(8px) scale(.96)'; k.style.pointerEvents='none'; }});
+      c.classList.add('revealed');
+      setTimeout(()=>{ c.textContent='🎫'; },150);
+      setTimeout(()=>{
+        voucherText.textContent = (i===winner) ? code : 'Miss… try next time!';
+        voucherText.style.display='block';
+        copyBtn.style.display = (i===winner) ? 'inline-block' : 'none';
+        closeBtn.style.display='inline-block';
+        if(i===winner) confetti();
+      },350);
+    }
+  });
+  voucherText.style.display='none'; copyBtn.style.display='none'; closeBtn.style.display='none';
+  overlay.classList.add('show');
+}
+
+copyBtn.addEventListener('click',()=>{
+  const text=voucherText.textContent.trim();
+  if(!text || text.startsWith('Miss')) return;
+  navigator.clipboard.writeText(text).then(()=>{ copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200); });
+});
+closeBtn.addEventListener('click',()=>overlay.classList.remove('show'));
+/* ---------- Disable buttons after claim ---------- */
+function disableControls(){ spinBtn.disabled=true; minusBtn.disabled=true; plusBtn.disabled=true }
+
+/* ---------- Progress, missions & streak ---------- */
+function updateRing(){ const used=MAX_SPINS-state.left; ring.style.setProperty('--p', Math.round((used/MAX_SPINS)*100)); ringNum.textContent=used; jack.style.setProperty('--fill', Math.min(1,(state.wins||0)/3)); }
+function updateMissions(){
+  m1.textContent = `${Math.min(1,state.spun||0)}/1`; m1.className=(state.spun>=1)?'badgeOk':'badgeTodo';
+  m2.textContent = `${state.hit3?1:0}/1`; m2.className=state.hit3?'badgeOk':'badgeTodo';
+  m3.textContent = `${MAX_SPINS-state.left}/${MAX_SPINS}`; m3.className=(state.left===0)?'badgeOk':'badgeTodo';
+  if(state.spun===1) toastOnce('First spin!');
+  if(state.hit3) toastOnce('3-of-a-kind!');
+  if(state.left===0) toastOnce('All spins used!');
+}
+function updateWins(){ winsEl.textContent = state.wins||0 }
+
+function updateStreak(){
+  const today=new Date().toDateString();
+  const raw=JSON.parse(localStorage.getItem(STREAK_KEY)||'{}');
+  if(raw.last !== today){
+    const last=raw.last? new Date(raw.last):null; const y=new Date(); y.setDate(y.getDate()-1);
+    raw.count = (last && last.toDateString()===y.toDateString()) ? (raw.count||0)+1 : 1;
+    raw.last = today; localStorage.setItem(STREAK_KEY, JSON.stringify(raw));
+  }
+  streakEl.textContent=`Day ${JSON.parse(localStorage.getItem(STREAK_KEY)||'{"count":1}').count}`;
+}
+
+/* ---------- Inputs ---------- */
+spinBtn.addEventListener('mousedown',()=>{ turbo=true; lever.classList.add('pull') });
+spinBtn.addEventListener('mouseup',()=>{ turbo=false; lever.classList.remove('pull') });
+spinBtn.addEventListener('mouseleave',()=>{ turbo=false; lever.classList.remove('pull') });
+spinBtn.addEventListener('click',spin);
+minusBtn.addEventListener('click',()=>setBet(BET-1));
+plusBtn.addEventListener('click',()=>setBet(BET+1));
+
+/* ---------- Persistence ---------- */
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem(STATE_KEY)) || {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} }
+  catch{ return {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} }
+}
+function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)) }
+
+/* ---------- Effects ---------- */
+const fx=document.getElementById('fx'); const ctx=fx.getContext('2d');
+function resize(){ fx.width=innerWidth; fx.height=innerHeight } addEventListener('resize',resize); resize();
+function confetti(){ const p=[]; for(let i=0;i<160;i++) p.push({x:fx.width/2,y:fx.height/2-80,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6-2,life:140+Math.random()*50,r:2+Math.random()*3,h:Math.random()*360}); (function loop(){ ctx.clearRect(0,0,fx.width,fx.height); p.forEach(o=>{ o.x+=o.vx; o.y+=o.vy; o.vy+=0.05; o.life--; ctx.globalAlpha=Math.max(0,o.life/180); ctx.fillStyle=`hsl(${o.h},100%,60%)`; ctx.fillRect(o.x,o.y,o.r,o.r);}); ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop); })()}
+function sparkles(){ const p=[]; for(let i=0;i<60;i++) p.push({x:fx.width/2,y:fx.height/2,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3-1,life:80+Math.random()*40,r:1+Math.random()*2}); (function loop(){ ctx.clearRect(0,0,fx.width,fx.height); p.forEach(o=>{ o.x+=o.vx; o.y+=o.vy; o.vy+=0.03; o.life--; ctx.globalAlpha=Math.max(0,o.life/120); ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle='#66ffda'; ctx.fill();}); ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop); })()}
+
+/* ---------- Build reels initially ---------- */
+(function initReels(){ /* already appended above */ })();
+
+/* ---------- Toast helper ---------- */
+const shown=new Set();
+function toastOnce(msg){ if(shown.has(msg)) return; shown.add(msg); toast.textContent='🏆 '+msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1800) }
+</script>
+</body>
+</html>
