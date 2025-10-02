@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -26,12 +26,24 @@
   }
   @supports (-webkit-touch-callout:none){ body{ background-attachment:scroll } }
 
+  /* ===== Back to Menu button (added) ===== */
+  .backBtn{
+    position:fixed; top:calc(10px + env(safe-area-inset-top)); left:calc(10px + env(safe-area-inset-left));
+    z-index:99999;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:12px; text-decoration:none;
+    font-weight:900; letter-spacing:.3px; color:#0c1220; background:#eaf2ff;
+    box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
+    user-select:none; -webkit-tap-highlight-color: transparent;
+  }
+  .backBtn:active{ transform:translateY(1px) }
+  .backBtn svg{ width:16px; height:16px }
+
   /* ===== 6D depth: back halo + spotlight + ground shadow ===== */
   .cabWrap{
     position: relative;
     width: min(640px,96vw);
   }
-  /* Big neon halo + color glows behind the cabinet */
   .cabWrap::before{
     content:"";
     position:absolute; inset:-8% -10% -14% -10%;
@@ -44,7 +56,6 @@
     opacity:.9;
     transform: translateZ(0);
   }
-  /* Moving spotlight sweep for extra life */
   .cabWrap::after{
     content:"";
     position:absolute; inset:-6% -8% -12% -8%;
@@ -60,7 +71,6 @@
     50%  { --sx:65%; --sy:18%; opacity:.9; }
     100% { --sx:35%; --sy:12%; opacity:.5; }
   }
-  /* Soft ground shadow */
   .cabWrap .groundShadow{
     position:absolute; left:50%; bottom:-20px;
     width:78%; height:44px; transform:translateX(-50%);
@@ -190,6 +200,12 @@
 </head>
 <body>
 
+<!-- Back button (visible before any play; auto-hides on first spin) -->
+<a class="backBtn" id="backBtn" href="index.html" aria-label="Back to menu">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Back
+</a>
+
 <div class="cabWrap">
   <div class="cab" id="cab">
     <canvas id="fx"></canvas>
@@ -242,8 +258,10 @@
 <div class="overlay" id="giftOverlay" role="dialog" aria-modal="true">
   <div class="gifModal">
     <img class="giftGif"
+         id="giftGif"
          src="https://ricomx.ft-crm.com/media-api/serve/64ae8b79-831d-4b08-80e9-6fbbc37e2e80_Surprise_GIF"
-         alt="Surprise gift animation" />
+         alt="Surprise gift animation"
+         decoding="async" loading="eager" referrerpolicy="no-referrer" draggable="false" />
     <div class="voucher" id="voucherText">VOUCHER-XXXX</div>
     <div class="row">
       <button class="copy" id="copyBtn">Copy Code</button>
@@ -285,6 +303,8 @@ const giftOverlay = document.getElementById('giftOverlay');
 const voucherText = document.getElementById('voucherText');
 const copyBtn     = document.getElementById('copyBtn');
 const closeBtn    = document.getElementById('closeBtn');
+const backBtn     = document.getElementById('backBtn');
+const giftGif     = document.getElementById('giftGif');
 
 /* ===== Init UI ===== */
 spinsLeftEl.textContent=state.left; updateMeters();
@@ -303,6 +323,10 @@ for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()); }
 /* ===== SPIN ===== */
 function spin(){
   if(spinning || state.claimed) return;
+
+  // first interaction → lock in realm and hide Back button
+  if(!started){ started=true; if(backBtn) backBtn.style.display='none'; }
+
   if(state.left<=0){ maybeVoucher(); return; }
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
@@ -385,12 +409,7 @@ function openGift(code){
   giftOverlay.classList.add('show');
   confetti();
 }
-copyBtn.addEventListener('click',()=>{
-  const t=voucherText.textContent.trim(); if(!t) return;
-  navigator.clipboard.writeText(t).then(()=>{
-    copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);
-  });
-});
+copyBtn.addEventListener('click',()=> copyText(voucherText.textContent.trim()));
 closeBtn.addEventListener('click',()=> giftOverlay.classList.remove('show'));
 
 /* ===== Controls ===== */
@@ -401,6 +420,47 @@ lever.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preven
 spinBtn.addEventListener('mousedown',()=>{ turbo=true; lever.classList.add('pull') });
 spinBtn.addEventListener('mouseup',()=>{ turbo=false; lever.classList.remove('pull') });
 spinBtn.addEventListener('mouseleave',()=>{ turbo=false; lever.classList.remove('pull') });
+
+/* ===== Clipboard (desktop + iOS fallback) ===== */
+async function copyText(txt){
+  if(!txt) return;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(txt);
+      copiedUI();
+      return;
+    }
+  }catch(_){}
+  // Fallback for older Safari / insecure contexts
+  const ta=document.createElement('textarea');
+  ta.value=txt; ta.setAttribute('readonly','');
+  ta.style.position='fixed'; ta.style.top='-9999px'; ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, ta.value.length);
+  try{ document.execCommand('copy'); }catch(_){}
+  document.body.removeChild(ta);
+  copiedUI();
+}
+function copiedUI(){
+  copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);
+}
+
+/* ===== GIF mobile robustness: retry with .gif if needed ===== */
+(function ensureGifShows(){
+  const url=giftGif.getAttribute('src')||'';
+  let tried=false;
+  function tryFix(){
+    if(tried) return;
+    tried=true;
+    if(!/\.gif(\?|$)/i.test(url)){
+      giftGif.src = url + '.gif';
+    }
+  }
+  // If it errors or doesn't decode in time, try with .gif appended
+  giftGif.addEventListener('error', tryFix, { once:true });
+  // Also set a gentle timer; if image height is 0 after a tick, swap
+  setTimeout(()=>{ if(giftGif.naturalWidth===0 || giftGif.naturalHeight===0){ tryFix(); } }, 900);
+})();
 
 /* ===== Persistence ===== */
 function loadState(){ try{ return JSON.parse(localStorage.getItem(STATE_KEY)) || {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } catch{ return {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } }
