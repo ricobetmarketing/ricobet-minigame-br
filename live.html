@@ -32,7 +32,7 @@
   .bar>i{position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,#65f0ff,#ff62ff)}
   .toggle{border:0;border-radius:12px;padding:8px 12px;font-weight:900;cursor:pointer;background:#2b2b2b;color:#fff; touch-action:manipulation}
   .note{font-size:12px; opacity:.9; white-space:nowrap}
-  .reset{border:0;background:#24325a;color:#fff;border-radius:10px;padding:6px 10px;font-weight:800}
+  .reset{border:0;background:#24325a;color:#fff;border-radius:10px;padding:6px 10px;font-weight:800; cursor:pointer}
 
   .felt{
     position:relative; border-radius:22px; padding:14px 14px 150px;
@@ -41,7 +41,7 @@
     box-shadow:inset 0 0 70px rgba(0,0,0,.6), 0 0 60px rgba(113,225,255,.18), 0 0 80px rgba(192,107,255,.16);
     overflow:hidden; width:100%; aspect-ratio:16/9; max-height:calc(100vh - 110px);
   }
-  #fx{ position:absolute; inset:0; pointer-events:none; z-index:2 }
+  #fx{ position:absolute; inset:0; pointer-events:none; z-index:1 }
 
   .feltArt{ position:absolute; inset:0; pointer-events:none; opacity:.75; filter:drop-shadow(0 3px 10px rgba(0,0,0,.45)); z-index:0 }
   .feltArt text{ font:900 clamp(12px,1.9vw,18px)/1 ui-sans-serif,system-ui,Segoe UI,Roboto,Arial; letter-spacing:2px; fill:#eaf2ff }
@@ -54,14 +54,14 @@
   .tot.pop{ transform:scale(1.18) }
 
   /* clickable bet areas */
-  .areas{ position:absolute; inset:clamp(110px,18vh,160px) clamp(12px,6vw,70px) clamp(160px,24vh,220px); display:grid; grid-template-columns:1fr 1fr 1fr; gap:clamp(10px,2.6vw,28px); z-index:10; pointer-events:auto }
+  .areas{ position:absolute; inset:clamp(110px,18vh,160px) clamp(12px,6vw,70px) clamp(160px,24vh,220px); display:grid; grid-template-columns:1fr 1fr 1fr; gap:clamp(10px,2.6vw,28px); z-index:30; pointer-events:auto }
   .area{
     appearance:none; -webkit-appearance:none; border:0; background:none;
     position:relative; border-radius:26px; display:grid; place-items:center;
     background:radial-gradient(closest-side, rgba(255,255,255,.05), rgba(255,255,255,.0) 70%);
     outline:2px dashed rgba(255,255,255,.15); padding:12px;
     transition: box-shadow .25s, transform .12s, outline-color .2s;
-    cursor:pointer; touch-action:manipulation; color:inherit;
+    cursor:pointer; touch-action:manipulation; color:inherit
   }
   .area h2{ margin:0; font:900 clamp(16px,2.2vw,22px)/1.1 ui-sans-serif; letter-spacing:1px; pointer-events:none }
   .area small{ opacity:.8; font-weight:700; font-size:clamp(10px,1.5vw,12px); pointer-events:none }
@@ -119,6 +119,12 @@
     .felt{ padding-bottom:140px }
     .areas{ inset:clamp(90px,18vh,150px) clamp(8px,5vw,16px) clamp(140px,22vh,200px) }
   }
+
+  /* status strip */
+  .status{
+    margin-top:8px; font-size:12px; color:#a9b7d8; display:flex; gap:10px; align-items:center; flex-wrap:wrap
+  }
+  .pill{background:#0f1a35;border:1px solid #26325a;border-radius:999px;padding:4px 8px;font-weight:800}
 </style>
 </head>
 <body>
@@ -128,11 +134,11 @@
       <div class="top">
         <div class="shoe"><div style="font-weight:800">Shoe</div><div class="bar"><i id="shoeFill"></i></div><div id="shoeLeft" style="font-size:12px;min-width:64px;text-align:right">—</div></div>
         <div class="note"><b>3 bets only</b> • Voucher after 3 bets • Banker 0.95:1 • Player 1:1 • Tie 8:1</div>
-        <button id="soundBtn" class="toggle">🔊 Sound: On</button>
-        <button id="resetBtn" class="reset" title="Clear saved progress">Reset</button>
+        <button id="soundBtn" class="toggle" type="button">🔊 Sound: On</button>
+        <button id="resetBtn" class="reset" type="button" title="Clear saved progress for testing">Reset</button>
       </div>
 
-      <div class="felt" id="felt">
+      <div class="felt" id="felt" aria-live="polite">
         <canvas id="fx"></canvas>
 
         <svg class="feltArt" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
@@ -146,7 +152,7 @@
         <div class="hand player" id="pHand"></div>
         <div class="hand banker" id="bHand"></div>
 
-        <div class="areas" id="areas">
+        <div class="areas" id="areas" role="group" aria-label="Betting areas">
           <button type="button" class="area player" id="areaPlayer" data-side="player" aria-label="Bet Player">
             <h2>PLAYER</h2><small>1 : 1</small><div class="betSpot"></div>
           </button>
@@ -159,13 +165,18 @@
         </div>
 
         <div class="controls">
-          <button class="btn" id="dealBtn" disabled>Deal</button>
-          <div class="btn ghost" id="progress">Bets left: 3 • Wins: 0</div>
+          <button class="btn" id="dealBtn" type="button" disabled>Deal</button>
+          <div class="btn ghost" id="progress" aria-live="polite">Bets left: 3 • Wins: 0</div>
         </div>
 
         <div class="banner" id="banner">Select a side</div>
 
         <div class="winner" id="winnerOverlay"><div class="winBadge" id="winBadge">PLAYER WIN</div></div>
+      </div>
+
+      <div class="status" id="statusRow">
+        <span class="pill" id="lockPill" style="display:none">Already claimed on this device</span>
+        <span>Tip: For testing you can press <b>Reset</b> or add <code>?reset=1</code> to the URL.</span>
       </div>
     </div>
   </div>
@@ -175,8 +186,8 @@
     <div style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Your Voucher</div>
     <div class="voucher" id="voucherText">VIPBAW</div>
     <div class="row">
-      <button class="copy" id="copyBtn">Copy Code</button>
-      <button class="close" id="closeBtn">Close</button>
+      <button class="copy" id="copyBtn" type="button">Copy Code</button>
+      <button class="close" id="closeBtn" type="button">Close</button>
     </div>
     <div style="color:#a9b7d8;margin-top:8px; font-size:12px">Use this code in your account. One play per user.</div>
   </div>
@@ -190,10 +201,10 @@
 
 <script>
 /* Fallback realm helpers */
-if(typeof getChoice!=='function') window.getChoice=()=>{try{return localStorage.getItem('realm_choice')}catch(e){return null}};
+if(typeof getChoice!=='function') window.getChoice=()=>{try{return localStorage.getItem('realm_choice')}catch(e){return null}}; 
 if(typeof setChoice!=='function') window.setChoice=v=>{try{localStorage.setItem('realm_choice',v)}catch(e){}};
 
-const MAX_ROUNDS=3, CLAIM_KEY='live_bac_3bets_claimed_v1', PROG_KEY='live_bac_3bets_progress_v1';
+const MAX_ROUNDS=3, CLAIM_KEY='live_bac_3bets_claimed_v2', PROG_KEY='live_bac_3bets_progress_v2';
 const CODE_WIN='VIPBAW', CODE_LOSE='VIPBAL';
 
 /* Optional reset via query */
@@ -214,7 +225,9 @@ g('soundBtn').addEventListener('click',e=>{
   soundOn=!soundOn; e.target.textContent = soundOn?'🔊 Sound: On':'🔈 Sound: Off';
   unlockAudio();
 });
-document.addEventListener('pointerdown', unlockAudio, {once:true});
+/* Unlock on first touch/click */
+['pointerdown','touchstart','mousedown'].forEach(ev=>document.addEventListener(ev, unlockAudio, {once:true, passive:true}));
+
 g('resetBtn').addEventListener('click',()=>{ try{ localStorage.removeItem(CLAIM_KEY); localStorage.removeItem(PROG_KEY); localStorage.removeItem('realm_choice'); }catch(e){} location.reload(); });
 
 /* Canvas confetti */
@@ -235,6 +248,7 @@ const dealBtn=g('dealBtn'), progress=g('progress');
 const areas=g('areas');
 const winnerOverlay=g('winnerOverlay'), winBadge=g('winBadge');
 const voucherOverlay=g('voucherOverlay'), voucherText=g('voucherText'), copyBtn=g('copyBtn'), closeBtn=g('closeBtn');
+const lockPill=g('lockPill'), statusRow=g('statusRow');
 
 /* State */
 let shoe=[], shoeSize=0;
@@ -242,12 +256,13 @@ let inRound=false, P=[], B=[];
 let selection=null;
 let roundsPlayed=0, winsCount=0;
 
-/* Claim check */
+/* Claim check (locks UI if already claimed) */
 const claimedRaw = localStorage.getItem(CLAIM_KEY);
 if(claimedRaw){
   lockSelection(true);
   const saved = JSON.parse(claimedRaw);
-  showVoucher(saved.code || CODE_LOSE, false);
+  lockPill.style.display='inline-block';
+  showVoucher(saved.code || CODE_LOSE, false); // show without sound/confetti on reload
 }
 
 /* Progress resume */
@@ -292,18 +307,24 @@ function setSelection(side){
   selection=side; banner.textContent=`Selected: ${side.toUpperCase()} • Tap DEAL`; dealBtn.disabled=false;
   setChoice('live'); unlockAudio(); playS(sClick);
 }
-/* Event delegation for super-reliable taps */
-areas.addEventListener('click', (e)=>{
-  const btn=e.target.closest('.area'); if(!btn || btn.disabled) return;
-  setSelection(btn.dataset.side);
-});
+
+/* Reliable taps (mobile + desktop) */
+function onAreaActivate(ev){
+  if(ev.type==='click' || ev.pointerType || ev.type==='touchend'){
+    const target = ev.target.closest('.area');
+    if(!target || target.disabled) return;
+    setSelection(target.dataset.side);
+  }
+}
+areas.addEventListener('pointerup', onAreaActivate);
+areas.addEventListener('click', onAreaActivate);
 
 /* Flow timings */
 const dealDelay=140, flipDelay=360, thirdDelay=420, popMs=220;
 function popTotals(){ pTot.classList.add('pop'); bTot.classList.add('pop'); setTimeout(()=>{ pTot.classList.remove('pop'); bTot.classList.remove('pop'); }, popMs); }
 
 /* Round */
-g('dealBtn').addEventListener('click', startRound);
+dealBtn.addEventListener('click', startRound, {passive:true});
 
 async function startRound(){
   if(inRound) return;
@@ -396,8 +417,9 @@ function finalizeVoucher(code){
   localStorage.setItem(CLAIM_KEY, JSON.stringify({code, ts:Date.now()}));
   lockSelection(true);
   inRound=false;
+  lockPill.style.display='inline-block';
 }
-function showVoucher(code){
+function showVoucher(code, withSound=true){
   voucherText.textContent=code;
   voucherOverlay.classList.add('show');
   copyBtn.onclick=()=>{ const t=voucherText.textContent.trim(); if(!t) return; navigator.clipboard.writeText(t).then(()=>{ copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1000); }); };
@@ -414,10 +436,10 @@ function saveProgress(){ try{ localStorage.setItem(PROG_KEY, JSON.stringify({rou
 
 /* Init */
 function init(){
-  const lockedTo=getChoice(); if(lockedTo && lockedTo!=='live'){ alert('You already started Slot. Live is locked for this event.'); location.replace('index.html'); }
+  const lockedTo=getChoice(); if(lockedTo && lockedTo!=='live'){ alert('You already started Slot. Live is locked for this event.'); location.replace('index.html'); return; }
   initShoe();
   banner.textContent='Select a side';
-  lockSelection(false);
+  lockSelection(!!localStorage.getItem(CLAIM_KEY));
 }
 init();
 </script>
