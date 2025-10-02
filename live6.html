@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Live Realm — Dealer’s Cut</title>
+<style>
+  :root{ --ink:#eaf2ff; --mut:#9fb0d9; --g1:#71e1ff; --g2:#25c3ff; }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--ink);background:radial-gradient(1200px 800px at 70% -10%, #18244d 0%, #0a0f1e 55%, #05070d 100%);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;display:flex;align-items:center;justify-content:center;padding:20px}
+  a.back{position:fixed;left:12px;top:12px;z-index:10;text-decoration:none;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:10px;color:#fff;font-weight:700}
+  .wrap{width:min(760px,96vw)}
+  .card{position:relative;border-radius:22px;padding:18px;background:linear-gradient(180deg,#1b2a56,#0f1832);outline:1px solid rgba(255,255,255,.08);box-shadow:0 16px 60px rgba(0,0,0,.55);text-align:center}
+  h1{margin:0 0 8px;font-size:20px;font-weight:900;text-transform:uppercase}
+  p.sub{margin:0 6px 16px;color:var(--mut)}
+  .wheelBox{position:relative;margin:0 auto;width:min(420px,86vw);aspect-ratio:1/1}
+  .wheel{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#0e1633;box-shadow:inset 0 0 40px rgba(0,0,0,.6)}
+  .slice{position:absolute;inset:0;clip-path:polygon(50% 50%, 100% 0, 100% 100%);transform-origin:50% 50%}
+  .slice:nth-child(1){background:linear-gradient(180deg,#7a1a68,#3a144f);transform:rotate(0deg)}
+  .slice:nth-child(2){background:linear-gradient(180deg,#1a3a7a,#12224f);transform:rotate(120deg)}
+  .slice:nth-child(3){background:linear-gradient(180deg,#7a1a28,#4f2212);transform:rotate(240deg)}
+  .label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+  .pin{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:16px solid #ffea9a;filter:drop-shadow(0 0 8px rgba(255,220,120,.9))}
+  .btn{border:0;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer;background:linear-gradient(to right,var(--g1),var(--g2));color:#061018;box-shadow:0 0 18px rgba(113,225,255,.5), inset 0 -3px 0 rgba(0,0,0,.35);margin-top:14px}
+  .code{display:none;margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.5px;padding:10px 12px;border-radius:12px;background:#0a0d1a;outline:1px dashed rgba(160,220,255,.35)}
+  .copy{display:none;margin-top:8px;border:0;border-radius:10px;padding:8px 10px;font-weight:900;background:#2b2b2b;color:#fff}
+</style>
+</head>
+<body>
+  <a class="back" href="index.html">← Back</a>
+  <div class="wrap">
+    <div class="card">
+      <h1>Dealer’s Cut</h1>
+      <p class="sub">One quick cut of the wheel. Your result locks you to <b>Live</b>.</p>
+      <div class="wheelBox">
+        <div class="pin"></div>
+        <div class="wheel" id="wheel">
+          <div class="slice"></div><div class="slice"></div><div class="slice"></div>
+          <div class="label" id="centerLabel">Tap Spin</div>
+        </div>
+      </div>
+      <button class="btn" id="spinBtn">Spin</button>
+      <div class="code" id="codeBox">LIVE-CUTS-XXXX</div>
+      <button class="copy" id="copyBtn">Copy Code</button>
+    </div>
+  </div>
+
+<script src="assets/common.js"></script>
+<script>
+const chk=getChoice(); if(chk && chk!=='live'){ alert('You already started Slot. Live is locked for this event.'); location.replace('index.html'); }
+const CLAIM_KEY='live_cuts_claimed_v1';
+const TIERS=[{name:'Low', code:'LIVE-LOW-5'},{name:'Medium', code:'LIVE-MED-10'},{name:'High', code:'LIVE-HIGH-15'}]; // you can weight pick() later
+const wheel=document.getElementById('wheel'), label=document.getElementById('centerLabel'), spinBtn=document.getElementById('spinBtn'), codeBox=document.getElementById('codeBox'), copyBtn=document.getElementById('copyBtn');
+const prior=localStorage.getItem(CLAIM_KEY); if(prior){ const c=JSON.parse(prior).code; codeBox.style.display='inline-block'; codeBox.textContent=c; copyBtn.style.display='inline-block'; spinBtn.disabled=true; }
+let spun=false;
+function spin(){ if(spun) return; setChoice('live'); spun=true; spinBtn.disabled=true;
+  const idx=Math.floor(Math.random()*3); const base=[0,120,240][idx]; const turns=5; const target=turns*360 + (360 - base - 60); // center each slice at top
+  const start=performance.now(), dur=3000;
+  function anim(t){ const p=Math.min(1,(t-start)/dur), e=1-Math.pow(1-p,3); wheel.style.transform=`rotate(${e*target}deg)`; if(p<1){ requestAnimationFrame(anim);} else { const r=TIERS[idx]; label.textContent=r.name; localStorage.setItem(CLAIM_KEY, JSON.stringify({code:r.code, ts:Date.now(), idx})); codeBox.style.display='inline-block'; codeBox.textContent=r.code; copyBtn.style.display='inline-block'; } }
+  requestAnimationFrame(anim);
+}
+copyBtn.addEventListener('click',()=>{ const t=codeBox.textContent.trim(); if(!t) return; navigator.clipboard.writeText(t).then(()=>{ copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);});});
+spinBtn.addEventListener('click',spin);
+</script>
+</body>
+</html>
