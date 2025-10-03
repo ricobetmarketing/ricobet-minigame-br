@@ -10,16 +10,25 @@
     --felt1:#184d57; --felt2:#0f2f35;
     --cardW: clamp(62px, 9.2vw, 92px);
     --cardH: calc(var(--cardW) * 1.39);
+    /* Option A — background image */
+    --page-bg: url("https://ricomx.ft-crm.com/media-api/serve/e9126f9e-5022-4188-a9af-5ab8ab9eee01_Mini_Game_BG.jpg");
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0; color:var(--ink);
-    background:radial-gradient(1400px 900px at 70% -10%, #18244d 0%, #0a0f1e 55%, #05070d 100%);
+    background:
+      linear-gradient(rgba(18,8,38,.12), rgba(8,7,20,.55)),
+      var(--page-bg) center/cover no-repeat fixed;
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     display:flex; align-items:center; justify-content:center; padding:8px;
     -webkit-tap-highlight-color: transparent;
   }
+  /* iOS fix to prevent background “jump” */
+  @supports (-webkit-touch-callout:none){
+    body{ background-attachment: scroll; }
+  }
+
   button{ touch-action:manipulation; }
   .wrap{ width:min(1100px,98vw) }
   .card{
@@ -519,7 +528,7 @@ closeBtn.onclick=()=> voucherOverlay.classList.remove('show');
 /* HUD + persistence */
 function saveProgress(){ try{ localStorage.setItem(PROG_KEY, JSON.stringify({roundsPlayed,winsCount})); }catch(e){} }
 function updateHud(){ progressTop.textContent=`Bets left: ${Math.max(0, MAX_ROUNDS - roundsPlayed)} • Wins: ${winsCount}`; }
-function init(){ banner.textContent='Tap a circle: Player / Tie / Banker'; lock(false); }
+function init(){ g('outerBanner').textContent='Tap a circle: Player / Tie / Banker'; lock(false); }
 init();
 </script>
 </body>
