@@ -19,12 +19,13 @@
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     display:flex; align-items:center; justify-content:center;
     background:
-      radial-gradient(1200px 800px at 70% -10%, rgba(16,22,44,.1) 0%, rgba(7,11,24,.2) 60%, #070b18 100%),
-      url("https://ricomx.ft-crm.com/media-api/serve/ede7ed69-ec35-449b-800b-b2cc5c7ab8c2_BG.jpg") center/cover no-repeat;
+      radial-gradient(1200px 800px at 70% -10%, rgba(16,22,44,.10) 0%, rgba(7,11,24,.20) 60%, #070b18 100%),
+      url("https://ricomx.ft-crm.com/media-api/serve/b9ad9150-9ffc-4813-8c6f-b7f8ad27088c_BG.jpg") center/cover no-repeat;
     overflow:hidden;
   }
 
-  .wrap{ position:relative; height:100dvh; width:100%; max-width:1100px;
+  .wrap{
+    position:relative; height:100dvh; width:100%; max-width:1100px;
     padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
     display:grid; grid-template-rows:auto 1fr; gap: clamp(10px, 2.5vw, 22px);
     margin:0 auto;
@@ -41,34 +42,56 @@
 
   .stage{ position:relative; height:100%; }
 
+  /* === Clickable “islands” with fully transparent background === */
   .island{
     --btnOffset: 10px;
     position:absolute; left:50%;
-    width:var(--island); aspect-ratio:1/1; border-radius:24px;
-    overflow:hidden; display:block; text-decoration:none; color:inherit;
+    width:var(--island); aspect-ratio:1/1;
+    border-radius:24px; /* rounded hit area; can change to 50% for a circle */
+    overflow:visible; /* let icon glow extend outside */
+    text-decoration:none; color:inherit;
     transform: translateX(-50%);
-    box-shadow:0 18px 36px rgba(0,0,0,.55);
-    background: radial-gradient(70% 70% at 50% 45%, rgba(255,255,255,.06), rgba(10,12,28,.85) 70%) #0e1429;
-    animation: float 5.5s ease-in-out infinite;
-    transition: transform .18s ease, box-shadow .18s ease;
+    /* No background plate, no container shadow */
+    background: transparent;
+    animation: bob 6s ease-in-out infinite;
+    transition: transform .18s ease;
   }
+  /* positions */
   #slotIsland{ top:19%; }
   #liveIsland{ bottom:14%; }
 
-  @keyframes float{
+  /* Overall gentle vertical bob for the whole island (icon + button) */
+  @keyframes bob{
     0%,100%{ transform: translateX(-50%) translateY(0) }
     50%{   transform: translateX(-50%) translateY(-6px) }
   }
-  .island:hover{ transform: translateX(-50%) translateY(-4px) scale(1.02); box-shadow:0 22px 44px rgba(0,0,0,.6); }
+  .island:hover{ transform: translateX(-50%) translateY(-4px) scale(1.02); }
 
-  .island img{ width:100%; height:100%; object-fit:cover; display:block; }
+  /* === ICON (image) with left↔right sway and glow === */
+  .icon{
+    width:100%; height:100%; object-fit:contain; display:block;
+    /* nice outline/glow even with transparent bg */
+    filter:
+      drop-shadow(0 10px 18px rgba(0,0,0,.35))
+      drop-shadow(0 0 18px rgba(120,243,255,.18));
+    transform-origin: 50% 85%; /* pivot a bit near bottom so it feels like dangling */
+    animation: sway 3.8s ease-in-out infinite;
+  }
+  @keyframes sway{
+    0%  { transform: rotate(-6deg) }
+    50% { transform: rotate(6deg) }
+    100%{ transform: rotate(-6deg) }
+  }
 
-  .island::before{
-    content:""; position:absolute; inset:-40% -40%;
-    background: linear-gradient(75deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.15) 50%, rgba(255,255,255,0) 60%);
+  /* Optional: a subtle specular sweep on the icon itself */
+  .island::after{
+    content:""; position:absolute; inset:-15%;
+    background:
+      radial-gradient(60% 40% at 30% 20%, rgba(255,255,255,.12), rgba(255,255,255,0) 60%);
     transform: translateX(-60%) rotate(8deg);
-    animation: sweep 6s ease-in-out infinite;
+    mix-blend-mode: screen;
     pointer-events:none;
+    animation: sweep 5.8s ease-in-out infinite;
   }
   @keyframes sweep{
     0%{ transform: translateX(-60%) rotate(8deg) }
@@ -76,6 +99,7 @@
     100%{ transform: translateX(60%) rotate(8deg) }
   }
 
+  /* ENTER pill — bottom-right of the clickable area */
   .cta{
     position:absolute; right:var(--btnOffset); bottom:var(--btnOffset);
     border:0; border-radius:999px; padding:8px 16px;
@@ -106,6 +130,12 @@
     box-shadow:0 4px 10px rgba(0,0,0,.35);
   }
   #soundToggle[aria-pressed="false"]{ opacity:.65 }
+
+  /* Respect reduced-motion */
+  @media (prefers-reduced-motion: reduce){
+    .island, .icon{ animation: none !important }
+    .cta:after{ animation: none !important }
+  }
 </style>
 </head>
 <body>
@@ -115,13 +145,15 @@
     </header>
 
     <div class="stage">
-      <a id="slotIsland" class="island" href="slot2.html">
-        <img src="https://ricobr.ft-crm.com/media-api/serve/af665c42-6b20-4ab0-b3e1-69d75744b739_Free_Spin.png" alt="">
+      <!-- Upper centered -->
+      <a id="slotIsland" class="island" href="slot2.html" aria-label="Enter Slot Realm">
+        <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/5b55a687-d742-4c8d-bf41-1ba837f4e84f_1.png" alt="">
         <span class="cta">ENTER</span>
       </a>
 
-      <a id="liveIsland" class="island" href="live.html">
-        <img src="https://ricobr.ft-crm.com/media-api/serve/31f4b97e-ea10-4991-91b2-4e2ebe31594d_Token.png" alt="">
+      <!-- Lower centered -->
+      <a id="liveIsland" class="island" href="live.html" aria-label="Enter Live Realm">
+        <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/df6b594c-e8bd-402d-b186-efca9501a635_2.png" alt="">
         <span class="cta">ENTER</span>
       </a>
     </div>
