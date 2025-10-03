@@ -46,7 +46,7 @@
     padding:10px 12px; border-radius:12px; text-decoration:none;
     font-weight:900; letter-spacing:.3px; color:#0c1220; background:#eaf2ff;
     box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
-    user-select:none; -webkit-tap-highlight-color: transparent;
+    user-select:none;
   }
   .backBtn:active{ transform:translateY(1px) }
   .backBtn svg{ width:16px; height:16px }
@@ -65,7 +65,7 @@
   .feltArt *{ pointer-events:none }
   .feltArt text{ font:900 clamp(12px,1.9vw,18px)/1 ui-sans-serif,system-ui,Segoe UI,Roboto,Arial; letter-spacing:2px; fill:#eaf2ff }
 
-  /* HUD at the TOP of table */
+  /* HUD */
   .hud{
     position:absolute; top:8px; left:50%; transform:translateX(-50%);
     z-index:9; display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center;
@@ -73,7 +73,7 @@
   .pill{background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:8px 12px; font-weight:900; font-size:clamp(12px,1.8vw,14px)}
 
   /* Hands + totals */
-  .hand{ position:absolute; top:clamp(18px, 3.5vh, 34px); display:flex; gap:10px; z-index:2; pointer-events:none }
+  .hand{ position:absolute; top:clamp(18px, 3.5vh, 34px); display:flex; gap:10px; z-index:5; pointer-events:none }
   .hand.player{ left:clamp(14px, 5vw, 60px) }
   .hand.banker{ right:clamp(14px, 5vw, 60px) }
   .tot{ position:absolute; top:6px; font:900 clamp(11px,1.8vw,14px)/1 ui-sans-serif; color:var(--gold); text-shadow:0 2px 6px rgba(0,0,0,.6); transition:transform .18s }
@@ -92,12 +92,17 @@
     align-items:center; justify-items:center;
     gap:clamp(10px,3vw,28px);
     width:min(520px, 72%);
-    z-index:6; pointer-events:auto;
+    z-index:20; /* above cards */
+    pointer-events:auto;
   }
   .area{
     appearance:none; -webkit-appearance:none; border:0; background:none; padding:0; margin:0;
     position:relative; cursor:pointer; color:inherit;
+    pointer-events:auto;
   }
+  /* Ensure inner elements never steal the click */
+  .area *{ pointer-events:none; }
+
   .betSpot{
     display:grid; place-items:center;
     width:clamp(82px,12vw,140px); height:clamp(82px,12vw,140px); border-radius:50%;
@@ -136,7 +141,7 @@
   /* Controls */
   .controls{
     position:absolute; left:50%; bottom:10px; transform:translateX(-50%);
-    display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; z-index:12
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; z-index:22
   }
   .btn{border:0; border-radius:14px; padding:10px 16px; font-weight:900; cursor:pointer;
        background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018;
@@ -171,17 +176,22 @@
   .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900; font-size:clamp(13px,3.6vw,14px)}
   .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
 
-  /* Instruction banner OUTSIDE the table */
   .outerBanner{ margin:10px 4px 0; display:flex; justify-content:center; }
   .outerBanner .pill{ background:rgba(0,0,0,.45); border-color:rgba(255,255,255,.16); font-size:clamp(12px,2.2vw,14px); text-align:center; }
 
   @media (max-width:600px){
     .felt{ padding-bottom:130px }
-    .areas{ top:50%; left:50%; transform:translate(-50%, -50%); width:88%; gap:clamp(8px,5vw,16px); }
+    .areas{ top:58%; left:50%; transform:translate(-50%, -50%); width:88%; gap:clamp(10px,5vw,18px); }
     .betSpot{ width:clamp(72px,22vw,96px); height:clamp(72px,22vw,96px) }
+    :root{ --cardW: clamp(52px, 16vw, 70px); }
+    .hand{ top: clamp(6px, 2.2vh, 14px); }
+  }
+  @media (max-width: 380px), (max-height: 640px){
+    :root{ --cardW: clamp(48px, 15vw, 64px); }
+    .areas{ top: 60%; }
   }
 
-  /* ===== Table props (shoe, burn card) ===== */
+  /* Shoe / Burn / Beads / Chip / Slide + Parallax (same as before) */
   .shoe{
     position:absolute; right:clamp(10px,4vw,30px); top:clamp(50px,7vh,80px);
     width:clamp(80px,10vw,120px); height:clamp(24px,3vw,36px);
@@ -197,75 +207,30 @@
     outline:1px solid rgba(255,255,255,.18);
     box-shadow:0 10px 20px rgba(0,0,0,.5); z-index:2;
   }
-
-  /* ===== Bead plate ===== */
   .beads{
     position:absolute; right:clamp(10px,4vw,26px); bottom:clamp(10px,3vh,16px);
     display:grid; grid-auto-flow:column; gap:6px; z-index:9;
   }
   .bead{ width:16px; height:16px; border-radius:50%; box-shadow:0 0 10px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2); }
-  .bead.p{ background:#49f7d4 }     /* player */
-  .bead.b{ background:#ff7a89 }     /* banker */
-  .bead.t{ background:#ffd86a }     /* tie */
-
-  /* ===== Chip toss ===== */
+  .bead.p{ background:#49f7d4 } .bead.b{ background:#ff7a89 } .bead.t{ background:#ffd86a }
   .chip{
     position:absolute; width:20px; height:20px; border-radius:50%;
     background:radial-gradient(circle at 30% 30%, #fff, #eaf2ff 40%, #9fb0d9 80%);
     box-shadow:0 6px 12px rgba(0,0,0,.45); pointer-events:none; z-index:20;
     transform:translate(-50%,-50%);
   }
-
-  /* ===== Card slide-in (from shoe) ===== */
-  .slideFrom{
-    position:relative;
-    transform: translate(var(--sx,0), var(--sy,0)) scale(.98);
-    filter: brightness(.95);
-    animation: cardSlide .35s cubic-bezier(.2,.8,.2,1) forwards;
-  }
+  .slideFrom{ position:relative; transform: translate(var(--sx,0), var(--sy,0)) scale(.98); filter:brightness(.95); animation: cardSlide .35s cubic-bezier(.2,.8,.2,1) forwards; }
   @keyframes cardSlide{ to{ transform: translate(0,0) scale(1); filter:none } }
-
-  /* ===== Felt parallax (optional) ===== */
   #felt.parallax{ perspective: 800px; }
   #felt.parallax .feltArt{ transform: translateZ(0); transition: transform .08s linear; }
 
   @media (prefers-reduced-motion: reduce){
     .slideFrom,.chip{ animation: none !important; }
   }
-  
-  /* Keep bet UI above cards, always */
-.hand{ z-index:5; }      /* cards layer */
-.areas{ z-index:20; }    /* betting circles above cards */
-.controls{ z-index:22; } /* Deal button above everything else */
-
-/* More breathing room on small phones */
-@media (max-width: 600px){
-  /* make cards smaller */
-  :root{
-    --cardW: clamp(52px, 16vw, 70px);
-  }
-  /* keep hands close to the top edge */
-  .hand{ top: clamp(6px, 2.2vh, 14px); }
-
-  /* push the betting circles down a bit */
-  .areas{
-    top: 58%;
-    width: 88%;
-    gap: clamp(10px, 5vw, 18px);
-  }
-}
-
-/* Extra-tight phones (very narrow / short) */
-@media (max-width: 380px), (max-height: 640px){
-  :root{ --cardW: clamp(48px, 15vw, 64px); }
-  .areas{ top: 60%; }
-}
-
 </style>
 </head>
 <body>
 
-<!-- Back button -->
 <a class="backBtn" id="backBtn" href="index.html" aria-label="Back to menu">
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   Back
@@ -283,12 +248,10 @@
     <div class="felt" id="felt" aria-live="polite">
       <canvas id="fx"></canvas>
 
-      <!-- NEW props -->
       <div class="shoe" aria-hidden="true"></div>
       <div class="burnCard" aria-hidden="true">🂠</div>
       <div class="beads" id="beads" aria-hidden="true"></div>
 
-      <!-- HUD at top of table -->
       <div class="hud">
         <div class="pill" id="progressTop">Bets left: 3 • Wins: 0</div>
       </div>
@@ -323,7 +286,6 @@
         </button>
       </div>
 
-      <!-- Controls -->
       <div class="controls">
         <button class="btn" id="dealBtn" type="button" disabled>Deal</button>
       </div>
@@ -338,7 +300,6 @@
   </div>
 </div>
 
-<!-- Voucher modal -->
 <div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
   <div class="modal">
     <div id="voucherHeader" style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Your Voucher</div>
@@ -352,7 +313,6 @@
 </div>
 
 <script>
-/*** Minimal 3-bet Baccarat with cinematic adds: card slide from shoe, chip toss, ambience, bead plate, parallax ***/
 function g(id){return document.getElementById(id)}
 function delay(ms){return new Promise(r=>setTimeout(r,ms))}
 
@@ -369,7 +329,7 @@ function delay(ms){return new Promise(r=>setTimeout(r,ms))}
   }, {passive:false});
 })();
 
-/* Optional URL reset */
+/* Optional reset */
 const urlp=new URLSearchParams(location.search);
 if(urlp.get('reset')==='1'){ try{ localStorage.removeItem('live_3bets_claimed_v3'); localStorage.removeItem('live_3bets_progress_v3'); }catch(e){} }
 
@@ -412,7 +372,7 @@ function chime(){
   });
 }
 
-/* Ambience (subtle room tone) */
+/* Ambience */
 let ambGain=null, ambNode=null, ambFilter=null;
 function startAmbience(){
   if(!audioReady||!AC||ambGain) return;
@@ -454,22 +414,21 @@ function pushBead(who){
 /* State */
 let roundsPlayed=0, winsCount=0, selection=null, inRound=false, gameOver=false;
 
-/* If already claimed, lock immediately */
-const CLAIM_KEY='live_3bets_claimed_v3', PROG_KEY='live_3bets_progress_v3';
+/* Already claimed? lock */
 const claimed=localStorage.getItem(CLAIM_KEY);
 if(claimed){
-  const c=JSON.parse(claimed||'{}'); voucherText.textContent=c.code||'VIPBAL';
-  voucherHeader.textContent = (c.code==='VIPBAW')
+  const c=JSON.parse(claimed||'{}'); voucherText.textContent=c.code||CODE_LOSE;
+  voucherHeader.textContent = (c.code===CODE_WIN)
     ? "Redeem your VIP Day rewards now!"
     : "We cover your back, redeem this code to get your VIP Day rewards!";
   voucherOverlay.classList.add('show');
   lock(true); gameOver=true; status.textContent='Voucher already claimed on this device.';
 }
 
-/* Resume progress if not claimed */
+/* Resume progress */
 try{
   const prog=JSON.parse(localStorage.getItem(PROG_KEY) || 'null');
-  if(prog && !claimed){ roundsPlayed=Math.min(3, prog.roundsPlayed||0); winsCount=Math.max(0, prog.winsCount||0) }
+  if(prog && !claimed){ roundsPlayed=Math.min(MAX_ROUNDS, prog.roundsPlayed||0); winsCount=Math.max(0, prog.winsCount||0) }
 }catch(e){}
 updateHud();
 
@@ -484,32 +443,24 @@ function makeCardEl(card, show=false){
   el.innerHTML=`<div class="card3d"><div class="sideFace back">🂠</div><div class="sideFace front">${card.r}${card.s}</div></div>`;
   card.el=el; card.shown=!!show; return card;
 }
-
-/* Slide-in from shoe to the card position */
 function slideFromShoe(el){
   const shoe = document.querySelector('.shoe');
   const felt = document.getElementById('felt');
   if(!shoe || !felt || !el) return;
-
   const s = shoe.getBoundingClientRect();
   const t = el.getBoundingClientRect();
   const f = felt.getBoundingClientRect();
-
   const sx = (s.left + s.right)/2 - f.left;
   const sy = (s.top + s.bottom)/2 - f.top;
   const tx = (t.left + t.right)/2 - f.left;
   const ty = (t.top + t.bottom)/2 - f.top;
-
   const dx = sx - tx;
   const dy = sy - ty;
-
   el.style.setProperty('--sx', dx + 'px');
   el.style.setProperty('--sy', dy + 'px');
   el.classList.add('slideFrom');
-  thud(0.08, 0.12); // slide sfx
+  thud(0.08, 0.12);
 }
-
-/* Heartbeat flip pacing */
 async function heartbeat(node){
   node.classList.remove('heartbeat'); void node.offsetWidth;
   node.classList.add('heartbeat');
@@ -522,7 +473,7 @@ function flip(card){
   blip(720,0.09,0.07);
 }
 
-/* Selection + chip toss */
+/* Selection + chip toss + reliable bindings */
 function lock(disabled){
   [btnP,btnT,btnB].forEach(b=>{ b.disabled=!!disabled; if(disabled) b.classList.remove('sel') });
   dealBtn.disabled = !!disabled;
@@ -532,12 +483,10 @@ function tossChipTo(el){
   const felt = document.getElementById('felt');
   const chip = document.createElement('div');
   chip.className = 'chip'; felt.appendChild(chip);
-
   const start = { x: felt.clientWidth*0.5, y: felt.clientHeight - 30 };
   const r = el.getBoundingClientRect();
   const f = felt.getBoundingClientRect();
   const end = { x: ((r.left+r.right)/2 - f.left), y: ((r.top+r.bottom)/2 - f.top) };
-
   const mid = { x: (start.x+end.x)/2, y: Math.min(start.y, end.y) - 60 };
   chip.animate(
     [
@@ -560,6 +509,18 @@ function selectSide(side){
   thud(0.1,0.12);
   const spot = btn.querySelector('.betSpot'); if(spot) tossChipTo(spot);
 }
+/* Extra-reliable bindings for all browsers */
+[btnP, btnT, btnB].forEach((b) => {
+  const side = b.dataset.side;
+  const handler = (e) => {
+    e.stopPropagation();
+    if (!b.disabled) selectSide(side);
+  };
+  b.addEventListener('click', handler, { passive: true });
+  b.addEventListener('pointerup', handler, { passive: true });
+  b.addEventListener('touchend', handler, { passive: true });
+});
+/* (You can keep these; they won't hurt) */
 areas.addEventListener('pointerup', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) }, {passive:true});
 areas.addEventListener('click', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) });
 
@@ -568,7 +529,7 @@ dealBtn.addEventListener('click', startRound, {passive:true});
 async function startRound(){
   if(inRound||gameOver) return;
   if(!selection) return alert('Select Player / Tie / Banker first.');
-  if(roundsPlayed>=3) return;
+  if(roundsPlayed>=MAX_ROUNDS) return;
   inRound=true; dealBtn.disabled=true; thud(0.12,0.18);
 
   // Prepare hands
@@ -578,7 +539,6 @@ async function startRound(){
   P.forEach(c=>{ pHand.appendChild(c.el); slideFromShoe(c.el); });
   B.forEach(c=>{ bHand.appendChild(c.el); slideFromShoe(c.el); });
 
-  // Slower cadence + heartbeat before each flip
   await delay(250);
   await heartbeat(pHand); flip(P[0]); updateTotals(P,B);
   await delay(550);
@@ -588,10 +548,8 @@ async function startRound(){
   await delay(550);
   await heartbeat(bHand); flip(B[1]); updateTotals(P,B);
 
-  // Natural check
   if(total(P)>=8 || total(B)>=8){ await finishRound(P,B); return; }
 
-  // Player third card
   let playerThird=null;
   if(total(P)<=5){
     playerThird = makeCardEl(newCard(), false);
@@ -600,7 +558,6 @@ async function startRound(){
     await heartbeat(pHand); flip(playerThird); P.push(playerThird); updateTotals(P,B);
   }
 
-  // Banker third card (table)
   const bT0=total(B);
   let needBanker=false;
   if(!playerThird){ needBanker=bT0<=5; }
@@ -638,12 +595,12 @@ async function finishRound(P,B){
   if(who!=='tie' && selection===who) winsCount++;
 
   roundsPlayed++; saveProgress();
-  const left = Math.max(0, 3 - roundsPlayed);
+  const left = Math.max(0, MAX_ROUNDS - roundsPlayed);
   progressTop.textContent = `Bets left: ${left} • Wins: ${winsCount}`;
 
-  if(roundsPlayed>=3){
+  if(roundsPlayed>=MAX_ROUNDS){
     await delay(800);
-    finalizeVoucher((winsCount>0)?'VIPBAW':'VIPBAL');
+    finalizeVoucher((winsCount>0)?CODE_WIN:CODE_LOSE);
   }else{
     banner.textContent = `Result: ${text} • Select next bet (${left} left)`;
     selection=null; [btnP,btnT,btnB].forEach(b=>b.classList.remove('sel'));
@@ -668,7 +625,7 @@ function showWinner(winner, text){
 /* Voucher (locks game) */
 function finalizeVoucher(code){
   voucherText.textContent = code;
-  voucherHeader.textContent = (code==='VIPBAW')
+  voucherHeader.textContent = (code===CODE_WIN)
     ? "Redeem your VIP Day rewards now!"
     : "It's ok, we cover your back, redeem this code to get your VIP Day rewards!";
   voucherOverlay.classList.add('show');
@@ -680,7 +637,7 @@ closeBtn.onclick=()=> voucherOverlay.classList.remove('show');
 
 /* HUD + persistence */
 function saveProgress(){ try{ localStorage.setItem(PROG_KEY, JSON.stringify({roundsPlayed,winsCount})); }catch(e){} }
-function updateHud(){ progressTop.textContent=`Bets left: ${Math.max(0, 3 - roundsPlayed)} • Wins: ${winsCount}`; }
+function updateHud(){ progressTop.textContent=`Bets left: ${Math.max(0, MAX_ROUNDS - roundsPlayed)} • Wins: ${winsCount}`; }
 function init(){ g('outerBanner').textContent='Tap a circle: Player / Tie / Banker'; lock(false); }
 init();
 
