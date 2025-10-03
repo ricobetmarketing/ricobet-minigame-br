@@ -26,7 +26,6 @@
   }
   @supports (-webkit-touch-callout:none){ body{ background-attachment:scroll } }
 
-  /* ===== Back to Menu button (added) ===== */
   .backBtn{
     position:fixed; top:calc(10px + env(safe-area-inset-top)); left:calc(10px + env(safe-area-inset-left));
     z-index:99999;
@@ -39,7 +38,6 @@
   .backBtn:active{ transform:translateY(1px) }
   .backBtn svg{ width:16px; height:16px }
 
-  /* ===== 6D depth: back halo + spotlight + ground shadow ===== */
   .cabWrap{ position: relative; width: min(640px,96vw); }
   .cabWrap::before{
     content:"";
@@ -77,7 +75,6 @@
     filter: blur(6px);
   }
 
-  /* ===== MACHINE ===== */
   .cab{
     position:relative; overflow:hidden; width:100%;
     border-radius:clamp(18px,3vw,30px);
@@ -160,16 +157,13 @@
   .cab.shake{animation:shake .28s ease}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 
-  /* Voucher modal */
   .overlay{
     position:fixed; inset:0; background:rgba(0,0,12,.86);
     display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px);
   }
   .overlay.show{display:grid}
   .gifModal{
-    /* ↓ You can tweak the GIF size here (e.g., 220px, 260px, 300px) */
-    --gifW: 280px;
-
+    --gifW: 280px; /* tweak size here */
     width:min(560px,92vw); border-radius:22px; padding:18px; text-align:center;
     background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
     outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75);
@@ -177,25 +171,21 @@
   }
   @keyframes popIn{to{transform:scale(1)}}
 
-  /* mediaBox holds GIF + optional video */
   .mediaBox{ display:flex; flex-direction:column; gap:10px; align-items:center; }
-
   .giftGif{
     width:100%; max-width:var(--gifW); height:auto; display:block; margin:0 auto;
     border-radius:14px; outline:1px solid rgba(255,255,255,.12);
     box-shadow:0 10px 40px rgba(120,80,255,.35);
   }
 
-  /* Responsive YouTube wrapper */
   .videoWrap{
     width:100%; max-width:520px;
     position:relative; padding-top:56.25%; /* 16:9 */
     border-radius:14px; overflow:hidden; outline:1px solid rgba(255,255,255,.12);
     box-shadow:0 10px 40px rgba(120,80,255,.20);
+    margin-top:12px;
   }
-  .videoWrap iframe{
-    position:absolute; inset:0; width:100%; height:100%; border:0;
-  }
+  .videoWrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 
   .voucher{
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -216,7 +206,6 @@
 </head>
 <body>
 
-<!-- Back button (visible before any play; auto-hides on first spin) -->
 <a class="backBtn" id="backBtn" href="index.html" aria-label="Back to menu">
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   Back
@@ -228,7 +217,6 @@
     <div class="tubes"></div>
 
     <div class="marquee" aria-hidden="true">
-      <!-- bulbs -->
       <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
       <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
       <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
@@ -266,30 +254,18 @@
     <div class="winflash"></div>
   </div>
 
-  <!-- soft ground shadow -->
   <div class="groundShadow"></div>
 </div>
 
-<!-- Voucher popup — GIF reveal -->
+<!-- Voucher popup -->
 <div class="overlay" id="giftOverlay" role="dialog" aria-modal="true">
   <div class="gifModal">
-    <!-- Media area: Smaller GIF + optional YouTube -->
     <div class="mediaBox">
       <img class="giftGif"
            id="giftGif"
            src="https://ricomx.ft-crm.com/media-api/serve/64ae8b79-831d-4b08-80e9-6fbbc37e2e80_Surprise_GIF"
            alt="Surprise gift animation"
            decoding="async" loading="eager" referrerpolicy="no-referrer" draggable="false" />
-
-      <!-- Optional walkthrough video (replace VIDEO_ID). Remove this block if not needed -->
-      <div class="videoWrap" id="howtoVideo">
-        <iframe
-          src="https://www.youtube.com/embed/w7gg1UKQ71g"
-          title="How to redeem your voucher"
-          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen></iframe>
-      </div>
-      <!-- End optional video -->
     </div>
 
     <div class="voucher" id="voucherText">VOUCHER-XXXX</div>
@@ -297,28 +273,34 @@
       <button class="copy" id="copyBtn">Copy Code</button>
       <button class="close" id="closeBtn">Close</button>
     </div>
+
+    <!-- YouTube AFTER voucher & buttons -->
+    <div class="videoWrap" id="howtoVideo">
+      <iframe
+        src="https://www.youtube.com/embed/w7gg1UKQ71g?rel=0&modestbranding=1&playsinline=1"
+        title="How to redeem your voucher"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+
     <div class="small" style="color:#a9b7d8;margin-top:8px">Redeem this code in your account.</div>
   </div>
 </div>
 
-<!-- Optional SFX -->
 <audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
 <audio id="sStop" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3" preload="auto"></audio>
 <audio id="sWin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
 
 <script>
-/* ===== Config ===== */
 const MAX_SPINS=5;
 const SYMBOLS=["🍒","🍊","🍋","💎","⭐","7️⃣","BAR"];
 const CODES   =["PURPLE-10FS","PURPLE-20FS","PURPLE-30FS","PURPLE-BONUS"];
 const STATE_KEY='slot_purple_state_fx1';
 const VOUCHER_KEY='slot_purple_voucher_fx1';
 
-/* ===== State ===== */
-let state=loadState(); // {left,claimed,spun,wins,hit3}
+let state=loadState();
 let spinning=false, started=false, turbo=false;
 
-/* ===== Elements ===== */
 const reelsEl=document.getElementById('reels');
 const spinBtn=document.getElementById('spin');
 const lever=document.getElementById('lever');
@@ -336,11 +318,9 @@ const closeBtn    = document.getElementById('closeBtn');
 const backBtn     = document.getElementById('backBtn');
 const giftGif     = document.getElementById('giftGif');
 
-/* ===== Init UI ===== */
 spinsLeftEl.textContent=state.left; updateMeters();
 if(state.claimed){ openGift(localStorage.getItem(VOUCHER_KEY)||'CLAIMED'); disableControls(); }
 
-/* Build reels (20 items per column) */
 function makeReel(){
   const reel=document.createElement('div'); reel.className='reel';
   const col=document.createElement('div'); col.className='col';
@@ -350,13 +330,9 @@ function makeReel(){
 }
 for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()); }
 
-/* ===== SPIN ===== */
 function spin(){
   if(spinning || state.claimed) return;
-
-  // first interaction → lock in realm and hide Back button
   if(!started){ started=true; if(backBtn) backBtn.style.display='none'; }
-
   if(state.left<=0){ maybeVoucher(); return; }
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
@@ -393,7 +369,6 @@ function spin(){
   });
 }
 
-/* Resolve spin */
 function onStop(arr){
   state.spun=(state.spun||0)+1;
 
@@ -420,7 +395,6 @@ function updateMeters(){
   jack.style.setProperty('--fill', Math.min(1,(state.wins||0)/3));
 }
 
-/* ===== Voucher logic ===== */
 function maybeVoucher(){
   if(state.claimed){ spinning=false; return; }
   const reveal=(state.left===0)||(Math.random()<0.32);
@@ -433,7 +407,6 @@ function maybeVoucher(){
   spinning=false;
 }
 
-/* ===== Modal helpers ===== */
 function openGift(code){
   voucherText.textContent = code;
   giftOverlay.classList.add('show');
@@ -442,7 +415,6 @@ function openGift(code){
 copyBtn.addEventListener('click',()=> copyText(voucherText.textContent.trim()));
 closeBtn.addEventListener('click',()=> giftOverlay.classList.remove('show'));
 
-/* ===== Controls ===== */
 function disableControls(){ spinBtn.disabled=true; lever.style.pointerEvents='none' }
 spinBtn.addEventListener('click',spin);
 lever.addEventListener('click',spin);
@@ -451,7 +423,6 @@ spinBtn.addEventListener('mousedown',()=>{ turbo=true; lever.classList.add('pull
 spinBtn.addEventListener('mouseup',()=>{ turbo=false; lever.classList.remove('pull') });
 spinBtn.addEventListener('mouseleave',()=>{ turbo=false; lever.classList.remove('pull') });
 
-/* ===== Clipboard (desktop + iOS fallback) ===== */
 async function copyText(txt){
   if(!txt) return;
   try{
@@ -461,7 +432,6 @@ async function copyText(txt){
       return;
     }
   }catch(_){}
-  // Fallback for older Safari / insecure contexts
   const ta=document.createElement('textarea');
   ta.value=txt; ta.setAttribute('readonly','');
   ta.style.position='fixed'; ta.style.top='-9999px'; ta.style.opacity='0';
@@ -475,28 +445,20 @@ function copiedUI(){
   copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);
 }
 
-/* ===== GIF mobile robustness: retry with .gif if needed ===== */
 (function ensureGifShows(){
   const url=giftGif.getAttribute('src')||'';
   let tried=false;
   function tryFix(){
-    if(tried) return;
-    tried=true;
-    if(!/\.gif(\?|$)/i.test(url)){
-      giftGif.src = url + '.gif';
-    }
+    if(tried) return; tried=true;
+    if(!/\.gif(\?|$)/i.test(url)){ giftGif.src = url + '.gif'; }
   }
-  // If it errors or doesn't decode in time, try with .gif appended
   giftGif.addEventListener('error', tryFix, { once:true });
-  // Also set a gentle timer; if image height is 0 after a tick, swap
   setTimeout(()=>{ if(giftGif.naturalWidth===0 || giftGif.naturalHeight===0){ tryFix(); } }, 900);
 })();
 
-/* ===== Persistence ===== */
 function loadState(){ try{ return JSON.parse(localStorage.getItem(STATE_KEY)) || {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } catch{ return {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } }
 function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)) }
 
-/* ===== FX: coins + confetti + shake ===== */
 const fx=document.getElementById('fx'); const ctx=fx.getContext('2d');
 function resize(){ fx.width=cab.clientWidth; fx.height=cab.clientHeight } addEventListener('resize',resize); addEventListener('orientationchange',()=>setTimeout(resize,250)); resize();
 
