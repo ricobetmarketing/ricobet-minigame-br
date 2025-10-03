@@ -172,7 +172,7 @@
   .overlay.show{display:flex}
 
   .gifModal{
-    --gifW: 280px;
+    --gifW: 220px; /* smaller gift GIF */
     width:min(560px,92vw);
     border-radius:22px;
     background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
@@ -303,6 +303,11 @@
         <button class="close" id="closeBtn">Close</button>
       </div>
 
+      <!-- NEW helper line before the tutorial -->
+      <div style="text-align:center;color:#a9b7d8;font-weight:700;margin-top:8px;">
+        Watch how to claim…
+      </div>
+
       <!-- YouTube AFTER voucher & buttons -->
       <div class="videoWrap" id="howtoVideo">
         <iframe
@@ -321,6 +326,9 @@
 <audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
 <audio id="sStop" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3" preload="auto"></audio>
 <audio id="sWin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
+
+<!-- NEW: extra lever “pull” click for more realism -->
+<audio id="sLever" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
 
 <!-- Background BGM (quiet) -->
 <audio id="bgm" src="theme.mp3" preload="auto" loop playsinline></audio>
@@ -345,6 +353,9 @@ const spinsLeftEl=document.getElementById('spinsLeft');
 const ring=document.getElementById('ring'); const ringNum=document.getElementById('ringNum');
 const jack=document.getElementById('jack');
 const sSpin=document.getElementById('sSpin'); const sStop=document.getElementById('sStop'); const sWin=document.getElementById('sWin');
+
+// NEW: separate lever sound that plays immediately on pull
+const sLever=document.getElementById('sLever');
 
 const giftOverlay = document.getElementById('giftOverlay');
 const voucherText = document.getElementById('voucherText');
@@ -412,9 +423,12 @@ function spin(){
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
 
-  // lever sound + slight duck so it doesn't clash
-  sSpin && sSpin.play().catch(()=>{});
+  // NEW: play lever “pull” instantly + duck bgm slightly
+  if(sLever){ try{ sLever.currentTime=0; sLever.play(); }catch(e){} }
   duck(500);
+
+  // existing start sound (kept)
+  sSpin && sSpin.play().catch(()=>{});
 
   const cols=[...document.querySelectorAll('.reel .col')];
   const targets = cols.map(() => SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]);
@@ -510,6 +524,10 @@ lever.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preven
 spinBtn.addEventListener('mousedown',()=>{ turbo=true; lever.classList.add('pull') });
 spinBtn.addEventListener('mouseup',()=>{ turbo=false; lever.classList.remove('pull') });
 spinBtn.addEventListener('mouseleave',()=>{ turbo=false; lever.classList.remove('pull') });
+
+// NEW: play lever “pull” sfx as soon as the user grabs the lever or button
+lever.addEventListener('pointerdown',()=>{ try{ sLever.currentTime=0; sLever.play(); }catch(e){} }, {passive:true});
+spinBtn.addEventListener('pointerdown',()=>{ try{ sLever.currentTime=0; sLever.play(); }catch(e){} }, {passive:true});
 
 /* Copy helper */
 async function copyText(txt){
