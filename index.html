@@ -10,7 +10,7 @@
     --ink:#eaf2ff; --muted:#9fb0d9;
     --g1:#71e1ff; --g2:#25c3ff;
     --pad: clamp(12px, 3.5vw, 28px);
-    --island: clamp(160px, 48vw, 280px);
+    --island: clamp(160px, 42vw, 220px); /* slightly smaller default on mobile */
   }
   *{ box-sizing:border-box }
   html,body{ height:100% }
@@ -20,7 +20,7 @@
     display:flex; align-items:center; justify-content:center;
     background:
       radial-gradient(1200px 800px at 70% -10%, rgba(16,22,44,.10) 0%, rgba(7,11,24,.20) 60%, #070b18 100%),
-      url("https://ricomx.ft-crm.com/media-api/serve/b9ad9150-9ffc-4813-8c6f-b7f8ad27088c_BG.jpg") center/cover no-repeat;
+      url("https://ricomx.ft-crm.com/media-api/serve/ede7ed69-ec35-449b-800b-b2cc5c7ab8c2_BG.jpg") center/cover no-repeat;
     overflow:hidden;
   }
 
@@ -40,41 +40,37 @@
     text-shadow:0 0 8px var(--g2), 0 0 22px var(--g1), 0 0 42px rgba(113,225,255,.45);
   }
 
-  .stage{ position:relative; height:100%; }
+  .stage{
+    position:relative; height:100%;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:space-between;
+    padding: 6vh 0; /* vertical breathing space */
+    gap: clamp(40px,8vh,80px); /* ensures visible gap between gifts */
+  }
 
-  /* === Clickable “islands” with fully transparent background === */
   .island{
     --btnOffset: 10px;
-    position:absolute; left:50%;
     width:var(--island); aspect-ratio:1/1;
-    border-radius:24px; /* rounded hit area; can change to 50% for a circle */
-    overflow:visible; /* let icon glow extend outside */
+    border-radius:24px;
+    overflow:visible; 
     text-decoration:none; color:inherit;
-    transform: translateX(-50%);
-    /* No background plate, no container shadow */
+    position:relative;
     background: transparent;
     animation: bob 6s ease-in-out infinite;
     transition: transform .18s ease;
   }
-  /* positions */
-  #slotIsland{ top:19%; }
-  #liveIsland{ bottom:14%; }
 
-  /* Overall gentle vertical bob for the whole island (icon + button) */
   @keyframes bob{
-    0%,100%{ transform: translateX(-50%) translateY(0) }
-    50%{   transform: translateX(-50%) translateY(-6px) }
+    0%,100%{ transform: translateY(0) }
+    50%{   transform: translateY(-6px) }
   }
-  .island:hover{ transform: translateX(-50%) translateY(-4px) scale(1.02); }
+  .island:hover{ transform: translateY(-4px) scale(1.02); }
 
-  /* === ICON (image) with left↔right sway and glow === */
   .icon{
     width:100%; height:100%; object-fit:contain; display:block;
-    /* nice outline/glow even with transparent bg */
-    filter:
-      drop-shadow(0 10px 18px rgba(0,0,0,.35))
-      drop-shadow(0 0 18px rgba(120,243,255,.18));
-    transform-origin: 50% 85%; /* pivot a bit near bottom so it feels like dangling */
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.35))
+            drop-shadow(0 0 18px rgba(120,243,255,.18));
+    transform-origin: 50% 85%;
     animation: sway 3.8s ease-in-out infinite;
   }
   @keyframes sway{
@@ -83,23 +79,6 @@
     100%{ transform: rotate(-6deg) }
   }
 
-  /* Optional: a subtle specular sweep on the icon itself */
-  .island::after{
-    content:""; position:absolute; inset:-15%;
-    background:
-      radial-gradient(60% 40% at 30% 20%, rgba(255,255,255,.12), rgba(255,255,255,0) 60%);
-    transform: translateX(-60%) rotate(8deg);
-    mix-blend-mode: screen;
-    pointer-events:none;
-    animation: sweep 5.8s ease-in-out infinite;
-  }
-  @keyframes sweep{
-    0%{ transform: translateX(-60%) rotate(8deg) }
-    55%{ transform: translateX(60%) rotate(8deg) }
-    100%{ transform: translateX(60%) rotate(8deg) }
-  }
-
-  /* ENTER pill — bottom-right of the clickable area */
   .cta{
     position:absolute; right:var(--btnOffset); bottom:var(--btnOffset);
     border:0; border-radius:999px; padding:8px 16px;
@@ -120,7 +99,6 @@
     100%{ box-shadow:0 0 0 0 rgba(37,195,255,0) }
   }
 
-  /* Sound toggle top-right, smaller */
   #soundToggle{
     position:fixed; top:10px; right:10px; z-index:20;
     border:1px solid rgba(255,255,255,.2);
@@ -130,12 +108,6 @@
     box-shadow:0 4px 10px rgba(0,0,0,.35);
   }
   #soundToggle[aria-pressed="false"]{ opacity:.65 }
-
-  /* Respect reduced-motion */
-  @media (prefers-reduced-motion: reduce){
-    .island, .icon{ animation: none !important }
-    .cta:after{ animation: none !important }
-  }
 </style>
 </head>
 <body>
@@ -145,21 +117,18 @@
     </header>
 
     <div class="stage">
-      <!-- Upper centered -->
-      <a id="slotIsland" class="island" href="slot2.html" aria-label="Enter Slot Realm">
+      <a class="island" href="slot2.html">
         <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/5b55a687-d742-4c8d-bf41-1ba837f4e84f_1.png" alt="">
         <span class="cta">ENTER</span>
       </a>
 
-      <!-- Lower centered -->
-      <a id="liveIsland" class="island" href="live.html" aria-label="Enter Live Realm">
+      <a class="island" href="live.html">
         <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/df6b594c-e8bd-402d-b186-efca9501a635_2.png" alt="">
         <span class="cta">ENTER</span>
       </a>
     </div>
   </div>
 
-  <!-- 🎵 Background Music -->
   <audio id="bgm" src="theme.mp3" preload="auto" loop playsinline autoplay></audio>
   <button id="soundToggle" aria-pressed="false" hidden>🔊</button>
 
