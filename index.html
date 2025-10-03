@@ -13,10 +13,12 @@
 
 <style>
   :root{
-    --ink:#eaf2ff; --muted:#9fb0d9;
+    --ink:#eaf2ff; --muted:#a9b7d8;
     --g1:#71e1ff; --g2:#25c3ff; --g3:#c06bff; --g4:#ffd86a;
     --pad: clamp(12px, 3.5vw, 28px);
     --island: clamp(170px, 38vw, 220px);
+    /* NEW: push the title a bit lower from the top */
+    --title-offset: clamp(16px, 8vh, 120px);
   }
   *{ box-sizing:border-box }
   html,body{ height:100% }
@@ -38,7 +40,11 @@
   }
 
   /* ===== Title (two-line, animated) ===== */
-  header{ text-align:center; z-index:2; pointer-events:none }
+  header{
+    text-align:center; z-index:2; pointer-events:none;
+    /* push header down slightly */
+    margin-top: var(--title-offset);
+  }
   .title{ margin:0; line-height:1.05; letter-spacing:.6px; text-transform:uppercase; }
   .title .small{
     display:block;
@@ -55,16 +61,12 @@
   .title .big{
     display:block;
     font-weight:900;
-    font-size:clamp(40px,10.5vw,84px); /* bigger */
+    font-size:clamp(40px,10.5vw,84px);
     letter-spacing:1.6px;
     background:linear-gradient(90deg, var(--g1), var(--g2), var(--g3), var(--g4), var(--g1));
     background-size:300% 100%;
     -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-    animation: hueSlide 5.2s ease-in-out infinite;
-    text-shadow:
-      0 0 10px rgba(113,225,255,.25),
-      0 0 22px rgba(192,107,255,.20),
-      0 0 44px rgba(255,216,106,.12);
+    text-shadow: 0 0 10px rgba(113,225,255,.25), 0 0 22px rgba(192,107,255,.20), 0 0 44px rgba(255,216,106,.12);
     position:relative;
     transform: scale(.96);
     animation-name: hueSlide, popInTitle;
@@ -74,7 +76,11 @@
     animation-fill-mode: none, both;
   }
   @keyframes popInTitle{ to{ transform: scale(1); } }
-
+  @keyframes hueSlide{
+    0%{ background-position:0% 50% }
+    50%{ background-position:100% 50% }
+    100%{ background-position:0% 50% }
+  }
   .title .big::after{
     content:"";
     position:absolute; inset:0;
@@ -83,11 +89,6 @@
     transform:translateX(-120%);
     animation: sheen 3.8s ease-in-out 600ms infinite;
     border-radius:.1em;
-  }
-  @keyframes hueSlide{
-    0%{ background-position:0% 50% }
-    50%{ background-position:100% 50% }
-    100%{ background-position:0% 50% }
   }
   @keyframes sheen{
     0%,15%{ transform:translateX(-120%) }
@@ -119,6 +120,7 @@
     gap: clamp(20px, 5.5vh, 44px);
   }
   @media (max-height: 700px){
+    :root{ --title-offset: clamp(10px, 5vh, 56px); } /* less push on short screens */
     .stage{ gap: clamp(16px, 4vh, 32px); padding: 2vh 0; }
   }
 
@@ -137,8 +139,6 @@
     background:radial-gradient(50% 60% at 50% 50%, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 100%);
     filter: blur(6px); opacity:.65; pointer-events:none;
   }
-  @media (max-width:600px){ .island::after{ bottom:-6px; height:14px; opacity:.6 } }
-
   @keyframes bob{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
 
   .icon{
@@ -291,7 +291,7 @@
       setUI(false);
     }finally{
       window.removeEventListener('pointerdown', unlockAudio, { once:true });
-      document.removeEventListener('keydown', unlockAudio, { once:true });
+      document.removeEventListener('keydown',  unlockAudio, { once:true });
     }
   }
 
@@ -338,7 +338,6 @@
     }, {passive:false});
   });
   closeBtn.addEventListener('click', closeView);
-
 })();
 </script>
 </body>
