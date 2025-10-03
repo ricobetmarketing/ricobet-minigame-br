@@ -137,7 +137,10 @@
   .jack{height:8px; width:clamp(120px,34vw,160px); border-radius:999px; background:#2a2a2a; position:relative; overflow:hidden; box-shadow:0 0 18px rgba(255,96,216,.25)}
   .jack:before{content:""; position:absolute; inset:0; background:linear-gradient(90deg,#ff62ff,#65f0ff); transform-origin:left; transform:scaleX(var(--fill,0)); transition:transform .25s ease}
 
-  .controls{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px}
+  /* CONTROLS AREA */
+  .controls{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px
+  }
   .btn.primary{cursor:pointer; border:0; border-radius:16px; padding:clamp(12px,2.8vw,14px) clamp(16px,4.6vw,18px);
                font-weight:900; text-transform:uppercase; letter-spacing:.5px;
                background:radial-gradient(60% 100% at 50% 0%, #ff66c7, #6d2df7 70%); color:#fff;
@@ -271,7 +274,8 @@
     </div>
 
     <div class="controls">
-      <button class="btn.primary" id="spin">Spin</button>
+      <!-- IMPORTANT: two classes "btn" and "primary" (not "btn.primary") -->
+      <button class="btn primary" id="spin">Spin</button>
       <div class="lever" id="lever" role="button" aria-label="Pull lever to spin" tabindex="0">
         <div class="stem"></div><div class="knob"></div>
       </div>
@@ -321,9 +325,9 @@
 </div>
 
 <!-- Sound effects -->
-<audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
-<audio id="sStop" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3" preload="auto"></audio>
-<audio id="sWin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
+<audio id="sSpin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
+<audio id="sStop"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3"  preload="auto"></audio>
+<audio id="sWin"   src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"   preload="auto"></audio>
 <audio id="sLever" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
 
 <!-- Background BGM (quiet) -->
@@ -361,13 +365,12 @@ const giftGif     = document.getElementById('giftGif');
 /* ====== BGM / Sound ====== */
 const bgm = document.getElementById('bgm');
 const bgmBtn = document.getElementById('bgmToggle');
-const BGM_BASE = 0.16; // overall music volume
-const BGM_DUCK = 0.06; // during wins / lever pull
+const BGM_BASE = 0.16;
+const BGM_DUCK = 0.06;
 let duckTimer = null;
 
 function showBgmBtn(){ bgmBtn.hidden = false; }
 function setBgmUI(on){ bgmBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
-// Optional: change label text if you want explicit ON/OFF text
 function setBgmLabel(on){ bgmBtn.textContent = on ? "🔊 Sound" : "🔇 Sound"; }
 function duck(ms=1400){
   clearTimeout(duckTimer);
@@ -375,40 +378,25 @@ function duck(ms=1400){
   duckTimer = setTimeout(()=>{ if(!bgm.paused) bgm.volume = BGM_BASE; duckTimer=null; }, ms);
 }
 
-// Try to autoplay quietly on load (muted warm-up so mobile allows it)
+// Warm-up (muted) so autoplay is allowed
 window.addEventListener('load', async ()=>{
-  try{
-    bgm.volume = BGM_BASE;
-    bgm.muted = true;
-    await bgm.play(); // warmup
-  }catch(e){}
-  showBgmBtn();
-  setBgmUI(!bgm.paused);
-  setBgmLabel(!bgm.paused);
+  try{ bgm.volume=BGM_BASE; bgm.muted=true; await bgm.play(); }catch(e){}
+  showBgmBtn(); setBgmUI(!bgm.paused); setBgmLabel(!bgm.paused);
 }, {once:true});
 
-// Unmute + keep playing on first interaction ANYWHERE (no need to press the Sound button)
+// Unmute on first interaction ANYWHERE (no need to press the Sound button)
 ['pointerdown','touchstart','mousedown','keydown'].forEach(ev=>{
   window.addEventListener(ev, async function firstInteract(){
-    try{
-      if(bgm.paused){ await bgm.play(); }
-      bgm.muted = false;
-      bgm.volume = BGM_BASE;
-      setBgmUI(true);
-      setBgmLabel(true);
-    }catch(e){}
+    try{ if(bgm.paused){ await bgm.play(); } bgm.muted=false; bgm.volume=BGM_BASE; setBgmUI(true); setBgmLabel(true); }catch(e){}
     window.removeEventListener(ev, firstInteract, {capture:false});
   }, {once:true, passive:true});
 });
 
-// Manual toggle (still available if needed)
+// Manual toggle (optional)
 bgmBtn.addEventListener('click', async ()=>{
   try{
-    if(bgm.paused){
-      bgm.muted=false; bgm.volume=BGM_BASE; await bgm.play(); setBgmUI(true); setBgmLabel(true);
-    }else{
-      bgm.pause(); setBgmUI(false); setBgmLabel(false);
-    }
+    if(bgm.paused){ bgm.muted=false; bgm.volume=BGM_BASE; await bgm.play(); setBgmUI(true); setBgmLabel(true); }
+    else{ bgm.pause(); setBgmUI(false); setBgmLabel(false); }
   }catch(e){}
 });
 
@@ -434,11 +422,11 @@ function spin(){
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
 
-  // Lever “grab” sound + duck bgm slightly
-  if(sLever){ try{ sLever.currentTime=0; sLever.play(); }catch(e){} }
+  // Lever “grab” sound immediately (works on user interaction)
+  try{ sLever.currentTime=0; sLever.play(); }catch(e){}
   duck(500);
 
-  // existing start sound
+  // Start sound (reel engage)
   sSpin && sSpin.play().catch(()=>{});
 
   const cols=[...document.querySelectorAll('.reel .col')];
@@ -479,7 +467,7 @@ function onStop(arr){
   let best=0; for(const k in freq){ if(freq[k]>best) best=freq[k] }
   if(best>=3){
     state.wins=(state.wins||0)+1; state.hit3=true;
-    payoutEl.innerHTML='<span style="color:var(--green);font-weight:900)">WIN!</span>';
+    payoutEl.innerHTML='<span style="color:var(--green);font-weight:900">WIN!</span>';
     duck(1800);
     sWin && sWin.play().catch(()=>{});
     coinBurst(); shake();
@@ -534,7 +522,7 @@ spinBtn.addEventListener('mousedown',()=>{ turbo=true; lever.classList.add('pull
 spinBtn.addEventListener('mouseup',()=>{ turbo=false; lever.classList.remove('pull') });
 spinBtn.addEventListener('mouseleave',()=>{ turbo=false; lever.classList.remove('pull') });
 
-// play lever click as soon as user grabs
+// Extra: play lever sfx as soon as the user GRABS lever or button
 lever.addEventListener('pointerdown',()=>{ try{ sLever.currentTime=0; sLever.play(); }catch(e){} }, {passive:true});
 spinBtn.addEventListener('pointerdown',()=>{ try{ sLever.currentTime=0; sLever.play(); }catch(e){} }, {passive:true});
 
