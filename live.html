@@ -17,7 +17,7 @@
   body{
     margin:0; color:var(--ink);
     background:
-      linear-gradient(rgba(18,8,38,.12), rgba(8,7,20,.55)),
+      linear-gradient( rgba(18,8,38,.12), rgba(8,7,20,.55) ),
       var(--page-bg) center/cover no-repeat fixed;
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     display:flex; align-items:center; justify-content:center; padding:8px;
@@ -62,7 +62,6 @@
   /* FX + felt art */
   #fx{ position:absolute; inset:0; pointer-events:none; z-index:1 }
   .feltArt{ position:absolute; inset:0; pointer-events:none; opacity:.75; filter:drop-shadow(0 3px 10px rgba(0,0,0,.45)); z-index:0 }
-  .feltArt *{ pointer-events:none }
   .feltArt text{ font:900 clamp(12px,1.9vw,18px)/1 ui-sans-serif,system-ui,Segoe UI,Roboto,Arial; letter-spacing:2px; fill:#eaf2ff }
 
   /* HUD */
@@ -76,6 +75,11 @@
   .hand{ position:absolute; top:clamp(18px, 3.5vh, 34px); display:flex; gap:10px; z-index:5; pointer-events:none }
   .hand.player{ left:clamp(14px, 5vw, 60px) }
   .hand.banker{ right:clamp(14px, 5vw, 60px) }
+
+  /* Auto-compact when 3rd card present */
+  .hand.compact{ gap:6px }
+  .hand.compact .playing-card{ transform:scale(.88); transform-origin: center top; }
+
   .tot{ position:absolute; top:6px; font:900 clamp(11px,1.8vw,14px)/1 ui-sans-serif; color:var(--gold); text-shadow:0 2px 6px rgba(0,0,0,.6); transition:transform .18s }
   .tot.p{ left:clamp(14px, 5vw, 60px) } .tot.b{ right:clamp(14px, 5vw, 60px) }
   .tot.pop{ transform:scale(1.18) }
@@ -218,19 +222,24 @@
   }
   .bead{ width:16px; height:16px; border-radius:50%; box-shadow:0 0 10px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2); }
   .bead.p{ background:#49f7d4 } .bead.b{ background:#ff7a89 } .bead.t{ background:#ffd86a }
+
+  /* Chip token (persistent per round) */
   .chip{
-    position:absolute; width:20px; height:20px; border-radius:50%;
-    background:radial-gradient(circle at 30% 30%, #fff, #eaf2ff 40%, #9fb0d9 80%);
-    box-shadow:0 6px 12px rgba(0,0,0,.45); pointer-events:none; z-index:20;
+    position:absolute; width:26px; height:26px; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #fff, #eaf2ff 40%, #9fb0d9 80%);
+    box-shadow:0 6px 12px rgba(0,0,0,.45);
     transform:translate(-50%,-50%);
+    z-index:21; pointer-events:none;
   }
+  .chip.move{ transition: transform .42s cubic-bezier(.2,.8,.2,1) }
+
   .slideFrom{ position:relative; transform: translate(var(--sx,0), var(--sy,0)) scale(.98); filter:brightness(.95); animation: cardSlide .35s cubic-bezier(.2,.8,.2,1) forwards; }
   @keyframes cardSlide{ to{ transform: translate(0,0) scale(1); filter:none } }
   #felt.parallax{ perspective: 800px; }
   #felt.parallax .feltArt{ transform: translateZ(0); transition: transform .08s linear; }
 
   @media (prefers-reduced-motion: reduce){
-    .slideFrom,.chip{ animation: none !important; }
+    .slideFrom,.chip{ animation: none !important; transition:none !important; }
   }
 </style>
 </head>
@@ -342,7 +351,7 @@ if(urlp.get('reset')==='1'){ try{ localStorage.removeItem('live_3bets_claimed_v3
 const CLAIM_KEY='live_3bets_claimed_v3', PROG_KEY='live_3bets_progress_v3';
 const MAX_ROUNDS=3, CODE_WIN='VIPBAW', CODE_LOSE='VIPBAL';
 
-/* Web Audio */
+/* ========= Web Audio (Sound FX) ========= */
 let AC=null, audioReady=false;
 function ensureAC(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioContext)(); } }
 function unlockAudio(){
@@ -352,21 +361,32 @@ function unlockAudio(){
 }
 ['pointerdown','touchstart','mousedown'].forEach(ev=>document.addEventListener(ev, unlockAudio, {once:true, passive:true}));
 
-function blip(freq=660, dur=0.08, gain=0.08){
+function tone(type, freq, dur, gain){
   if(!audioReady||!AC) return;
   const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
-  o.type='square'; o.frequency.setValueAtTime(freq,t);
+  o.type=type; o.frequency.setValueAtTime(freq,t);
   g.gain.value=gain; g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
   o.connect(g).connect(AC.destination); o.start(t); o.stop(t+dur);
 }
+function blip(freq=720, dur=0.08, gain=0.07){ tone('square',freq,dur,gain); }
 function thud(dur=0.12, gain=0.18){
   if(!audioReady||!AC) return;
   const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
-  o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(60,t+dur);
+  const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=320;
+  o.type='sine'; o.frequency.setValueAtTime(130,t); o.frequency.exponentialRampToValueAtTime(62,t+dur);
   g.gain.value=gain; g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-  o.connect(g).connect(AC.destination); o.start(t); o.stop(t+dur);
+  o.connect(f).connect(g).connect(AC.destination); o.start(t); o.stop(t+dur);
 }
-function chime(){
+function swoosh(){
+  if(!audioReady||!AC) return;
+  const t=AC.currentTime, n=AC.createBuffer(1, AC.sampleRate*0.25, AC.sampleRate);
+  const d=n.getChannelData(0);
+  for(let i=0;i<d.length;i++){ d[i]=(Math.random()*2-1)*0.4*(1-i/d.length); }
+  const s=AC.createBufferSource(); const g=AC.createGain();
+  g.gain.value=0.2; g.gain.exponentialRampToValueAtTime(0.0001, t+0.25);
+  s.buffer=n; s.connect(g).connect(AC.destination); s.start(t);
+}
+function chimeWin(){
   if(!audioReady||!AC) return;
   const now=AC.currentTime;
   [[880,0],[1175,0.08],[1568,0.16]].forEach(([f,ofs])=>{
@@ -376,8 +396,15 @@ function chime(){
     o.connect(g).connect(AC.destination); o.start(now+ofs); o.stop(now+ofs+0.36);
   });
 }
+function buzzLose(){
+  if(!audioReady||!AC) return;
+  const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
+  o.type='sawtooth'; o.frequency.setValueAtTime(140,t);
+  g.gain.value=0.11; g.gain.exponentialRampToValueAtTime(0.0001, t+0.28);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t+0.28);
+}
 
-/* Ambience */
+/* Soft casino ambience */
 let ambGain=null, ambNode=null, ambFilter=null;
 function startAmbience(){
   if(!audioReady||!AC||ambGain) return;
@@ -393,11 +420,19 @@ function startAmbience(){
 }
 (function(){ const prev=unlockAudio; unlockAudio=function(){ prev(); startAmbience(); }; })();
 
-/* Confetti */
+/* ========= FX canvas ========= */
 const fx=g('fx'), ctx=fx.getContext('2d');
 function resizeFX(){ fx.width=fx.parentElement.clientWidth; fx.height=fx.parentElement.clientHeight }
 addEventListener('resize',resizeFX); addEventListener('orientationchange',()=>setTimeout(resizeFX,200)); resizeFX();
-function confetti(){ const p=[]; for(let i=0;i<160;i++) p.push({x:fx.width/2,y:120+Math.random()*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*5,life:140+Math.random()*60,r:2+Math.random()*3,h:Math.random()*360}); (function loop(){ ctx.clearRect(0,0,fx.width,fx.height); p.forEach(o=>{ o.x+=o.vx;o.y+=o.vy;o.vy+=0.06;o.life--;ctx.globalAlpha=Math.max(0,o.life/200);ctx.fillStyle=`hsl(${o.h},100%,60%)`;ctx.fillRect(o.x,o.y,o.r,o.r);}); ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop); })(); }
+function confetti(){
+  const p=[];
+  for(let i=0;i<160;i++) p.push({x:fx.width/2,y:120+Math.random()*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*5,life:140+Math.random()*60,r:2+Math.random()*3,h:Math.random()*360});
+  (function loop(){
+    ctx.clearRect(0,0,fx.width,fx.height);
+    p.forEach(o=>{ o.x+=o.vx;o.y+=o.vy;o.vy+=0.06;o.life--;ctx.globalAlpha=Math.max(0,o.life/200);ctx.fillStyle=`hsl(${o.h},100%,60%)`;ctx.fillRect(o.x,o.y,o.r,o.r);});
+    ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop);
+  })();
+}
 
 /* DOM refs */
 const status=g('status'), banner=g('outerBanner');
@@ -406,6 +441,7 @@ const areas=g('areas'), btnP=g('areaPlayer'), btnT=g('areaTie'), btnB=g('areaBan
 const dealBtn=g('dealBtn'), progressTop=g('progressTop');
 const winnerOverlay=g('winnerOverlay'), winBadge=g('winBadge');
 const voucherOverlay=g('voucherOverlay'), voucherText=g('voucherText'), voucherHeader=g('voucherHeader'), copyBtn=g('copyBtn'), closeBtn=g('closeBtn');
+const felt = g('felt');
 
 /* Beads */
 function pushBead(who){
@@ -418,6 +454,29 @@ function pushBead(who){
 
 /* State */
 let roundsPlayed=0, winsCount=0, selection=null, inRound=false, gameOver=false;
+
+/* Single persistent chip per round */
+let chipEl=null;
+function ensureChip(){
+  if(!chipEl){
+    chipEl=document.createElement('div'); chipEl.className='chip';
+    felt.appendChild(chipEl);
+  }
+}
+function moveChipToBetSpot(btn){
+  ensureChip();
+  const f = felt.getBoundingClientRect();
+  const spot = btn.querySelector('.betSpot').getBoundingClientRect();
+  const cx = (spot.left+spot.right)/2 - f.left;
+  const cy = (spot.top+spot.bottom)/2 - f.top;
+  chipEl.classList.add('move');
+  chipEl.style.transform = `translate(${cx}px,${cy}px)`;
+  // thunk!
+  thud(0.08, 0.14);
+}
+function hideChip(){
+  if(chipEl){ chipEl.classList.remove('move'); chipEl.style.transform='translate(-9999px,-9999px)'; }
+}
 
 /* Already claimed? lock */
 const claimed=localStorage.getItem(CLAIM_KEY);
@@ -444,13 +503,12 @@ function bacVal(r){ if(r==='A')return 1; if(r==='10'||r==='J'||r==='Q'||r==='K')
 function total(hand){ return hand.reduce((t,c)=>t+bacVal(c.r),0)%10 }
 function newCard(){ const r=RANKS[(Math.random()*RANKS.length)|0]; const s=SUITS[(Math.random()*4)|0]; return {r,s,shown:false,el:null} }
 function makeCardEl(card, show=false){
-  const el=document.createElement('div'); el.className='playing-card deal-in'+(show?' reveal':'');
+  const el=document.createElement('div'); el.className='playing-card deal-in'+(show?' reveal':'' );
   el.innerHTML=`<div class="card3d"><div class="sideFace back">🂠</div><div class="sideFace front">${card.r}${card.s}</div></div>`;
   card.el=el; card.shown=!!show; return card;
 }
 function slideFromShoe(el){
   const shoe = document.querySelector('.shoe');
-  const felt = document.getElementById('felt');
   if(!shoe || !felt || !el) return;
   const s = shoe.getBoundingClientRect();
   const t = el.getBoundingClientRect();
@@ -463,8 +521,8 @@ function slideFromShoe(el){
   const dy = sy - ty;
   el.style.setProperty('--sx', dx + 'px');
   el.style.setProperty('--sy', dy + 'px');
-  el.classList.add('slideFrom','popIn'); /* visible + little settle pop */
-  thud(0.08, 0.12);
+  el.classList.add('slideFrom','popIn');
+  swoosh();
 }
 async function heartbeat(node){
   node.classList.remove('heartbeat'); void node.offsetWidth;
@@ -475,46 +533,36 @@ async function heartbeat(node){
 function flip(card){
   if(card.shown) return; card.shown=true;
   if(card.el) card.el.classList.add('reveal');
-  blip(720,0.09,0.07);
+  blip(780,0.07,0.07);
 }
 
-/* Selection + chip toss + reliable bindings */
+/* Selection + click rules */
 function lock(disabled){
   [btnP,btnT,btnB].forEach(b=>{ b.disabled=!!disabled; if(disabled) b.classList.remove('sel') });
   dealBtn.disabled = !!disabled;
   if(disabled) selection=null;
 }
-function tossChipTo(el){
-  const felt = document.getElementById('felt');
-  const chip = document.createElement('div');
-  chip.className = 'chip'; felt.appendChild(chip);
-  const start = { x: felt.clientWidth*0.5, y: felt.clientHeight - 30 };
-  const r = el.getBoundingClientRect();
-  const f = felt.getBoundingClientRect();
-  const end = { x: ((r.left+r.right)/2 - f.left), y: ((r.top+r.bottom)/2 - f.top) };
-  const mid = { x: (start.x+end.x)/2, y: Math.min(start.y, end.y) - 60 };
-  chip.animate(
-    [
-      { transform: `translate(${start.x}px,${start.y}px) scale(1)`, offset: 0 },
-      { transform: `translate(${mid.x}px,${mid.y}px) scale(1.05)`, offset: .6 },
-      { transform: `translate(${end.x}px,${end.y}px) scale(1)`, offset: 1 }
-    ],
-    { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' }
-  ).onfinish = ()=> chip.remove();
-  blip(520, 0.05, 0.06);
-}
 function selectSide(side){
   if(inRound||gameOver) return;
-  [btnP,btnT,btnB].forEach(b=>b.classList.remove('sel'));
-  const map={player:btnP, tie:btnT, banker:btnB}, btn=map[side];
+  const map={player:btnP, tie:btnT, banker:btnB};
+  const btn=map[side];
   if(!btn || btn.disabled) return;
-  btn.classList.add('sel'); selection=side; dealBtn.disabled=false;
+
+  // Prevent chip spam: if picking the same side, do nothing.
+  if(selection===side) return;
+
+  [btnP,btnT,btnB].forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selection=side;
+  dealBtn.disabled=false;
+
   banner.textContent=`Selected: ${side.toUpperCase()} • Tap DEAL`;
   status.textContent=`Selected: ${side}`;
-  thud(0.1,0.12);
-  const spot = btn.querySelector('.betSpot'); if(spot) tossChipTo(spot);
+
+  // Place/move a single chip to the spot
+  moveChipToBetSpot(btn);
 }
-/* Extra-reliable bindings for all browsers */
+/* Bindings */
 [btnP, btnT, btnB].forEach((b) => {
   const side = b.dataset.side;
   const handler = (e) => {
@@ -525,7 +573,6 @@ function selectSide(side){
   b.addEventListener('pointerup', handler, { passive: true });
   b.addEventListener('touchend', handler, { passive: true });
 });
-/* Delegation too (safe) */
 areas.addEventListener('pointerup', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) }, {passive:true});
 areas.addEventListener('click', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) });
 
@@ -535,10 +582,15 @@ async function startRound(){
   if(inRound||gameOver) return;
   if(!selection) return alert('Select Player / Tie / Banker first.');
   if(roundsPlayed>=MAX_ROUNDS) return;
-  inRound=true; dealBtn.disabled=true; thud(0.12,0.18);
+  inRound=true; dealBtn.disabled=true;
+
+  // Hide chip during dealing to avoid covering cards
+  hideChip();
 
   // Prepare hands
   pHand.innerHTML=''; bHand.innerHTML='';
+  pHand.classList.remove('compact'); bHand.classList.remove('compact');
+
   let P = [ makeCardEl(newCard(), false), makeCardEl(newCard(), false) ];
   let B = [ makeCardEl(newCard(), false), makeCardEl(newCard(), false) ];
   P.forEach(c=>{ pHand.appendChild(c.el); slideFromShoe(c.el); });
@@ -559,6 +611,7 @@ async function startRound(){
   if(total(P)<=5){
     playerThird = makeCardEl(newCard(), false);
     pHand.appendChild(playerThird.el); slideFromShoe(playerThird.el);
+    pHand.classList.add('compact');  // << compact when 3rd card
     await delay(420);
     await heartbeat(pHand); flip(playerThird); P.push(playerThird); updateTotals(P,B);
   }
@@ -573,6 +626,7 @@ async function startRound(){
   if(needBanker){
     const b3 = makeCardEl(newCard(), false);
     bHand.appendChild(b3.el); slideFromShoe(b3.el);
+    bHand.classList.add('compact'); // << compact when 3rd card
     await delay(420);
     await heartbeat(bHand); flip(b3); B.push(b3); updateTotals(P,B);
   }
@@ -597,6 +651,7 @@ async function finishRound(P,B){
   let text = (who==='player') ? 'Player Win' : (who==='banker') ? 'Dealer Win' : 'Tie';
   pushBead(who);
   showWinner(who, text);
+
   if(who!=='tie' && selection===who) winsCount++;
 
   roundsPlayed++; saveProgress();
@@ -610,6 +665,9 @@ async function finishRound(P,B){
     banner.textContent = `Result: ${text} • Select next bet (${left} left)`;
     selection=null; [btnP,btnT,btnB].forEach(b=>b.classList.remove('sel'));
     inRound=false; dealBtn.disabled=true;
+
+    // Re-show chip holder away from screen edge so player picks again
+    hideChip();
   }
 }
 function showWinner(winner, text){
@@ -623,8 +681,9 @@ function showWinner(winner, text){
   winnerOverlay.classList.remove('show'); void winnerOverlay.offsetWidth;
   winnerOverlay.classList.add('show');
 
-  if(winner==='player'){ confetti(); }
-  chime();
+  if(winner==='player'){ chimeWin(); confetti(); }
+  else if(winner==='banker'){ buzzLose(); }
+  else { blip(520,0.12,0.08); } // tie: neutral tick
 }
 
 /* Voucher (locks game) */
@@ -643,7 +702,7 @@ closeBtn.onclick=()=> voucherOverlay.classList.remove('show');
 /* HUD + persistence */
 function saveProgress(){ try{ localStorage.setItem(PROG_KEY, JSON.stringify({roundsPlayed,winsCount})); }catch(e){} }
 function updateHud(){ progressTop.textContent=`Bets left: ${Math.max(0, MAX_ROUNDS - roundsPlayed)} • Wins: ${winsCount}`; }
-function init(){ g('outerBanner').textContent='Tap a circle: Player / Tie / Banker'; lock(false); }
+function init(){ g('outerBanner').textContent='Tap a circle: Player / Tie / Banker'; lock(false); hideChip(); }
 init();
 
 /* Parallax tilt (optional) */
