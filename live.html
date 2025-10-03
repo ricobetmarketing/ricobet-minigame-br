@@ -158,7 +158,7 @@
   .bead{ width:16px; height:16px; border-radius:50%; box-shadow:0 0 10px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2) }
   .bead.p{ background:#49f7d4 } .bead.b{ background:#ff7a89 } .bead.t{ background:#ffd86a }
 
-  /* BGM Toggle */
+  /* Sound Toggle */
   .bgmBtn{
     position:fixed; top:10px; right:10px; z-index:9999;
     border:1px solid rgba(255,255,255,.2);
@@ -253,9 +253,9 @@
   </div>
 </div>
 
-<!-- Background BGM (quiet) -->
-<audio id="bgm" src="theme.mp3" preload="auto" loop playsinline></audio>
-<button id="bgmToggle" class="bgmBtn" aria-pressed="false" hidden>🔊 BGM</button>
+<!-- Background Sound (quiet) -->
+<audio id="bgm" src="theme.mp3" preload="auto" loop playsinline autoplay></audio>
+<button id="bgmToggle" class="bgmBtn" aria-pressed="false" hidden>🔊 Sound</button>
 
 <script>
 function g(id){return document.getElementById(id)}
@@ -288,7 +288,7 @@ function ensureAC(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioCon
 function unlockAudio(){
   ensureAC();
   if(AC && AC.state==='suspended'){ AC.resume(); }
-  // Kick off quiet BGM on first interaction
+  // Turn the background sound on at base volume after any page interaction
   try{ bgm.muted=false; bgm.volume = baseVol; bgm.play(); setBgmUI(true); }catch(e){}
   audioReady=true;
 }
@@ -337,7 +337,7 @@ function buzzLose(){
   o.connect(g).connect(AC.destination); o.start(t); o.stop(t+0.28);
 }
 
-/* ========= BGM: theme.mp3 (quiet + ducking) ========= */
+/* ========= Background Sound: theme.mp3 (quiet + ducking) ========= */
 const bgm = g('bgm');
 const bgmBtn = g('bgmToggle');
 const baseVol = 0.16;   // quiet by default
@@ -347,10 +347,21 @@ let duckTimer = null;
 function setBgmUI(on){ bgmBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
 function showBgmBtn(){ bgmBtn.hidden = false; }
 
+/* Try to autoplay audibly on load (may be blocked by some browsers). If blocked,
+   fall back to muted autoplay and then unmute on first interaction (unlockAudio). */
 window.addEventListener('load', async ()=>{
-  // Warm-up muted (some browsers allow auto start muted)
-  try{ bgm.volume = baseVol; bgm.muted = true; await bgm.play(); }catch(e){}
-  showBgmBtn(); setBgmUI(!bgm.paused);
+  try{
+    bgm.volume = baseVol;
+    bgm.muted = false;
+    await bgm.play();            // audible attempt
+  }catch(e){
+    try{
+      bgm.muted = true;          // fallback: silent warm-up
+      await bgm.play();
+    }catch(_){}
+  }
+  showBgmBtn();
+  setBgmUI(!bgm.paused);
 }, {once:true});
 
 bgmBtn.addEventListener('click', async ()=>{
@@ -612,27 +623,21 @@ async function finishRound(P,B){
     await delay(800);
     finalizeVoucher((winsCount>0)?CODE_WIN:CODE_LOSE);
   }else{
-    // --- Enhancement: hold table for ~3s, then clear cards and prompt betting ---
+    // Hold table ~3s, then clear and reopen betting
     banner.textContent = `Result: ${text} • Next bet opens soon…`;
     status.textContent = 'Hold…';
-    // hard lock inputs during the hold
     lock(true);
-    // keep round flagged as running until we reopen
     setTimeout(()=>{
-      // clear both hands & overlays
       pHand.innerHTML=''; bHand.innerHTML='';
       pHand.classList.remove('compact'); bHand.classList.remove('compact');
       winnerOverlay.classList.remove('show');
       hideChip();
-
-      // reopen betting
       inRound=false;
-      lock(false);            // re-enable bet buttons (selection cleared already)
-      dealBtn.disabled=true;  // require a fresh selection
+      lock(false);
+      dealBtn.disabled=true;
       banner.textContent = `Place your bet: Player / Tie / Banker (${left} left)`;
       status.textContent = 'Place your bet';
     }, 3000);
-    // ---------------------------------------------------------
   }
 }
 function showWinner(winner, text){
