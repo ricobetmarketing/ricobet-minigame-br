@@ -23,6 +23,7 @@
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
     display:flex; align-items:center; justify-content:center;
     padding:clamp(10px,4vw,18px);
+    -webkit-text-size-adjust:100%;
   }
   @supports (-webkit-touch-callout:none){ body{ background-attachment:scroll } }
 
@@ -157,20 +158,45 @@
   .cab.shake{animation:shake .28s ease}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 
+  /* -------- Overlay (scrollable) -------- */
   .overlay{
-    position:fixed; inset:0; background:rgba(0,0,12,.86);
-    display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px);
+    position:fixed; inset:0;
+    background:rgba(0,0,12,.86);
+    display:none; z-index:9999;
+    padding:16px; /* lets the modal breathe at small screens */
+    backdrop-filter: blur(4px);
+    align-items:center; justify-content:center;
+    /* Make the layer itself scrollable if needed */
+    overflow:auto; overscroll-behavior:contain;
+    -webkit-overflow-scrolling: touch;
   }
-  .overlay.show{display:grid}
+  .overlay.show{display:flex}
+
   .gifModal{
-    --gifW: 280px; /* tweak size here */
-    width:min(560px,92vw); border-radius:22px; padding:18px; text-align:center;
+    --gifW: 280px;
+    width:min(560px,92vw);
+    border-radius:22px;
     background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
-    outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75);
+    outline:1px solid rgba(180,220,255,.25);
+    box-shadow:0 24px 90px rgba(0,0,0,.75);
     transform:scale(.96); animation:popIn .28s ease forwards;
+    agon: popIn .28s ease forwards;
+    /* KEY: limit height & enable inner scrolling */
+    max-height:92svh;  /* safe viewport height on mobile */
+    display:flex; flex-direction:column;
+    overflow:auto;     /* scroll inside the card */
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y; /* allow vertical swipes */
   }
   @keyframes popIn{to{transform:scale(1)}}
 
+  /* little grabber for swipe affordance */
+  .grabber{
+    width:48px; height:5px; border-radius:999px; margin:8px auto 10px;
+    background:rgba(255,255,255,.25);
+  }
+
+  .modalBody{display:flex; flex-direction:column; gap:12px; padding:18px}
   .mediaBox{ display:flex; flex-direction:column; gap:10px; align-items:center; }
   .giftGif{
     width:100%; max-width:var(--gifW); height:auto; display:block; margin:0 auto;
@@ -184,6 +210,7 @@
     border-radius:14px; overflow:hidden; outline:1px solid rgba(255,255,255,.12);
     box-shadow:0 10px 40px rgba(120,80,255,.20);
     margin-top:12px;
+    background:#000;
   }
   .videoWrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 
@@ -194,7 +221,7 @@
     color:#d8b6ff; background:#0a0d1a; display:inline-block;
     outline:1px dashed rgba(160,220,255,.4);
   }
-  .row{display:flex; gap:10px; justify-content:center; margin-top:12px}
+  .row{display:flex; gap:10px; justify-content:center; margin-top:4px; flex-wrap:wrap}
   .copy,.close{
     cursor:pointer; border:0; border-radius:12px; padding:10px 14px;
     font-weight:900; font-size:clamp(13px,3.6vw,14px)
@@ -259,31 +286,34 @@
 
 <!-- Voucher popup -->
 <div class="overlay" id="giftOverlay" role="dialog" aria-modal="true">
-  <div class="gifModal">
-    <div class="mediaBox">
-      <img class="giftGif"
-           id="giftGif"
-           src="https://ricomx.ft-crm.com/media-api/serve/64ae8b79-831d-4b08-80e9-6fbbc37e2e80_Surprise_GIF"
-           alt="Surprise gift animation"
-           decoding="async" loading="eager" referrerpolicy="no-referrer" draggable="false" />
-    </div>
+  <div class="gifModal" role="document">
+    <div class="grabber" aria-hidden="true"></div>
+    <div class="modalBody">
+      <div class="mediaBox">
+        <img class="giftGif"
+             id="giftGif"
+             src="https://ricomx.ft-crm.com/media-api/serve/64ae8b79-831d-4b08-80e9-6fbbc37e2e80_Surprise_GIF"
+             alt="Surprise gift animation"
+             decoding="async" loading="eager" referrerpolicy="no-referrer" draggable="false" />
+      </div>
 
-    <div class="voucher" id="voucherText">VOUCHER-XXXX</div>
-    <div class="row">
-      <button class="copy" id="copyBtn">Copy Code</button>
-      <button class="close" id="closeBtn">Close</button>
-    </div>
+      <div class="voucher" id="voucherText">VOUCHER-XXXX</div>
+      <div class="row">
+        <button class="copy" id="copyBtn">Copy Code</button>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
 
-    <!-- YouTube AFTER voucher & buttons -->
-    <div class="videoWrap" id="howtoVideo">
-      <iframe
-        src="https://www.youtube.com/embed/w7gg1UKQ71g?rel=0&modestbranding=1&playsinline=1"
-        title="How to redeem your voucher"
-        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-    </div>
+      <!-- YouTube AFTER voucher & buttons -->
+      <div class="videoWrap" id="howtoVideo">
+        <iframe
+          src="https://www.youtube.com/embed/w7gg1UKQ71g?rel=0&modestbranding=1&playsinline=1"
+          title="How to redeem your voucher"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+      </div>
 
-    <div class="small" style="color:#a9b7d8;margin-top:8px">Redeem this code in your account.</div>
+      <div class="small" style="color:#a9b7d8;margin-top:4px; text-align:center">Redeem this code in your account.</div>
+    </div>
   </div>
 </div>
 
@@ -415,6 +445,13 @@ function openGift(code){
 copyBtn.addEventListener('click',()=> copyText(voucherText.textContent.trim()));
 closeBtn.addEventListener('click',()=> giftOverlay.classList.remove('show'));
 
+/* Also allow backdrop tap to close (optional UX) */
+giftOverlay.addEventListener('click', (e)=>{
+  const md = document.querySelector('.gifModal');
+  if(!md) return;
+  if(!md.contains(e.target)) giftOverlay.classList.remove('show');
+});
+
 function disableControls(){ spinBtn.disabled=true; lever.style.pointerEvents='none' }
 spinBtn.addEventListener('click',spin);
 lever.addEventListener('click',spin);
@@ -445,6 +482,7 @@ function copiedUI(){
   copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);
 }
 
+/* iOS GIF fallback to ensure it shows */
 (function ensureGifShows(){
   const url=giftGif.getAttribute('src')||'';
   let tried=false;
@@ -459,8 +497,12 @@ function copiedUI(){
 function loadState(){ try{ return JSON.parse(localStorage.getItem(STATE_KEY)) || {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } catch{ return {left:MAX_SPINS,claimed:false,spun:0,wins:0,hit3:false} } }
 function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)) }
 
+/* FX canvas */
 const fx=document.getElementById('fx'); const ctx=fx.getContext('2d');
-function resize(){ fx.width=cab.clientWidth; fx.height=cab.clientHeight } addEventListener('resize',resize); addEventListener('orientationchange',()=>setTimeout(resize,250)); resize();
+function resize(){ fx.width=cab.clientWidth; fx.height=cab.clientHeight }
+addEventListener('resize',resize);
+addEventListener('orientationchange',()=>setTimeout(resize,250));
+resize();
 
 function coinBurst(){
   const parts=[]; for(let i=0;i<90;i++) parts.push({x:fx.width/2, y:fx.height/2+40, vx:(Math.random()-0.5)*4, vy:-Math.random()*3-2, r:Math.random()*3+2, g:0.06+Math.random()*0.02, life:120+Math.random()*40});
