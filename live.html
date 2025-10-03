@@ -10,7 +10,7 @@
     --felt1:#184d57; --felt2:#0f2f35;
     --cardW: clamp(62px, 9.2vw, 92px);
     --cardH: calc(var(--cardW) * 1.39);
-    /* Option A — background image */
+    /* Background image (Option A) */
     --page-bg: url("https://ricomx.ft-crm.com/media-api/serve/e9126f9e-5022-4188-a9af-5ab8ab9eee01_Mini_Game_BG.jpg");
   }
   *{box-sizing:border-box}
@@ -84,11 +84,20 @@
   .tot.p{ left:clamp(14px, 5vw, 60px) } .tot.b{ right:clamp(14px, 5vw, 60px) }
   .tot.pop{ transform:scale(1.18) }
 
-  /* CLICKABLE BET AREAS (only circles are big & clickable) */
+  /* CLICKABLE BET AREAS — CENTERED */
   .areas{
-    position:absolute; inset:clamp(100px,18vh,160px) clamp(12px,6vw,70px) clamp(150px,23vh,210px);
-    display:grid; grid-template-columns:1fr 1fr 1fr; place-items:center;
-    z-index:6; /* BELOW controls so Deal is always tappable */
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    display:grid;
+    grid-auto-flow:column;
+    grid-template-columns:repeat(3, 1fr);
+    align-items:center;
+    justify-items:center;
+    gap:clamp(10px,3vw,28px);
+    width:min(520px, 72%);
+    z-index:6; /* below controls so Deal is always tappable */
     pointer-events:auto;
   }
   .area{
@@ -132,8 +141,13 @@
   @keyframes deal{to{opacity:1; transform:translateY(0) scale(1)}}
 
   /* Controls (always above areas) */
-  .controls{ position:absolute; left:50%; bottom:10px; transform:translateX(-50%); display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; z-index:12 }
-  .btn{border:0; border-radius:14px; padding:10px 16px; font-weight:900; cursor:pointer; background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018; box-shadow:0 0 18px rgba(113,225,255,.5), inset 0 -3px 0 rgba(0,0,0,.35)}
+  .controls{
+    position:absolute; left:50%; bottom:10px; transform:translateX(-50%);
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; z-index:12
+  }
+  .btn{border:0; border-radius:14px; padding:10px 16px; font-weight:900; cursor:pointer;
+       background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018;
+       box-shadow:0 0 18px rgba(113,225,255,.5), inset 0 -3px 0 rgba(0,0,0,.35)}
   .btn:disabled{opacity:.55}
 
   .winner{ position:absolute; inset:0; display:none; place-items:center; z-index:8; pointer-events:none }
@@ -179,10 +193,13 @@
   @media (max-width:600px){
     .felt{ padding-bottom:130px }
     .areas{
-      inset:clamp(86px,18vh,140px) clamp(8px,4vw,16px) clamp(130px,22vh,190px);
-      gap:clamp(6px,2.6vw,20px);
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      width:88%;
+      gap:clamp(8px,5vw,16px);
     }
-    .betSpot{ width:clamp(78px,18vw,110px); height:clamp(78px,18vw,110px) }
+    .betSpot{ width:clamp(72px,22vw,96px); height:clamp(72px,22vw,96px) }
   }
 </style>
 </head>
@@ -213,7 +230,7 @@
 
       <svg class="feltArt" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
         <defs><path id="arc1" d="M200,360 A420,260 0 0,1 1000,360"/></defs>
-        <text style="font-size:26px"><textPath href="#arc1" startOffset="50%" text-anchor="middle">BACCARAT — AUTO FLIP</textPath></text>
+        <text style="font-size:26px"><textPath href="#arc1" startOffset="50%" text-anchor="middle">RicoBet - BACCARAT</textPath></text>
       </svg>
 
       <div class="tot p" id="pTot">Player: —</div>
@@ -222,7 +239,7 @@
       <div class="hand player" id="pHand"></div>
       <div class="hand banker" id="bHand"></div>
 
-      <!-- CLICKABLE AREAS (only the circles) -->
+      <!-- CLICKABLE AREAS (centered row of circles) -->
       <div class="areas" id="areas" role="group" aria-label="Betting areas">
         <button type="button" class="area player" id="areaPlayer" data-side="player" aria-label="Bet Player">
           <div class="betSpot">
