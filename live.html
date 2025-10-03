@@ -612,10 +612,27 @@ async function finishRound(P,B){
     await delay(800);
     finalizeVoucher((winsCount>0)?CODE_WIN:CODE_LOSE);
   }else{
-    banner.textContent = `Result: ${text} • Select next bet (${left} left)`;
-    selection=null; [btnP,btnT,btnB].forEach(b=>b.classList.remove('sel'));
-    inRound=false; dealBtn.disabled=true;
-    hideChip();
+    // --- Enhancement: hold table for ~3s, then clear cards and prompt betting ---
+    banner.textContent = `Result: ${text} • Next bet opens soon…`;
+    status.textContent = 'Hold…';
+    // hard lock inputs during the hold
+    lock(true);
+    // keep round flagged as running until we reopen
+    setTimeout(()=>{
+      // clear both hands & overlays
+      pHand.innerHTML=''; bHand.innerHTML='';
+      pHand.classList.remove('compact'); bHand.classList.remove('compact');
+      winnerOverlay.classList.remove('show');
+      hideChip();
+
+      // reopen betting
+      inRound=false;
+      lock(false);            // re-enable bet buttons (selection cleared already)
+      dealBtn.disabled=true;  // require a fresh selection
+      banner.textContent = `Place your bet: Player / Tie / Banker (${left} left)`;
+      status.textContent = 'Place your bet';
+    }, 3000);
+    // ---------------------------------------------------------
   }
 }
 function showWinner(winner, text){
