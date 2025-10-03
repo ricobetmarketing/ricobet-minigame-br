@@ -29,8 +29,18 @@
   }
 
   .top{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin:2px 2px 8px; flex-wrap:wrap }
+  .leftTop{display:flex; gap:8px; align-items:center}
   .note{font-size:12px; opacity:.9}
   .status{font-weight:800; background:rgba(0,0,0,.35); padding:6px 10px; border-radius:10px}
+
+  /* Back button */
+  .backBtn{
+    border:0; border-radius:12px; padding:8px 12px; font-weight:900; cursor:pointer;
+    background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018;
+    box-shadow:0 0 14px rgba(113,225,255,.45), inset 0 -3px 0 rgba(0,0,0,.35);
+    display:inline-flex; gap:8px; align-items:center; font-size:14px;
+  }
+  .backBtn:active{ transform:translateY(1px) }
 
   .felt{
     position:relative; border-radius:22px; padding:14px 14px 140px;
@@ -157,7 +167,10 @@
   <div class="wrap">
     <div class="card">
       <div class="top">
-        <div class="note"><b>3 bets only</b> • Voucher after 3 bets • Banker 0.95:1 • Player 1:1 • Tie 8:1</div>
+        <div class="leftTop">
+          <button class="backBtn" id="backBtn" type="button" aria-label="Back to menu">⬅ Back</button>
+          <div class="note"><b>3 bets only</b> • Voucher after 3 bets • Banker 0.95:1 • Player 1:1 • Tie 8:1</div>
+        </div>
         <div class="status" id="status">Ready</div>
       </div>
 
@@ -236,9 +249,21 @@
 </div>
 
 <script>
-/*** Minimal 3-bet Baccarat with heartbeat reveal, winner badge, and WebAudio sounds ***/
+/*** Minimal 3-bet Baccarat with heartbeat reveal, winner badge, WebAudio sounds, and Back button ***/
 function g(id){return document.getElementById(id)}
 function delay(ms){return new Promise(r=>setTimeout(r,ms))}
+
+/* Back button logic: ?back=/menu.html → else history.back() → else /index.html */
+(function setupBack(){
+  const backBtn=g('backBtn');
+  const q=new URLSearchParams(location.search);
+  const backUrl=q.get('back');
+  backBtn.addEventListener('click', ()=>{
+    if(backUrl){ location.href = backUrl; return; }
+    if(history.length > 1){ history.back(); return; }
+    location.href = '/index.html';
+  }, {passive:true});
+})();
 
 /* Optional URL reset for your testing (no button shown) */
 const urlp=new URLSearchParams(location.search);
