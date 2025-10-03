@@ -163,10 +163,9 @@
     position:fixed; inset:0;
     background:rgba(0,0,12,.86);
     display:none; z-index:9999;
-    padding:16px; /* lets the modal breathe at small screens */
+    padding:16px;
     backdrop-filter: blur(4px);
     align-items:center; justify-content:center;
-    /* Make the layer itself scrollable if needed */
     overflow:auto; overscroll-behavior:contain;
     -webkit-overflow-scrolling: touch;
   }
@@ -180,22 +179,14 @@
     outline:1px solid rgba(180,220,255,.25);
     box-shadow:0 24px 90px rgba(0,0,0,.75);
     transform:scale(.96); animation:popIn .28s ease forwards;
-    agon: popIn .28s ease forwards;
-    /* KEY: limit height & enable inner scrolling */
-    max-height:92svh;  /* safe viewport height on mobile */
+    max-height:92svh;
     display:flex; flex-direction:column;
-    overflow:auto;     /* scroll inside the card */
+    overflow:auto;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-y; /* allow vertical swipes */
+    touch-action: pan-y;
   }
   @keyframes popIn{to{transform:scale(1)}}
-
-  /* little grabber for swipe affordance */
-  .grabber{
-    width:48px; height:5px; border-radius:999px; margin:8px auto 10px;
-    background:rgba(255,255,255,.25);
-  }
-
+  .grabber{ width:48px; height:5px; border-radius:999px; margin:8px auto 10px; background:rgba(255,255,255,.25); }
   .modalBody{display:flex; flex-direction:column; gap:12px; padding:18px}
   .mediaBox{ display:flex; flex-direction:column; gap:10px; align-items:center; }
   .giftGif{
@@ -203,10 +194,9 @@
     border-radius:14px; outline:1px solid rgba(255,255,255,.12);
     box-shadow:0 10px 40px rgba(120,80,255,.35);
   }
-
   .videoWrap{
     width:100%; max-width:520px;
-    position:relative; padding-top:56.25%; /* 16:9 */
+    position:relative; padding-top:56.25%;
     border-radius:14px; overflow:hidden; outline:1px solid rgba(255,255,255,.12);
     box-shadow:0 10px 40px rgba(120,80,255,.20);
     margin-top:12px;
@@ -229,6 +219,16 @@
   .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
 
   #fx{position:absolute; inset:0; pointer-events:none}
+
+  /* BGM toggle */
+  .bgmBtn{
+    position:fixed; top:10px; right:10px; z-index:99999;
+    border:1px solid rgba(255,255,255,.2);
+    background:rgba(6,9,18,.6); backdrop-filter:blur(6px);
+    color:#eaf2ff; font-weight:700; font-size:12px; border-radius:999px; padding:6px 10px;
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+  }
+  .bgmBtn[aria-pressed="false"]{ opacity:.65 }
 </style>
 </head>
 <body>
@@ -317,9 +317,14 @@
   </div>
 </div>
 
+<!-- Sound effects -->
 <audio id="sSpin" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/lever.mp3" preload="auto"></audio>
 <audio id="sStop" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3" preload="auto"></audio>
 <audio id="sWin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
+
+<!-- Background BGM (quiet) -->
+<audio id="bgm" src="theme.mp3" preload="auto" loop playsinline></audio>
+<button id="bgmToggle" class="bgmBtn" aria-pressed="false" hidden>🔊 BGM</button>
 
 <script>
 const MAX_SPINS=5;
@@ -348,9 +353,48 @@ const closeBtn    = document.getElementById('closeBtn');
 const backBtn     = document.getElementById('backBtn');
 const giftGif     = document.getElementById('giftGif');
 
+/* ====== BGM: theme.mp3 (quiet + ducking) ====== */
+const bgm = document.getElementById('bgm');
+const bgmBtn = document.getElementById('bgmToggle');
+const BGM_BASE = 0.16; // overall music volume (tweak to taste)
+const BGM_DUCK = 0.06; // during wins / lever pull
+let duckTimer = null;
+
+function showBgmBtn(){ bgmBtn.hidden = false; }
+function setBgmUI(on){ bgmBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+function duck(ms=1400){
+  clearTimeout(duckTimer);
+  bgm.volume = BGM_DUCK;
+  duckTimer = setTimeout(()=>{ if(!bgm.paused) bgm.volume = BGM_BASE; duckTimer=null; }, ms);
+}
+
+window.addEventListener('load', async ()=>{
+  // Warm-up muted for autoplay policies
+  try{ bgm.volume = BGM_BASE; bgm.muted = true; await bgm.play(); }catch(e){}
+  showBgmBtn(); setBgmUI(!bgm.paused);
+}, {once:true});
+
+// Unlock + start BGM on first interaction anywhere
+['pointerdown','touchstart','mousedown','keydown'].forEach(ev=>{
+  window.addEventListener(ev, async function firstInteract(){
+    try{ bgm.muted=false; bgm.volume=BGM_BASE; await bgm.play(); setBgmUI(true); }
+    catch(e){}
+    window.removeEventListener(ev, firstInteract, {capture:false});
+  }, {once:true, passive:true});
+});
+
+bgmBtn.addEventListener('click', async ()=>{
+  try{
+    if(bgm.paused){ bgm.muted=false; bgm.volume=BGM_BASE; await bgm.play(); setBgmUI(true); }
+    else{ bgm.pause(); setBgmUI(false); }
+  }catch(e){}
+});
+
+/* ====== Init UI ====== */
 spinsLeftEl.textContent=state.left; updateMeters();
 if(state.claimed){ openGift(localStorage.getItem(VOUCHER_KEY)||'CLAIMED'); disableControls(); }
 
+/* Build reels */
 function makeReel(){
   const reel=document.createElement('div'); reel.className='reel';
   const col=document.createElement('div'); col.className='col';
@@ -360,13 +404,17 @@ function makeReel(){
 }
 for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()); }
 
+/* Spin flow */
 function spin(){
   if(spinning || state.claimed) return;
   if(!started){ started=true; if(backBtn) backBtn.style.display='none'; }
   if(state.left<=0){ maybeVoucher(); return; }
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
+
+  // lever sound + slight duck so it doesn't clash
   sSpin && sSpin.play().catch(()=>{});
+  duck(500);
 
   const cols=[...document.querySelectorAll('.reel .col')];
   const targets = cols.map(() => SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]);
@@ -407,7 +455,10 @@ function onStop(arr){
   if(best>=3){
     state.wins=(state.wins||0)+1; state.hit3=true;
     payoutEl.innerHTML='<span style="color:var(--green);font-weight:900">WIN!</span>';
-    sWin && sWin.play().catch(()=>{}); coinBurst(); shake();
+    // duck while the win jingle plays
+    duck(1800);
+    sWin && sWin.play().catch(()=>{});
+    coinBurst(); shake();
     cab.classList.add('win'); setTimeout(()=>cab.classList.remove('win'),700);
   } else {
     payoutEl.textContent='Spin again';
@@ -445,7 +496,7 @@ function openGift(code){
 copyBtn.addEventListener('click',()=> copyText(voucherText.textContent.trim()));
 closeBtn.addEventListener('click',()=> giftOverlay.classList.remove('show'));
 
-/* Also allow backdrop tap to close (optional UX) */
+/* Also allow backdrop tap to close */
 giftOverlay.addEventListener('click', (e)=>{
   const md = document.querySelector('.gifModal');
   if(!md) return;
@@ -460,6 +511,7 @@ spinBtn.addEventListener('mousedown',()=>{ turbo=true; lever.classList.add('pull
 spinBtn.addEventListener('mouseup',()=>{ turbo=false; lever.classList.remove('pull') });
 spinBtn.addEventListener('mouseleave',()=>{ turbo=false; lever.classList.remove('pull') });
 
+/* Copy helper */
 async function copyText(txt){
   if(!txt) return;
   try{
@@ -482,7 +534,7 @@ function copiedUI(){
   copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);
 }
 
-/* iOS GIF fallback to ensure it shows */
+/* iOS GIF fallback */
 (function ensureGifShows(){
   const url=giftGif.getAttribute('src')||'';
   let tried=false;
