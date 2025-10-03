@@ -135,7 +135,12 @@
   .back{ background:linear-gradient(180deg,#0e1a3a,#0a1329); color:#9fb0d9; font-size:clamp(20px,3.4vw,28px) }
   .front{ background:radial-gradient(240px 160px at 50% -20%,#fff,#e9eefc 40%,#c8d4f3 100%); color:#1a2050; font-size:clamp(18px,3vw,26px); transform:rotateY(180deg) }
   .reveal .card3d{ transform:rotateY(180deg) }
-  .deal-in{ opacity:0; transform:translateY(-24px) scale(.96); animation:deal .44s cubic-bezier(.2,.8,.2,1) forwards }
+
+  /* IMPORTANT: visible by default (no reliance on a fade-in animation) */
+  .deal-in{ opacity:1; transform:none; animation:none; }
+
+  /* Optional tiny settle pop when a card lands */
+  .popIn{ animation:deal .22s cubic-bezier(.2,.8,.2,1) both; }
   @keyframes deal{to{opacity:1; transform:translateY(0) scale(1)}}
 
   /* Controls */
@@ -191,7 +196,7 @@
     .areas{ top: 60%; }
   }
 
-  /* Shoe / Burn / Beads / Chip / Slide + Parallax (same as before) */
+  /* Props / effects */
   .shoe{
     position:absolute; right:clamp(10px,4vw,30px); top:clamp(50px,7vh,80px);
     width:clamp(80px,10vw,120px); height:clamp(24px,3vw,36px);
@@ -458,7 +463,7 @@ function slideFromShoe(el){
   const dy = sy - ty;
   el.style.setProperty('--sx', dx + 'px');
   el.style.setProperty('--sy', dy + 'px');
-  el.classList.add('slideFrom');
+  el.classList.add('slideFrom','popIn'); /* visible + little settle pop */
   thud(0.08, 0.12);
 }
 async function heartbeat(node){
@@ -520,7 +525,7 @@ function selectSide(side){
   b.addEventListener('pointerup', handler, { passive: true });
   b.addEventListener('touchend', handler, { passive: true });
 });
-/* (You can keep these; they won't hurt) */
+/* Delegation too (safe) */
 areas.addEventListener('pointerup', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) }, {passive:true});
 areas.addEventListener('click', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) });
 
