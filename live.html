@@ -33,21 +33,25 @@
   .note{font-size:12px; opacity:.9}
   .status{font-weight:800; background:rgba(0,0,0,.35); padding:6px 10px; border-radius:10px}
 
-  /* Back button */
+  /* Back button — same style as Slots page */
   .backBtn{
-    border:0; border-radius:12px; padding:8px 12px; font-weight:900; cursor:pointer;
-    background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018;
-    box-shadow:0 0 14px rgba(113,225,255,.45), inset 0 -3px 0 rgba(0,0,0,.35);
-    display:inline-flex; gap:8px; align-items:center; font-size:14px;
+    position:fixed; top:calc(10px + env(safe-area-inset-top)); left:calc(10px + env(safe-area-inset-left));
+    z-index:99999;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:12px; text-decoration:none;
+    font-weight:900; letter-spacing:.3px; color:#0c1220; background:#eaf2ff;
+    box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
+    user-select:none; -webkit-tap-highlight-color: transparent;
   }
   .backBtn:active{ transform:translateY(1px) }
+  .backBtn svg{ width:16px; height:16px }
 
   .felt{
     position:relative; border-radius:22px; padding:14px 14px 140px;
     background:radial-gradient(closest-side,var(--felt1),var(--felt2));
     outline:1px solid rgba(255,255,255,.08);
     box-shadow:inset 0 0 70px rgba(0,0,0,.6), 0 0 60px rgba(113,225,255,.18), 0 0 80px rgba(192,107,255,.16);
-    overflow:hidden; width:100%; aspect-ratio:16/9; max-height:calc(100vh - 120px);
+    overflow:hidden; width:100%; aspect-ratio:16/9; max-height:calc(100vh - 140px);
   }
 
   /* FX + felt art */
@@ -122,7 +126,6 @@
   .controls{ position:absolute; left:50%; bottom:10px; transform:translateX(-50%); display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; z-index:12 }
   .btn{border:0; border-radius:14px; padding:10px 16px; font-weight:900; cursor:pointer; background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018; box-shadow:0 0 18px rgba(113,225,255,.5), inset 0 -3px 0 rgba(0,0,0,.35)}
   .btn:disabled{opacity:.55}
-  .banner{ position:absolute; right:10px; bottom:10px; background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:8px 12px; font-weight:900; z-index:12; font-size:clamp(12px,1.8vw,14px) }
 
   .winner{ position:absolute; inset:0; display:none; place-items:center; z-index:8; pointer-events:none }
   .winner.show{ display:grid; animation:fadeOut 2.4s ease forwards }
@@ -152,6 +155,18 @@
   .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900; font-size:clamp(13px,3.6vw,14px)}
   .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
 
+  /* Instruction banner OUTSIDE the table */
+  .outerBanner{
+    margin:10px 4px 0;
+    display:flex; justify-content:center;
+  }
+  .outerBanner .pill{
+    background:rgba(0,0,0,.45);
+    border-color:rgba(255,255,255,.16);
+    font-size:clamp(12px,2.2vw,14px);
+    text-align:center;
+  }
+
   @media (max-width:600px){
     .felt{ padding-bottom:130px }
     .areas{
@@ -159,81 +174,79 @@
       gap:clamp(6px,2.6vw,20px);
     }
     .betSpot{ width:clamp(78px,18vw,110px); height:clamp(78px,18vw,110px) }
-    .banner{ right:auto; left:10px; bottom:10px }
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="top">
-        <div class="leftTop">
-          <button class="backBtn" id="backBtn" type="button" aria-label="Back to menu">⬅ Back</button>
-          <div class="note"><b>3 bets only</b> • Voucher after 3 bets • Banker 0.95:1 • Player 1:1 • Tie 8:1</div>
-        </div>
-        <div class="status" id="status">Ready</div>
+
+<!-- Back button (same style as your Slots page) -->
+<a class="backBtn" id="backBtn" href="index.html" aria-label="Back to menu">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Back
+</a>
+
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <div class="leftTop">
+        <div class="note"><b>3 bets only</b> • Voucher after 3 bets • Banker 0.95:1 • Player 1:1 • Tie 8:1</div>
       </div>
-
-      <div class="felt" id="felt" aria-live="polite">
-        <canvas id="fx"></canvas>
-
-        <!-- HUD at top of table -->
-        <div class="hud">
-          <div class="pill" id="progressTop">Bets left: 3 • Wins: 0</div>
-        </div>
-
-        <svg class="feltArt" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
-          <defs><path id="arc1" d="M200,360 A420,260 0 0,1 1000,360"/></defs>
-          <text style="font-size:26px"><textPath href="#arc1" startOffset="50%" text-anchor="middle">BACCARAT — AUTO FLIP</textPath></text>
-        </svg>
-
-        <div class="tot p" id="pTot">Player: —</div>
-        <div class="tot b" id="bTot">Banker: —</div>
-
-        <div class="hand player" id="pHand"></div>
-        <div class="hand banker" id="bHand"></div>
-
-        <!-- CLICKABLE AREAS (only the circles) -->
-        <div class="areas" id="areas" role="group" aria-label="Betting areas">
-          <button type="button" class="area player" id="areaPlayer" data-side="player" aria-label="Bet Player">
-            <div class="betSpot">
-              <div class="spotText">
-                <span class="lab">PLAYER</span>
-                <span class="odds">1 : 1</span>
-              </div>
-            </div>
-          </button>
-
-          <button type="button" class="area tie" id="areaTie" data-side="tie" aria-label="Bet Tie">
-            <div class="betSpot">
-              <div class="spotText">
-                <span class="lab">TIE</span>
-                <span class="odds">8 : 1</span>
-              </div>
-            </div>
-          </button>
-
-          <button type="button" class="area banker" id="areaBanker" data-side="banker" aria-label="Bet Banker">
-            <div class="betSpot">
-              <div class="spotText">
-                <span class="lab">BANKER</span>
-                <span class="odds">0.95 : 1</span>
-              </div>
-            </div>
-          </button>
-        </div>
-
-        <!-- Controls always above areas -->
-        <div class="controls">
-          <button class="btn" id="dealBtn" type="button" disabled>Deal</button>
-        </div>
-
-        <div class="banner" id="banner">Tap a circle: Player / Tie / Banker</div>
-
-        <div class="winner" id="winnerOverlay"><div class="winBadge" id="winBadge">Player Win</div></div>
-      </div>
+      <div class="status" id="status">Ready</div>
     </div>
+
+    <div class="felt" id="felt" aria-live="polite">
+      <canvas id="fx"></canvas>
+
+      <!-- HUD at top of table -->
+      <div class="hud">
+        <div class="pill" id="progressTop">Bets left: 3 • Wins: 0</div>
+      </div>
+
+      <svg class="feltArt" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
+        <defs><path id="arc1" d="M200,360 A420,260 0 0,1 1000,360"/></defs>
+        <text style="font-size:26px"><textPath href="#arc1" startOffset="50%" text-anchor="middle">BACCARAT — AUTO FLIP</textPath></text>
+      </svg>
+
+      <div class="tot p" id="pTot">Player: —</div>
+      <div class="tot b" id="bTot">Banker: —</div>
+
+      <div class="hand player" id="pHand"></div>
+      <div class="hand banker" id="bHand"></div>
+
+      <!-- CLICKABLE AREAS (only the circles) -->
+      <div class="areas" id="areas" role="group" aria-label="Betting areas">
+        <button type="button" class="area player" id="areaPlayer" data-side="player" aria-label="Bet Player">
+          <div class="betSpot">
+            <div class="spotText"><span class="lab">PLAYER</span><span class="odds">1 : 1</span></div>
+          </div>
+        </button>
+        <button type="button" class="area tie" id="areaTie" data-side="tie" aria-label="Bet Tie">
+          <div class="betSpot">
+            <div class="spotText"><span class="lab">TIE</span><span class="odds">8 : 1</span></div>
+          </div>
+        </button>
+        <button type="button" class="area banker" id="areaBanker" data-side="banker" aria-label="Bet Banker">
+          <div class="betSpot">
+            <div class="spotText"><span class="lab">BANKER</span><span class="odds">0.95 : 1</span></div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Controls always above areas -->
+      <div class="controls">
+        <button class="btn" id="dealBtn" type="button" disabled>Deal</button>
+      </div>
+
+      <div class="winner" id="winnerOverlay"><div class="winBadge" id="winBadge">Player Win</div></div>
+    </div>
+
+    <!-- Instruction banner OUTSIDE the table -->
+    <div class="outerBanner">
+      <div class="pill" id="outerBanner">Tap a circle: Player / Tie / Banker</div>
+    </div>
+
   </div>
+</div>
 
 <!-- Voucher modal -->
 <div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
@@ -253,16 +266,20 @@
 function g(id){return document.getElementById(id)}
 function delay(ms){return new Promise(r=>setTimeout(r,ms))}
 
-/* Back button logic: ?back=/menu.html → else history.back() → else /index.html */
+/* Back button behavior:
+   ?back=/menu.html → go there
+   else history.back() if possible
+   else fall back to index.html */
 (function setupBack(){
   const backBtn=g('backBtn');
   const q=new URLSearchParams(location.search);
   const backUrl=q.get('back');
-  backBtn.addEventListener('click', ()=>{
+  backBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
     if(backUrl){ location.href = backUrl; return; }
     if(history.length > 1){ history.back(); return; }
-    location.href = '/index.html';
-  }, {passive:true});
+    location.href = 'index.html';
+  }, {passive:false});
 })();
 
 /* Optional URL reset for your testing (no button shown) */
@@ -273,7 +290,7 @@ if(urlp.get('reset')==='1'){ try{ localStorage.removeItem('live_3bets_claimed_v3
 const CLAIM_KEY='live_3bets_claimed_v3', PROG_KEY='live_3bets_progress_v3';
 const MAX_ROUNDS=3, CODE_WIN='VIPBAW', CODE_LOSE='VIPBAL';
 
-/* Web Audio (reliable, no external files) */
+/* Web Audio (no external unlock issues) */
 let AC=null, audioReady=false;
 function ensureAC(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioContext)(); } }
 function unlockAudio(){
@@ -312,10 +329,10 @@ function chime(){ // win badge
 const fx=g('fx'), ctx=fx.getContext('2d');
 function resizeFX(){ fx.width=fx.parentElement.clientWidth; fx.height=fx.parentElement.clientHeight }
 addEventListener('resize',resizeFX); addEventListener('orientationchange',()=>setTimeout(resizeFX,200)); resizeFX();
-function confetti(){ const p=[]; for(let i=0;i<160;i++) p.push({x:fx.width/2,y:120+Math.random()*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*5,life:140+Math.random()*60,r:2+Math.random()*3,h:Math.random()*360}); (function loop(){ ctx.clearRect(0,0,fx.width,fx.height); p.forEach(o=>{o.x+=o.vx;o.y+=o.vy;o.vy+=0.06;o.life--;ctx.globalAlpha=Math.max(0,o.life/200);ctx.fillStyle=`hsl(${o.h},100%,60%)`;ctx.fillRect(o.x,o.y,o.r,o.r);}); ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop); })(); }
+function confetti(){ const p=[]; for(let i=0;i<160;i++) p.push({x:fx.width/2,y:120+Math.random()*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*5,life:140+Math.random()*60,r:2+Math.random()*3,h:Math.random()*360}); (function loop(){ ctx.clearRect(0,0,fx.width,fx.height); p.forEach(o=>{ o.x+=o.vx;o.y+=o.vy;o.vy+=0.06;o.life--;ctx.globalAlpha=Math.max(0,o.life/200);ctx.fillStyle=`hsl(${o.h},100%,60%)`;ctx.fillRect(o.x,o.y,o.r,o.r);}); ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop); })(); }
 
 /* DOM refs */
-const status=g('status'), banner=g('banner');
+const status=g('status'), banner=g('outerBanner');
 const pHand=g('pHand'), bHand=g('bHand'), pTot=g('pTot'), bTot=g('bTot');
 const areas=g('areas'), btnP=g('areaPlayer'), btnT=g('areaTie'), btnB=g('areaBanker');
 const dealBtn=g('dealBtn'), progressTop=g('progressTop');
@@ -484,7 +501,6 @@ function showWinner(winner, text){
 
   if(winner==='player'){ confetti(); }
   chime();
-  banner.textContent=text;
 }
 
 /* Voucher (locks game) */
