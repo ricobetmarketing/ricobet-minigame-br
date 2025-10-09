@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>Live — Baccarat (3 Bets)</title>
+<title>Ao Vivo — Baccarat (3 Apostas)</title>
 <style>
   :root{
     --ink:#eaf2ff; --mut:#9fb0d9; --g1:#71e1ff; --g2:#25c3ff; --gold:#ffd86a;
@@ -16,9 +16,7 @@
   html,body{height:100%}
   body{
     margin:0; color:var(--ink);
-    background:
-      linear-gradient( rgba(18,8,38,.12), rgba(8,7,20,.55) ),
-      var(--page-bg) center/cover no-repeat fixed;
+    background: linear-gradient( rgba(18,8,38,.12), rgba(8,7,20,.55) ), var(--page-bg) center/cover no-repeat fixed;
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     display:flex; align-items:center; justify-content:center; padding:8px;
     -webkit-tap-highlight-color: transparent;
@@ -27,8 +25,7 @@
 
   button{ touch-action:manipulation; }
   .wrap{ width:min(1100px,98vw) }
-  .card{
-    position:relative; border-radius:22px; padding:12px; overflow:visible;
+  .card{ position:relative; border-radius:22px; padding:12px; overflow:visible;
     background:linear-gradient(180deg,#1b2a56,#0f1832);
     outline:1px solid rgba(255,255,255,.08); box-shadow:0 16px 60px rgba(0,0,0,.55);
   }
@@ -38,40 +35,30 @@
   .note{font-size:12px; opacity:.9}
   .status{font-weight:800; background:rgba(0,0,0,.35); padding:6px 10px; border-radius:10px}
 
-  /* Back button */
   .backBtn{
     position:fixed; top:calc(10px + env(safe-area-inset-top)); left:calc(10px + env(safe-area-inset-left));
-    z-index:99999;
-    display:inline-flex; align-items:center; gap:8px;
-    padding:10px 12px; border-radius:12px; text-decoration:none;
-    font-weight:900; letter-spacing:.3px; color:#0c1220; background:#eaf2ff;
-    box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
+    z-index:99999; display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:12px; text-decoration:none; font-weight:900; letter-spacing:.3px;
+    color:#0c1220; background:#eaf2ff; box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
     user-select:none;
   }
   .backBtn:active{ transform:translateY(1px) }
   .backBtn svg{ width:16px; height:16px }
 
-  .felt{
-    position:relative; border-radius:22px; padding:14px 14px 140px;
+  .felt{ position:relative; border-radius:22px; padding:14px 14px 140px;
     background:radial-gradient(closest-side,var(--felt1),var(--felt2));
     outline:1px solid rgba(255,255,255,.08);
     box-shadow:inset 0 0 70px rgba(0,0,0,.6), 0 0 60px rgba(113,225,255,.18), 0 0 80px rgba(192,107,255,.16);
     overflow:hidden; width:100%; aspect-ratio:16/9; max-height:calc(100vh - 140px);
   }
 
-  /* FX + felt art */
   #fx{ position:absolute; inset:0; pointer-events:none; z-index:1 }
   .feltArt{ position:absolute; inset:0; pointer-events:none; opacity:.75; filter:drop-shadow(0 3px 10px rgba(0,0,0,.45)); z-index:0 }
   .feltArt text{ font:900 clamp(12px,1.9vw,18px)/1 ui-sans-serif,system-ui,Segoe UI,Roboto,Arial; letter-spacing:2px; fill:#eaf2ff }
 
-  /* HUD */
-  .hud{
-    position:absolute; top:8px; left:50%; transform:translateX(-50%);
-    z-index:9; display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center;
-  }
+  .hud{ position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:9; display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center }
   .pill{background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:8px 12px; font-weight:900; font-size:clamp(12px,1.8vw,14px)}
 
-  /* Hands + totals */
   .hand{ position:absolute; top:clamp(18px, 3.5vh, 34px); display:flex; gap:10px; z-index:5; pointer-events:none }
   .hand.player{ left:clamp(14px, 5vw, 60px) }
   .hand.banker{ right:clamp(14px, 5vw, 60px) }
@@ -82,9 +69,7 @@
   .tot.p{ left:clamp(14px, 5vw, 60px) } .tot.b{ right:clamp(14px, 5vw, 60px) }
   .tot.pop{ transform:scale(1.18) }
 
-  /* Bet areas */
-  .areas{
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  .areas{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
     display:grid; grid-auto-flow:column; grid-template-columns:repeat(3,1fr);
     align-items:center; justify-items:center; gap:clamp(10px,3vw,28px);
     width:min(520px,72%); z-index:20; pointer-events:auto;
@@ -92,13 +77,10 @@
   .area{ appearance:none; border:0; background:none; padding:0; margin:0; position:relative; cursor:pointer; color:inherit }
   .area *{ pointer-events:none }
 
-  .betSpot{
-    display:grid; place-items:center;
-    width:clamp(82px,12vw,140px); height:clamp(82px,12vw,140px); border-radius:50%;
+  .betSpot{ display:grid; place-items:center; width:clamp(82px,12vw,140px); height:clamp(82px,12vw,140px); border-radius:50%;
     box-shadow:inset 0 0 0 6px rgba(255,255,255,.15);
     background:radial-gradient(circle, rgba(255,255,255,.08), rgba(255,255,255,0) 65%);
-    outline:2px dashed rgba(255,255,255,.14);
-    transition: transform .12s, box-shadow .25s, outline-color .2s;
+    outline:2px dashed rgba(255,255,255,.14); transition: transform .12s, box-shadow .25s, outline-color .2s;
   }
   .area.sel .betSpot{ transform:translateY(-2px); box-shadow:0 0 18px rgba(113,225,255,.35) inset, 0 0 26px rgba(113,225,255,.22); outline-color:rgba(113,225,255,.5) }
 
@@ -106,13 +88,10 @@
   .lab{ display:block; font:900 clamp(13px,2.2vw,18px)/1 ui-sans-serif; letter-spacing:1px }
   .odds{ display:block; opacity:.85; font-weight:800; font-size:clamp(10px,1.6vw,12px); margin-top:2px }
   .player .lab{ color:#c6ffea } .banker .lab{ color:#ffc6c6 } .tie .lab{ color:#ffe39a }
-  .area.winPulse .betSpot{ animation:pulseGlow 1.1s ease-in-out 3 }
-  @keyframes pulseGlow{ 0%,100%{ box-shadow:inset 0 0 0 6px rgba(255,255,255,.15) } 50%{ box-shadow:0 0 22px 8px rgba(255,255,255,.18), 0 0 60px 14px rgba(255,255,255,.12), inset 0 0 0 6px rgba(255,255,255,.15) } }
 
   .heartbeat{ animation:beat .52s ease-in-out 2 }
   @keyframes beat{ 0%{transform:scale(1)} 35%{transform:scale(1.03)} 70%{transform:scale(1)} 100%{transform:scale(1)} }
 
-  /* Cards */
   .playing-card{ width:var(--cardW); height:var(--cardH); border-radius:14px; position:relative; outline:2px solid #e5ecff; box-shadow:0 16px 28px rgba(0,0,0,.4); perspective:1000px }
   .card3d{ position:absolute; inset:0; border-radius:14px; transition:transform .6s ease; transform:rotateY(0); transform-style:preserve-3d; -webkit-transform-style:preserve-3d }
   .sideFace{ position:absolute; inset:0; display:grid; place-items:center; border-radius:14px; font-weight:900; backface-visibility:hidden; -webkit-backface-visibility:hidden }
@@ -123,7 +102,6 @@
   .popIn{ animation:deal .22s cubic-bezier(.2,.8,.2,1) both }
   @keyframes deal{to{opacity:1; transform:translateY(0) scale(1)}}
 
-  /* Controls */
   .controls{ position:absolute; left:50%; bottom:10px; transform:translateX(-50%); display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; z-index:22 }
   .btn{border:0; border-radius:14px; padding:10px 16px; font-weight:900; cursor:pointer; background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018; box-shadow:0 0 18px rgba(113,225,255,.5), inset 0 -3px 0 rgba(0,0,0,.35)}
   .btn:disabled{opacity:.55}
@@ -136,7 +114,6 @@
   .winBadge.banker{ background:linear-gradient(90deg,#ffc6cf,#ff9aa5)}
   .winBadge.tie{ background:linear-gradient(90deg,#fff0b5,#ffd86a)}
 
-  /* Voucher modal */
   .overlay{ position:fixed; inset:0; background:rgba(0,0,12,.86); display:none; place-items:center; z-index:13000; backdrop-filter: blur(4px) }
   .overlay.show{ display:grid }
   .modal{ width:min(520px,92vw); border-radius:20px; padding:18px; text-align:center; background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%); outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75); transform:scale(.96); animation:popIn .28s ease forwards; color:#eaf2ff }
@@ -148,7 +125,6 @@
   .outerBanner{ margin:10px 4px 0; display:flex; justify-content:center; }
   .outerBanner .pill{ background:rgba(0,0,0,.45); border-color:rgba(255,255,255,.16); font-size:clamp(12px,2.2vw,14px); text-align:center; }
 
-  /* Chip token */
   .chip{ position:absolute; width:26px; height:26px; border-radius:50%; background:radial-gradient(circle at 35% 35%, #fff, #eaf2ff 40%, #9fb0d9 80%); box-shadow:0 6px 12px rgba(0,0,0,.45); transform:translate(-50%,-50%); z-index:21; pointer-events:none }
   .chip.move{ transition: transform .42s cubic-bezier(.2,.8,.2,1) }
 
@@ -158,31 +134,26 @@
   .bead{ width:16px; height:16px; border-radius:50%; box-shadow:0 0 10px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2) }
   .bead.p{ background:#49f7d4 } .bead.b{ background:#ff7a89 } .bead.t{ background:#ffd86a }
 
-  /* Sound Toggle */
-  .bgmBtn{
-    position:fixed; top:10px; right:10px; z-index:9999;
-    border:1px solid rgba(255,255,255,.2);
-    background:rgba(6,9,18,.6); backdrop-filter:blur(6px);
-    color:#eaf2ff; font-weight:700; font-size:12px; border-radius:999px; padding:6px 10px;
-    box-shadow:0 4px 10px rgba(0,0,0,.35);
+  .bgmBtn{ position:fixed; top:10px; right:10px; z-index:9999; border:1px solid rgba(255,255,255,.2);
+    background:rgba(6,9,18,.6); backdrop-filter:blur(6px); color:#eaf2ff; font-weight:700; font-size:12px; border-radius:999px; padding:6px 10px; box-shadow:0 4px 10px rgba(0,0,0,.35);
   }
   .bgmBtn[aria-pressed="false"]{ opacity:.65 }
 </style>
 </head>
 <body>
 
-<a class="backBtn" id="backBtn" href="index.html" aria-label="Back to menu">
+<a class="backBtn" id="backBtn" href="index.html" aria-label="Voltar ao menu">
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  Back
+  Voltar
 </a>
 
 <div class="wrap">
   <div class="card">
     <div class="top">
       <div class="leftTop">
-        <div class="note"><b>VIP Day only</b> • Place 3 Bets To Win Bonus Code</div>
+        <div class="note"><b>Apenas no VIP Day</b> • Faça 3 apostas para ganhar um código</div>
       </div>
-      <div class="status" id="status">Ready</div>
+      <div class="status" id="status">Pronto</div>
     </div>
 
     <div class="felt" id="felt" aria-live="polite">
@@ -193,7 +164,7 @@
       <div class="beads" id="beads" aria-hidden="true"></div>
 
       <div class="hud">
-        <div class="pill" id="progressTop">Bets left: 3 • Wins: 0</div>
+        <div class="pill" id="progressTop">Apostas restantes: 3 • Vitórias: 0</div>
       </div>
 
       <svg class="feltArt" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
@@ -201,67 +172,57 @@
         <text style="font-size:26px"><textPath href="#arc1" startOffset="50%" text-anchor="middle">RicoBet - BACCARAT</textPath></text>
       </svg>
 
-      <div class="tot p" id="pTot">Player: —</div>
-      <div class="tot b" id="bTot">Banker: —</div>
+      <div class="tot p" id="pTot">Jogador: —</div>
+      <div class="tot b" id="bTot">Banca: —</div>
 
       <div class="hand player" id="pHand"></div>
       <div class="hand banker" id="bHand"></div>
 
-      <!-- CLICKABLE AREAS -->
-      <div class="areas" id="areas" role="group" aria-label="Betting areas">
-        <button type="button" class="area player" id="areaPlayer" data-side="player" aria-label="Bet Player">
-          <div class="betSpot">
-            <div class="spotText"><span class="lab">PLAYER</span><span class="odds">1 : 1</span></div>
-          </div>
+      <div class="areas" id="areas" role="group" aria-label="Áreas de aposta">
+        <button type="button" class="area player" id="areaPlayer" data-side="player" aria-label="Apostar no Jogador">
+          <div class="betSpot"><div class="spotText"><span class="lab">JOGADOR</span><span class="odds">1 : 1</span></div></div>
         </button>
-        <button type="button" class="area tie" id="areaTie" data-side="tie" aria-label="Bet Tie">
-          <div class="betSpot">
-            <div class="spotText"><span class="lab">TIE</span><span class="odds">8 : 1</span></div>
-          </div>
+        <button type="button" class="area tie" id="areaTie" data-side="tie" aria-label="Apostar no Empate">
+          <div class="betSpot"><div class="spotText"><span class="lab">EMPATE</span><span class="odds">8 : 1</span></div></div>
         </button>
-        <button type="button" class="area banker" id="areaBanker" data-side="banker" aria-label="Bet Banker">
-          <div class="betSpot">
-            <div class="spotText"><span class="lab">BANKER</span><span class="odds">0.95 : 1</span></div>
-          </div>
+        <button type="button" class="area banker" id="areaBanker" data-side="banker" aria-label="Apostar na Banca">
+          <div class="betSpot"><div class="spotText"><span class="lab">BANCA</span><span class="odds">0,95 : 1</span></div></div>
         </button>
       </div>
 
       <div class="controls">
-        <button class="btn" id="dealBtn" type="button" disabled>Deal</button>
+        <button class="btn" id="dealBtn" type="button" disabled>Dar as cartas</button>
       </div>
 
-      <div class="winner" id="winnerOverlay"><div class="winBadge" id="winBadge">Player Win</div></div>
+      <div class="winner" id="winnerOverlay"><div class="winBadge" id="winBadge">Jogador venceu</div></div>
     </div>
 
-    <div class="outerBanner">
-      <div class="pill" id="outerBanner">Tap a circle: Player / Tie / Banker</div>
-    </div>
-
+    <div class="outerBanner"><div class="pill" id="outerBanner">Toque em um círculo: Jogador / Empate / Banca</div></div>
   </div>
 </div>
 
-<!-- Voucher modal -->
+<!-- Voucher -->
 <div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
   <div class="modal">
-    <div id="voucherHeader" style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Your Voucher</div>
-    <div class="voucher" id="voucherText">VIPBAW</div>
+    <div id="voucherHeader" style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Seu Código</div>
+    <div class="voucher" id="voucherText">VIPLW5</div>
     <div class="row">
-      <button class="copy" id="copyBtn" type="button">Copy Code</button>
-      <button class="close" id="closeBtn" type="button">Close</button>
+      <button class="copy" id="copyBtn" type="button">Copiar Código</button>
+      <button class="close" id="closeBtn" type="button">Fechar</button>
     </div>
-    <div style="color:#a9b7d8;margin-top:8px; font-size:12px">Use this code in your account. One play per user.</div>
+    <div style="color:#a9b7d8;margin-top:8px; font-size:12px">Use este código na sua conta. Uma jogada por usuário.</div>
   </div>
 </div>
 
-<!-- Background Sound (quiet) -->
+<!-- BGM discreto -->
 <audio id="bgm" src="theme.mp3" preload="auto" loop playsinline autoplay></audio>
-<button id="bgmToggle" class="bgmBtn" aria-pressed="false" hidden>🔊 Sound</button>
+<button id="bgmToggle" class="bgmBtn" aria-pressed="false" hidden>🔊 Som</button>
 
 <script>
 function g(id){return document.getElementById(id)}
 function delay(ms){return new Promise(r=>setTimeout(r,ms))}
 
-/* Back button */
+/* Voltar */
 (function setupBack(){
   const backBtn=g('backBtn');
   const q=new URLSearchParams(location.search);
@@ -274,133 +235,53 @@ function delay(ms){return new Promise(r=>setTimeout(r,ms))}
   }, {passive:false});
 })();
 
-/* Optional reset */
+/* ===== Bloqueio entre jogos ===== */
+const LOCK_KEY='game_lock_choice'; // 'slot' | 'live'
+const lockedChoice = localStorage.getItem(LOCK_KEY);
+if(lockedChoice && lockedChoice !== 'live'){
+  // Se o outro jogo já foi escolhido, volta ao index
+  location.href='index.html';
+}
+
+/* Reset opcional ?reset=1 */
 const urlp=new URLSearchParams(location.search);
-if(urlp.get('reset')==='1'){ try{ localStorage.removeItem('live_3bets_claimed_v3'); localStorage.removeItem('live_3bets_progress_v3'); }catch(e){} }
+if(urlp.get('reset')==='1'){ try{ localStorage.removeItem('live_3bets_claimed_v3'); localStorage.removeItem('live_3bets_progress_v3'); localStorage.removeItem(LOCK_KEY);}catch(e){} }
 
-/* Keys and limits */
+/* Chaves e limites */
 const CLAIM_KEY='live_3bets_claimed_v3', PROG_KEY='live_3bets_progress_v3';
-const MAX_ROUNDS=3, CODE_WIN='VIPBAW', CODE_LOSE='VIPBAL';
+const MAX_ROUNDS=3, CODE_WIN='VIPLW5', CODE_LOSE='VIPLL5';
 
-/* ========= Web Audio (Sound FX) ========= */
+/* Audio FX */
 let AC=null, audioReady=false;
 function ensureAC(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioContext)(); } }
 function unlockAudio(){
-  ensureAC();
-  if(AC && AC.state==='suspended'){ AC.resume(); }
-  // Turn the background sound on at base volume after any page interaction
+  ensureAC(); if(AC && AC.state==='suspended'){ AC.resume(); }
   try{ bgm.muted=false; bgm.volume = baseVol; bgm.play(); setBgmUI(true); }catch(e){}
   audioReady=true;
 }
 ['pointerdown','touchstart','mousedown'].forEach(ev=>document.addEventListener(ev, unlockAudio, {once:true, passive:true}));
 
-function tone(type, freq, dur, gain){
-  if(!audioReady||!AC) return;
-  const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
-  o.type=type; o.frequency.setValueAtTime(freq,t);
-  g.gain.value=gain; g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
-  o.connect(g).connect(AC.destination); o.start(t); o.stop(t+dur);
-}
+function tone(type, freq, dur, gain){ if(!audioReady||!AC) return; const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t); g.gain.value=gain; g.gain.exponentialRampToValueAtTime(0.0001, t+dur); o.connect(g).connect(AC.destination); o.start(t); o.stop(t+dur); }
 function blip(freq=780, dur=0.07, gain=0.07){ tone('square',freq,dur,gain); }
-function thud(dur=0.12, gain=0.18){
-  if(!audioReady||!AC) return;
-  const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
-  const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=320;
-  o.type='sine'; o.frequency.setValueAtTime(130,t); o.frequency.exponentialRampToValueAtTime(62,t+dur);
-  g.gain.value=gain; g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-  o.connect(f).connect(g).connect(AC.destination); o.start(t); o.stop(t+dur);
-}
-function swoosh(){
-  if(!audioReady||!AC) return;
-  const t=AC.currentTime, n=AC.createBuffer(1, AC.sampleRate*0.25, AC.sampleRate);
-  const d=n.getChannelData(0);
-  for(let i=0;i<d.length;i++){ d[i]=(Math.random()*2-1)*0.4*(1-i/d.length); }
-  const s=AC.createBufferSource(); const g=AC.createGain();
-  g.gain.value=0.2; g.gain.exponentialRampToValueAtTime(0.0001, t+0.25);
-  s.buffer=n; s.connect(g).connect(AC.destination); s.start(t);
-}
-function chimeWin(){
-  if(!audioReady||!AC) return;
-  const now=AC.currentTime;
-  [[880,0],[1175,0.08],[1568,0.16]].forEach(([f,ofs])=>{
-    const o=AC.createOscillator(), g=AC.createGain();
-    o.type='triangle'; o.frequency.value=f;
-    g.gain.value=0.12; g.gain.exponentialRampToValueAtTime(0.0001, now+ofs+0.35);
-    o.connect(g).connect(AC.destination); o.start(now+ofs); o.stop(now+ofs+0.36);
-  });
-}
-function buzzLose(){
-  if(!audioReady||!AC) return;
-  const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
-  o.type='sawtooth'; o.frequency.setValueAtTime(140,t);
-  g.gain.value=0.11; g.gain.exponentialRampToValueAtTime(0.0001, t+0.28);
-  o.connect(g).connect(AC.destination); o.start(t); o.stop(t+0.28);
-}
+function thud(dur=0.12, gain=0.18){ if(!audioReady||!AC) return; const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain(); const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=320; o.type='sine'; o.frequency.setValueAtTime(130,t); o.frequency.exponentialRampToValueAtTime(62,t+dur); g.gain.value=gain; g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(f).connect(g).connect(AC.destination); o.start(t); o.stop(t+dur); }
+function swoosh(){ if(!audioReady||!AC) return; const t=AC.currentTime, n=AC.createBuffer(1, AC.sampleRate*0.25, AC.sampleRate); const d=n.getChannelData(0); for(let i=0;i<d.length;i++){ d[i]=(Math.random()*2-1)*0.4*(1-i/d.length); } const s=AC.createBufferSource(); const g=AC.createGain(); g.gain.value=0.2; g.gain.exponentialRampToValueAtTime(0.0001, t+0.25); s.buffer=n; s.connect(g).connect(AC.destination); s.start(t); }
+function chimeWin(){ if(!audioReady||!AC) return; const now=AC.currentTime; [[880,0],[1175,0.08],[1568,0.16]].forEach(([f,ofs])=>{ const o=AC.createOscillator(), g=AC.createGain(); o.type='triangle'; o.frequency.value=f; g.gain.value=0.12; g.gain.exponentialRampToValueAtTime(0.0001, now+ofs+0.35); o.connect(g).connect(AC.destination); o.start(now+ofs); o.stop(now+ofs+0.36); }); }
+function buzzLose(){ if(!audioReady||!AC) return; const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(140,t); g.gain.value=0.11; g.gain.exponentialRampToValueAtTime(0.0001, t+0.28); o.connect(g).connect(AC.destination); o.start(t); o.stop(t+0.28); }
 
-/* ========= Background Sound: theme.mp3 (quiet + ducking) ========= */
-const bgm = g('bgm');
-const bgmBtn = g('bgmToggle');
-const baseVol = 0.25;   // quiet by default
-const duckVol = 0.06;   // during big moments
-let duckTimer = null;
+/* BGM (ducking) */
+const bgm = g('bgm'); const bgmBtn = g('bgmToggle'); const baseVol = 0.25; const duckVol = 0.06; let duckTimer=null;
+function setBgmUI(on){ bgmBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); } function showBgmBtn(){ bgmBtn.hidden = false; }
+window.addEventListener('load', async ()=>{ try{ bgm.volume=baseVol; bgm.muted=false; await bgm.play(); }catch(e){ try{ bgm.muted=true; await bgm.play(); }catch(_){ } } showBgmBtn(); setBgmUI(!bgm.paused); }, {once:true});
+bgmBtn.addEventListener('click', async ()=>{ try{ if(bgm.paused){ bgm.muted=false; bgm.volume=baseVol; await bgm.play(); setBgmUI(true); } else { bgm.pause(); setBgmUI(false); } }catch(e){} });
+function duck(ms=1400){ clearTimeout(duckTimer); bgm.volume = duckVol; duckTimer = setTimeout(()=>{ clearTimeout(duckTimer); duckTimer=null; if(!bgm.paused) bgm.volume = baseVol; }, ms); }
 
-function setBgmUI(on){ bgmBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
-function showBgmBtn(){ bgmBtn.hidden = false; }
-
-/* Try to autoplay audibly on load (may be blocked by some browsers). If blocked,
-   fall back to muted autoplay and then unmute on first interaction (unlockAudio). */
-window.addEventListener('load', async ()=>{
-  try{
-    bgm.volume = baseVol;
-    bgm.muted = false;
-    await bgm.play();            // audible attempt
-  }catch(e){
-    try{
-      bgm.muted = true;          // fallback: silent warm-up
-      await bgm.play();
-    }catch(_){}
-  }
-  showBgmBtn();
-  setBgmUI(!bgm.paused);
-}, {once:true});
-
-bgmBtn.addEventListener('click', async ()=>{
-  try{
-    if(bgm.paused){
-      bgm.muted=false; bgm.volume=baseVol; await bgm.play(); setBgmUI(true);
-    }else{
-      bgm.pause(); setBgmUI(false);
-    }
-  }catch(e){ /* ignore */ }
-});
-
-function duck(ms=1400){
-  clearTimeout(duckTimer);
-  const target = duckVol;
-  bgm.volume = target;
-  duckTimer = setTimeout(()=> unduck(), ms);
-}
-function unduck(){
-  clearTimeout(duckTimer);
-  duckTimer = null;
-  if(!bgm.paused){ bgm.volume = baseVol; }
-}
-
-/* ========= FX canvas ========= */
+/* FX canvas */
 const fx=g('fx'), ctx=fx.getContext('2d');
 function resizeFX(){ fx.width=fx.parentElement.clientWidth; fx.height=fx.parentElement.clientHeight }
 addEventListener('resize',resizeFX); addEventListener('orientationchange',()=>setTimeout(resizeFX,200)); resizeFX();
-function confetti(){
-  const p=[];
-  for(let i=0;i<160;i++) p.push({x:fx.width/2,y:120+Math.random()*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*5,life:140+Math.random()*60,r:2+Math.random()*3,h:Math.random()*360});
-  (function loop(){
-    ctx.clearRect(0,0,fx.width,fx.height);
-    p.forEach(o=>{ o.x+=o.vx;o.y+=o.vy;o.vy+=0.06;o.life--;ctx.globalAlpha=Math.max(0,o.life/200);ctx.fillStyle=`hsl(${o.h},100%,60%)`;ctx.fillRect(o.x,o.y,o.r,o.r);});
-    ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop);
-  })();
-}
+function confetti(){ const p=[]; for(let i=0;i<160;i++) p.push({x:fx.width/2,y:120+Math.random()*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*5,life:140+Math.random()*60,r:2+Math.random()*3,h:Math.random()*360}); (function loop(){ ctx.clearRect(0,0,fx.width,fx.height); p.forEach(o=>{ o.x+=o.vx;o.y+=o.vy;o.vy+=0.06;o.life--;ctx.globalAlpha=Math.max(0,o.life/200);ctx.fillStyle=`hsl(${o.h},100%,60%)`;ctx.fillRect(o.x,o.y,o.r,o.r);}); ctx.globalAlpha=1; if(p.some(o=>o.life>0)) requestAnimationFrame(loop); })(); }
 
-/* DOM refs */
+/* DOM */
 const status=g('status'), banner=g('outerBanner');
 const pHand=g('pHand'), bHand=g('bHand'), pTot=g('pTot'), bTot=g('bTot');
 const areas=g('areas'), btnP=g('areaPlayer'), btnT=g('areaTie'), btnB=g('areaBanker');
@@ -410,147 +291,68 @@ const voucherOverlay=g('voucherOverlay'), voucherText=g('voucherText'), voucherH
 const felt = g('felt');
 
 /* Beads */
-function pushBead(who){
-  const beads = g('beads');
-  const b = document.createElement('div');
-  b.className = 'bead ' + (who==='player'?'p':who==='banker'?'b':'t');
-  beads.appendChild(b);
-  while(beads.children.length > 6) beads.removeChild(beads.firstChild);
-}
+function pushBead(who){ const beads = g('beads'); const b = document.createElement('div'); b.className = 'bead ' + (who==='player'?'p':who==='banker'?'b':'t'); beads.appendChild(b); while(beads.children.length > 6) beads.removeChild(beads.firstChild); }
 
-/* State */
+/* Estado */
 let roundsPlayed=0, winsCount=0, selection=null, inRound=false, gameOver=false;
 
-/* Single persistent chip per round */
+/* Chip visual */
 let chipEl=null;
-function ensureChip(){
-  if(!chipEl){
-    chipEl=document.createElement('div'); chipEl.className='chip';
-    felt.appendChild(chipEl);
-  }
-}
-function moveChipToBetSpot(btn){
-  ensureChip();
-  const f = felt.getBoundingClientRect();
-  const spot = btn.querySelector('.betSpot').getBoundingClientRect();
-  const cx = (spot.left+spot.right)/2 - f.left;
-  const cy = (spot.top+spot.bottom)/2 - f.top;
-  chipEl.classList.add('move');
-  chipEl.style.transform = `translate(${cx}px,${cy}px)`;
-  thud(0.08, 0.14);
-}
-function hideChip(){
-  if(chipEl){ chipEl.classList.remove('move'); chipEl.style.transform='translate(-9999px,-9999px)'; }
-}
+function ensureChip(){ if(!chipEl){ chipEl=document.createElement('div'); chipEl.className='chip'; felt.appendChild(chipEl); } }
+function moveChipToBetSpot(btn){ ensureChip(); const f = felt.getBoundingClientRect(); const spot = btn.querySelector('.betSpot').getBoundingClientRect(); const cx = (spot.left+spot.right)/2 - f.left; const cy = (spot.top+spot.bottom)/2 - f.top; chipEl.classList.add('move'); chipEl.style.transform = `translate(${cx}px,${cy}px)`; thud(0.08, 0.14); }
+function hideChip(){ if(chipEl){ chipEl.classList.remove('move'); chipEl.style.transform='translate(-9999px,-9999px)'; } }
 
-/* Already claimed? lock */
+/* Se já foi reivindicado, trava */
 const claimed=localStorage.getItem(CLAIM_KEY);
 if(claimed){
   const c=JSON.parse(claimed||'{}'); voucherText.textContent=c.code||CODE_LOSE;
-  voucherHeader.textContent = (c.code===CODE_WIN)
-    ? "Redeem your VIP Day rewards now!"
-    : "We cover your back, redeem this code to get your VIP Day rewards!";
-  voucherOverlay.classList.add('show');
-  lock(true); gameOver=true; status.textContent='Voucher already claimed on this device.';
+  voucherHeader.textContent = (c.code===CODE_WIN) ? "Resgate agora suas recompensas VIP Day!" : "Tudo bem! Use este código para resgatar suas recompensas.";
+  voucherOverlay.classList.add('show'); lock(true); gameOver=true; status.textContent='Código já resgatado neste dispositivo.';
 }
 
-/* Resume progress */
-try{
-  const prog=JSON.parse(localStorage.getItem(PROG_KEY) || 'null');
-  if(prog && !claimed){ roundsPlayed=Math.min(MAX_ROUNDS, prog.roundsPlayed||0); winsCount=Math.max(0, prog.winsCount||0) }
-}catch(e){}
+/* Retomar progresso */
+try{ const prog=JSON.parse(localStorage.getItem(PROG_KEY) || 'null'); if(prog && !claimed){ roundsPlayed=Math.min(MAX_ROUNDS, prog.roundsPlayed||0); winsCount=Math.max(0, prog.winsCount||0) } }catch(e){}
 updateHud();
 
-/* Card helpers */
-const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const SUITS=['♠','♥','♦','♣'];
+/* Cartas */
+const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K']; const SUITS=['♠','♥','♦','♣'];
 function bacVal(r){ if(r==='A')return 1; if(r==='10'||r==='J'||r==='Q'||r==='K') return 0; return +r }
 function total(hand){ return hand.reduce((t,c)=>t+bacVal(c.r),0)%10 }
 function newCard(){ const r=RANKS[(Math.random()*RANKS.length)|0]; const s=SUITS[(Math.random()*4)|0]; return {r,s,shown:false,el:null} }
-function makeCardEl(card, show=false){
-  const el=document.createElement('div'); el.className='playing-card deal-in'+(show?' reveal':'' );
-  el.innerHTML=`<div class="card3d"><div class="sideFace back">🂠</div><div class="sideFace front">${card.r}${card.s}</div></div>`;
-  card.el=el; card.shown=!!show; return card;
-}
-function slideFromShoe(el){
-  const shoe = document.querySelector('.shoe');
-  if(!shoe || !felt || !el) return;
-  const s = shoe.getBoundingClientRect();
-  const t = el.getBoundingClientRect();
-  const f = felt.getBoundingClientRect();
-  const sx = (s.left + s.right)/2 - f.left;
-  const sy = (s.top + s.bottom)/2 - f.top;
-  const tx = (t.left + t.right)/2 - f.left;
-  const ty = (t.top + t.bottom)/2 - f.top;
-  const dx = sx - tx;
-  const dy = sy - ty;
-  el.style.setProperty('--sx', dx + 'px');
-  el.style.setProperty('--sy', dy + 'px');
-  el.classList.add('slideFrom','popIn');
-  swoosh();
-}
-async function heartbeat(node){
-  node.classList.remove('heartbeat'); void node.offsetWidth;
-  node.classList.add('heartbeat');
-  thud(0.1,0.14);
-  await delay(180);
-}
-function flip(card){
-  if(card.shown) return; card.shown=true;
-  if(card.el) card.el.classList.add('reveal');
-  blip(780,0.07,0.07);
-}
+function makeCardEl(card, show=false){ const el=document.createElement('div'); el.className='playing-card deal-in'+(show?' reveal':'' ); el.innerHTML=`<div class="card3d"><div class="sideFace back">🂠</div><div class="sideFace front">${card.r}${card.s}</div></div>`; card.el=el; card.shown=!!show; return card; }
+function slideFromShoe(el){ const shoe = document.querySelector('.shoe'); if(!shoe || !felt || !el) return; const s = shoe.getBoundingClientRect(); const t = el.getBoundingClientRect(); const f = felt.getBoundingClientRect(); const sx = (s.left + s.right)/2 - f.left; const sy = (s.top + s.bottom)/2 - f.top; const tx = (t.left + t.right)/2 - f.left; const ty = (t.top + t.bottom)/2 - f.top; const dx = sx - tx; const dy = sy - ty; el.style.setProperty('--sx', dx + 'px'); el.style.setProperty('--sy', dy + 'px'); el.classList.add('slideFrom','popIn'); swoosh(); }
+async function heartbeat(node){ node.classList.remove('heartbeat'); void node.offsetWidth; node.classList.add('heartbeat'); thud(0.1,0.14); await delay(180); }
+function flip(card){ if(card.shown) return; card.shown=true; if(card.el) card.el.classList.add('reveal'); blip(780,0.07,0.07); }
 
-/* Selection + click rules */
-function lock(disabled){
-  [btnP,btnT,btnB].forEach(b=>{ b.disabled=!!disabled; if(disabled) b.classList.remove('sel') });
-  dealBtn.disabled = !!disabled;
-  if(disabled) selection=null;
-}
+/* Seleção/apostas */
+function lock(disabled){ [btnP,btnT,btnB].forEach(b=>{ b.disabled=!!disabled; if(disabled) b.classList.remove('sel') }); dealBtn.disabled = !!disabled; if(disabled) selection=null; }
 function selectSide(side){
   if(inRound||gameOver) return;
   const map={player:btnP, tie:btnT, banker:btnB};
-  const btn=map[side];
-  if(!btn || btn.disabled) return;
-  if(selection===side) return; // prevent chip spam
-
-  [btnP,btnT,btnB].forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-  selection=side;
-  dealBtn.disabled=false;
-
-  banner.textContent=`Selected: ${side.toUpperCase()} • Tap DEAL`;
-  status.textContent=`Selected: ${side}`;
-
+  const btn=map[side]; if(!btn || btn.disabled) return; if(selection===side) return;
+  [btnP,btnT,btnB].forEach(b=>b.classList.remove('sel')); btn.classList.add('sel');
+  selection=side; dealBtn.disabled=false;
+  banner.textContent=`Selecionado: ${side.toUpperCase()} • Toque em DAR AS CARTAS`;
+  status.textContent=`Selecionado: ${side}`;
   moveChipToBetSpot(btn);
 }
-/* Bindings */
-[btnP, btnT, btnB].forEach((b) => {
-  const side = b.dataset.side;
-  const handler = (e) => {
-    e.stopPropagation();
-    if (!b.disabled) selectSide(side);
-  };
-  b.addEventListener('click', handler, { passive: true });
-  b.addEventListener('pointerup', handler, { passive: true });
-  b.addEventListener('touchend', handler, { passive: true });
-});
+[btnP, btnT, btnB].forEach((b)=>{ const side = b.dataset.side; const handler = (e)=>{ e.stopPropagation(); if (!b.disabled) selectSide(side); }; b.addEventListener('click', handler, { passive: true }); b.addEventListener('pointerup', handler, { passive: true }); b.addEventListener('touchend', handler, { passive: true }); });
 areas.addEventListener('pointerup', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) }, {passive:true});
 areas.addEventListener('click', e=>{ const t=e.target.closest?.('.area'); if(t && !t.disabled) selectSide(t.dataset.side) });
 
-/* Round flow */
+/* Rodada */
 dealBtn.addEventListener('click', startRound, {passive:true});
 async function startRound(){
   if(inRound||gameOver) return;
-  if(!selection) return alert('Select Player / Tie / Banker first.');
+  if(!selection) return alert('Selecione Jogador / Empate / Banca primeiro.');
   if(roundsPlayed>=MAX_ROUNDS) return;
   inRound=true; dealBtn.disabled=true;
 
-  hideChip(); // keep table clean while dealing
+  // Marca bloqueio na primeira aposta deste jogo
+  if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'live');
 
-  // Prepare hands
-  pHand.innerHTML=''; bHand.innerHTML='';
-  pHand.classList.remove('compact'); bHand.classList.remove('compact');
+  hideChip();
+  pHand.innerHTML=''; bHand.innerHTML=''; pHand.classList.remove('compact'); bHand.classList.remove('compact');
 
   let P = [ makeCardEl(newCard(), false), makeCardEl(newCard(), false) ];
   let B = [ makeCardEl(newCard(), false), makeCardEl(newCard(), false) ];
@@ -595,21 +397,21 @@ async function startRound(){
   await finishRound(P,B);
 }
 
-/* Totals + micro-pop */
+/* Totais */
 function updateTotals(P=[],B=[]){
   const p = P.some(c=>c.shown) ? total(P) : '—';
   const b = B.some(c=>c.shown) ? total(B) : '—';
-  pTot.textContent = 'Player: ' + p;
-  bTot.textContent = 'Banker: ' + b;
+  pTot.textContent = 'Jogador: ' + p;
+  bTot.textContent = 'Banca: ' + b;
   pTot.classList.add('pop'); bTot.classList.add('pop');
   setTimeout(()=>{ pTot.classList.remove('pop'); bTot.classList.remove('pop'); }, 240);
 }
 
-/* Finish + winner badge + beads + voucher */
+/* Finalização + 2 de 3 */
 async function finishRound(P,B){
   const pT=total(P), bT=total(B);
   let who = (pT>bT)?'player' : (bT>pT)?'banker':'tie';
-  let text = (who==='player') ? 'Player Win' : (who==='banker') ? 'Dealer Win' : 'Tie';
+  let text = (who==='player') ? 'Jogador venceu' : (who==='banker') ? 'Banca venceu' : 'Empate';
   pushBead(who);
   showWinner(who, text);
 
@@ -617,68 +419,57 @@ async function finishRound(P,B){
 
   roundsPlayed++; saveProgress();
   const left = Math.max(0, MAX_ROUNDS - roundsPlayed);
-  progressTop.textContent = `Bets left: ${left} • Wins: ${winsCount}`;
+  progressTop.textContent = `Apostas restantes: ${left} • Vitórias: ${winsCount}`;
 
   if(roundsPlayed>=MAX_ROUNDS){
     await delay(800);
-    finalizeVoucher((winsCount>0)?CODE_WIN:CODE_LOSE);
+    // Vitória exige 2 de 3
+    finalizeVoucher((winsCount>=2)?CODE_WIN:CODE_LOSE);
   }else{
-    // Hold table ~3s, then clear and reopen betting
-    banner.textContent = `Result: ${text} • Next bet opens soon…`;
-    status.textContent = 'Hold…';
+    banner.textContent = `Resultado: ${text} • Próxima aposta em instantes…`;
+    status.textContent = 'Aguarde…';
     lock(true);
     setTimeout(()=>{
       pHand.innerHTML=''; bHand.innerHTML='';
       pHand.classList.remove('compact'); bHand.classList.remove('compact');
       winnerOverlay.classList.remove('show');
       hideChip();
-      inRound=false;
-      lock(false);
-      dealBtn.disabled=true;
-      banner.textContent = `Place your bet: Player / Tie / Banker (${left} left)`;
-      status.textContent = 'Place your bet';
+      inRound=false; lock(false); dealBtn.disabled=true;
+      banner.textContent = `Faça sua aposta: Jogador / Empate / Banca (${left} restantes)`;
+      status.textContent = 'Faça sua aposta';
     }, 3000);
   }
 }
 function showWinner(winner, text){
   winBadge.textContent=text;
   winBadge.className='winBadge '+(winner==='player'?'player':winner==='banker'?'banker':'tie');
-  [btnP,btnT,btnB].forEach(b=>b.classList.remove('winPulse'));
-  if(winner==='player') btnP.classList.add('winPulse');
-  else if(winner==='banker') btnB.classList.add('winPulse');
-  else btnT.classList.add('winPulse');
-
-  winnerOverlay.classList.remove('show'); void winnerOverlay.offsetWidth;
-  winnerOverlay.classList.add('show');
-
+  winnerOverlay.classList.remove('show'); void winnerOverlay.offsetWidth; winnerOverlay.classList.add('show');
   if(winner==='player'){ chimeWin(); confetti(); duck(1500); }
   else if(winner==='banker'){ buzzLose(); duck(1000); }
-  else { blip(520,0.12,0.08); } // tie
+  else { blip(520,0.12,0.08); }
 }
 
-/* Voucher (locks game) */
+/* Voucher */
 function finalizeVoucher(code){
   voucherText.textContent = code;
-  voucherHeader.textContent = (code===CODE_WIN)
-    ? "Redeem your VIP Day rewards now!"
-    : "It's ok, we cover your back, redeem this code to get your VIP Day rewards!";
+  voucherHeader.textContent = (code===CODE_WIN) ? "Resgate agora suas recompensas VIP Day!" : "Tudo bem! Use este código para resgatar suas recompensas.";
   voucherOverlay.classList.add('show');
   localStorage.setItem(CLAIM_KEY, JSON.stringify({code, ts:Date.now()}));
   lock(true); gameOver=true;
 }
-copyBtn.onclick=()=>{ const t=voucherText.textContent.trim(); if(!t) return; navigator.clipboard.writeText(t).then(()=>{ copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200); }); };
+copyBtn.onclick=()=>{ const t=voucherText.textContent.trim(); if(!t) return; navigator.clipboard.writeText(t).then(()=>{ copyBtn.textContent='Copiado!'; setTimeout(()=>copyBtn.textContent='Copiar Código',1200); }); };
 closeBtn.onclick=()=> voucherOverlay.classList.remove('show');
 
-/* HUD + persistence */
+/* HUD + persistência */
 function saveProgress(){ try{ localStorage.setItem(PROG_KEY, JSON.stringify({roundsPlayed,winsCount})); }catch(e){} }
-function updateHud(){ progressTop.textContent=`Bets left: ${Math.max(0, MAX_ROUNDS - roundsPlayed)} • Wins: ${winsCount}`; }
-function init(){ g('outerBanner').textContent='Tap a circle: Player / Tie / Banker'; lock(false); hideChip(); }
+function updateHud(){ progressTop.textContent=`Apostas restantes: ${Math.max(0, MAX_ROUNDS - roundsPlayed)} • Vitórias: ${winsCount}`; }
+function init(){ g('outerBanner').textContent='Toque em um círculo: Jogador / Empate / Banca'; lock(false); hideChip(); }
 init();
 
-/* FX canvas sizing */
+/* FX sizing */
 (function setupFX(){ const fx=g('fx'); const resize=()=>{ fx.width=fx.parentElement.clientWidth; fx.height=fx.parentElement.clientHeight }; addEventListener('resize',resize); resize(); })();
 
-/* Parallax tilt (optional) */
+/* Parallax opcional */
 (function parallaxFelt(){
   const fel = g('felt'); const maxTilt = 6;
   function tilt(ev){
