@@ -342,6 +342,14 @@ const CODES   =["VIPS05","VIPS25"];
 const STATE_KEY='slot_purple_state_fx1';
 const VOUCHER_KEY='slot_purple_voucher_fx1';
 
+/* 🔒 Lock entre jogos (novo) */
+const LOCK_KEY='game_lock_choice';
+const lockedChoice = localStorage.getItem(LOCK_KEY);
+if(lockedChoice && lockedChoice !== 'slot'){
+  // Se Baccarat já foi iniciado, envia de volta ao menu
+  location.href='index.html';
+}
+
 let state=loadState();
 let spinning=false, started=false, turbo=false;
 
@@ -418,7 +426,12 @@ for(let i=0;i<3;i++){ reelsEl.appendChild(makeReel()); }
 /* Fluxo de giro */
 function spin(){
   if(spinning || state.claimed) return;
-  if(!started){ started=true; if(backBtn) backBtn.style.display='none'; }
+  if(!started){
+    started=true;
+    if(backBtn) backBtn.style.display='none';
+    // 🔒 Marca o lock na PRIMEIRA jogada
+    if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'slot');
+  }
   if(state.left<=0){ maybeVoucher(); return; }
 
   spinning=true; payoutEl.textContent=''; lever.classList.add('pull');
@@ -432,7 +445,7 @@ function spin(){
 
   const cols=[...document.querySelectorAll('.reel .col')];
   const targets = cols.map(() => SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]);
-  const results=[];
+  const results[];
 
   cols.forEach((col,idx)=>{
     const dur=(turbo? 600: 1450)+idx*220;
