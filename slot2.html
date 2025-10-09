@@ -445,7 +445,7 @@ function spin(){
 
   const cols=[...document.querySelectorAll('.reel .col')];
   const targets = cols.map(() => SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]);
-  const results[];
+  const results=[]; /* <-- FIXED: was 'const results[];' */
 
   cols.forEach((col,idx)=>{
     const dur=(turbo? 600: 1450)+idx*220;
