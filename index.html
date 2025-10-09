@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="es">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Elige tus Recompensas</title>
+<title>Escolha suas Recompensas</title>
 
-<!-- Preloads/prefetch útiles para una primera carga más rápida -->
+<!-- Preloads/prefetch para navegação mais rápida -->
 <link rel="prefetch" href="slot2.html">
 <link rel="prefetch" href="live.html">
 <link rel="preload" as="image" href="https://ricomx.ft-crm.com/media-api/serve/5b55a687-d742-4c8d-bf41-1ba837f4e84f_1.png">
@@ -17,7 +17,6 @@
     --g1:#71e1ff; --g2:#25c3ff; --g3:#c06bff; --g4:#ffd86a;
     --pad: clamp(12px, 3.5vw, 28px);
     --island: clamp(170px, 38vw, 220px);
-    /* Empujar el título un poco hacia abajo */
     --title-offset: clamp(16px, 8vh, 120px);
   }
   *{ box-sizing:border-box }
@@ -39,67 +38,37 @@
     margin:0 auto;
   }
 
-  /* ===== Título (dos líneas, animado) ===== */
-  header{
-    text-align:center; z-index:2; pointer-events:none;
-    margin-top: var(--title-offset);
-  }
+  header{ text-align:center; z-index:2; pointer-events:none; margin-top: var(--title-offset); }
   .title{ margin:0; line-height:1.05; letter-spacing:.6px; text-transform:uppercase; }
   .title .small{
-    display:block;
-    font-weight:800;
-    font-size:clamp(16px,3.8vw,22px);
-    color:var(--ink);
-    opacity:.95;
-    text-shadow:0 0 10px rgba(37,195,255,.25);
-    transform: translateY(8px);
+    display:block; font-weight:800; font-size:clamp(16px,3.8vw,22px); color:var(--ink); opacity:.95;
+    text-shadow:0 0 10px rgba(37,195,255,.25); transform: translateY(8px);
     animation: smallUp .7s cubic-bezier(.2,.8,.2,1) .1s both;
   }
   @keyframes smallUp{ to{ transform:none; } }
-
   .title .big{
-    display:block;
-    font-weight:900;
-    font-size:clamp(40px,10.5vw,84px);
-    letter-spacing:1.6px;
+    display:block; font-weight:900; font-size:clamp(40px,10.5vw,84px); letter-spacing:1.6px;
     background:linear-gradient(90deg, var(--g1), var(--g2), var(--g3), var(--g4), var(--g1));
-    background-size:300% 100%;
-    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    background-size:300% 100%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
     text-shadow: 0 0 10px rgba(113,225,255,.25), 0 0 22px rgba(192,107,255,.20), 0 0 44px rgba(255,216,106,.12);
-    position:relative;
-    transform: scale(.96);
-    animation-name: hueSlide, popInTitle;
-    animation-duration: 5.2s, .6s;
+    position:relative; transform: scale(.96);
+    animation-name: hueSlide, popInTitle; animation-duration: 5.2s, .6s;
     animation-timing-function: ease-in-out, cubic-bezier(.2,.8,.2,1);
-    animation-iteration-count: infinite, 1;
-    animation-fill-mode: none, both;
+    animation-iteration-count: infinite, 1; animation-fill-mode: none, both;
   }
   @keyframes popInTitle{ to{ transform: scale(1); } }
-  @keyframes hueSlide{
-    0%{ background-position:0% 50% }
-    50%{ background-position:100% 50% }
-    100%{ background-position:0% 50% }
-  }
+  @keyframes hueSlide{ 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
   .title .big::after{
-    content:"";
-    position:absolute; inset:0;
+    content:""; position:absolute; inset:0;
     background:linear-gradient(110deg, transparent 35%, rgba(255,255,255,.3) 50%, transparent 65%);
-    mix-blend-mode:screen;
-    transform:translateX(-120%);
+    mix-blend-mode:screen; transform:translateX(-120%); border-radius:.1em;
     animation: sheen 3.8s ease-in-out 600ms infinite;
-    border-radius:.1em;
   }
-  @keyframes sheen{
-    0%,15%{ transform:translateX(-120%) }
-    45%{ transform:translateX(120%) }
-    100%{ transform:translateX(120%) }
-  }
+  @keyframes sheen{ 0%,15%{ transform:translateX(-120%) } 45%{ transform:translateX(120%) } 100%{ transform:translateX(120%) } }
 
   .sub{
-    margin:6px 0 0; color:var(--muted); font-weight:800; letter-spacing:.35px;
-    font-size:clamp(12px,2.8vw,14px);
-    position:relative; display:inline-block;
-    opacity:0; transform:translateY(8px);
+    margin:6px 0 0; color:var(--muted); font-weight:800; letter-spacing:.35px; font-size:clamp(12px,2.8vw,14px);
+    position:relative; display:inline-block; opacity:0; transform:translateY(8px);
     animation: subIn .7s cubic-bezier(.2,.8,.2,1) .35s both;
   }
   @keyframes subIn{ to{ opacity:1; transform:none } }
@@ -111,27 +80,15 @@
   }
   @keyframes underlineGlow{ 0%,100%{opacity:.35;transform:scaleX(.4)} 50%{opacity:.8;transform:scaleX(.9)} }
 
-  .stage{
-    position:relative; height:100%;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    padding: 3.5vh 0;
-    gap: clamp(20px, 5.5vh, 44px);
-  }
-  @media (max-height: 700px){
-    :root{ --title-offset: clamp(10px, 5vh, 56px); }
-    .stage{ gap: clamp(16px, 4vh, 32px); padding: 2vh 0; }
-  }
+  .stage{ position:relative; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3.5vh 0; gap: clamp(20px, 5.5vh, 44px) }
+  @media (max-height: 700px){ :root{ --title-offset: clamp(10px, 5vh, 56px); } .stage{ gap: clamp(16px, 4vh, 32px); padding: 2vh 0; } }
 
   .island{
     --btnOffset: 10px;
-    width:var(--island); aspect-ratio:1/1;
-    border-radius:24px; position:relative; text-decoration:none; color:inherit;
-    animation: bob 6s ease-in-out infinite; transition: transform .18s ease;
+    width:var(--island); aspect-ratio:1/1; border-radius:24px; position:relative; text-decoration:none; color:inherit;
+    animation:bob 6s ease-in-out infinite; transition: transform .18s ease;
   }
   .island:hover{ transform: translateY(-4px) scale(1.02); }
-
-  /* Sombra en el “suelo” de cada opción */
   .island::after{
     content:""; position:absolute; left:50%; bottom:-8px; transform:translateX(-50%);
     width:68%; height:18px; border-radius:999px;
@@ -140,139 +97,121 @@
   }
   @keyframes bob{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
 
-  .icon{
-    position:relative; width:100%; height:100%; object-fit:contain; display:block;
+  .icon{ position:relative; width:100%; height:100%; object-fit:contain; display:block;
     filter: drop-shadow(0 14px 22px rgba(0,0,0,.45)) drop-shadow(0 0 18px rgba(120,243,255,.18));
     transform-origin: 50% 85%; animation: sway 3.8s ease-in-out infinite; will-change: transform;
   }
   @keyframes sway{ 0%{transform:rotate(-6deg)} 50%{transform:rotate(6deg)} 100%{transform:rotate(-6deg)} }
 
   .ribbon{
-    position:absolute; top:8px; left:10px; z-index:3;
-    font-weight:900; font-size:11px; letter-spacing:.6px;
-    padding:6px 10px; border-radius:999px;
-    background:rgba(6,9,18,.78); color:#ffd86a; border:1px solid rgba(255,255,255,.18);
-    box-shadow:0 4px 12px rgba(0,0,0,.35);
-    pointer-events:none;
+    position:absolute; top:8px; left:10px; z-index:3; font-weight:900; font-size:11px; letter-spacing:.6px;
+    padding:6px 10px; border-radius:999px; background:rgba(6,9,18,.78); color:#ffd86a; border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 4px 12px rgba(0,0,0,.35); pointer-events:none;
   }
-  .ribbon.live{ color:#ffb7c2 }
-  .ribbon.hot{ color:#ffe39a }
+  .ribbon.live{ color:#ffb7c2 } .ribbon.hot{ color:#ffe39a }
 
   .cta{
     position:absolute; right:var(--btnOffset); bottom:var(--btnOffset);
     border:0; border-radius:999px; padding:8px 16px;
-    background:linear-gradient(to right,var(--g1),var(--g2));
-    color:#061018; font-weight:900; letter-spacing:.4px; font-size:13px;
-    box-shadow:0 6px 18px rgba(0,0,0,.35);
-    display:inline-flex; align-items:center; justify-content:center;
+    background:linear-gradient(to right,var(--g1),var(--g2)); color:#061018; font-weight:900; letter-spacing:.4px; font-size:13px;
+    box-shadow:0 6px 18px rgba(0,0,0,.35); display:inline-flex; align-items:center; justify-content:center;
   }
-  .cta:after{
-    content:""; position:absolute; inset:0; border-radius:inherit;
-    box-shadow:0 0 0 0 rgba(37,195,255,.45); animation:pulse 2.4s ease-in-out infinite;
-  }
+  .cta:after{ content:""; position:absolute; inset:0; border-radius:inherit; box-shadow:0 0 0 0 rgba(37,195,255,.45); animation:pulse 2.4s ease-in-out infinite; }
   @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(37,195,255,.45)} 70%{box-shadow:0 0 0 16px rgba(37,195,255,0)} 100%{box-shadow:0 0 0 0 rgba(37,195,255,0)} }
 
-  /* Globo de ayuda suave */
   .hint{
     position:absolute; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%) translateY(6px);
-    padding:8px 10px; font-size:12px; font-weight:800; color:#0c1220;
-    background:#eaf2ff; border-radius:10px; white-space:nowrap;
-    box-shadow:0 10px 30px rgba(0,0,0,.45);
-    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    padding:8px 10px; font-size:12px; font-weight:800; color:#0c1220; background:#eaf2ff; border-radius:10px; white-space:nowrap;
+    box-shadow:0 10px 30px rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
   }
-  .hint::after{
-    content:""; position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
-    border:6px solid transparent; border-top-color:#eaf2ff;
-  }
+  .hint::after{ content:""; position:absolute; left:50%; bottom:-6px; transform:translateX(-50%); border:6px solid transparent; border-top-color:#eaf2ff; }
   .island.show-hint .hint{ opacity:1; transform:translateX(-50%) translateY(0); }
 
-  /* Botón de sonido */
+  /* Botão de som */
   #soundToggle{
     position:fixed; top:10px; right:10px; z-index:20;
-    border:1px solid rgba(255,255,255,.2);
-    background:rgba(6,9,18,.6); backdrop-filter:blur(6px);
-    color:#eaf2ff; font-weight:600; font-size:11px;
-    border-radius:999px; padding:4px 8px; box-shadow:0 4px 10px rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.2); background:rgba(6,9,18,.6); backdrop-filter:blur(6px);
+    color:#eaf2ff; font-weight:600; font-size:11px; border-radius:999px; padding:4px 8px; box-shadow:0 4px 10px rgba(0,0,0,.35);
   }
   #soundToggle[aria-pressed="false"]{ opacity:.65 }
 
-  /* ===== Contenedor SPA (iframe) ===== */
-  .viewWrap{
-    position:fixed; inset:0;
-    background:#000; display:none; z-index:50;
-  }
-  .viewWrap.show{ display:block; }
-  .viewWrap iframe{
-    position:absolute; inset:0; width:100%; height:100%; border:0; background:#000;
-  }
+  /* Iframe SPA */
+  .viewWrap{ position:fixed; inset:0; background:#000; display:none; z-index:50 }
+  .viewWrap.show{ display:block }
+  .viewWrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#000 }
   .backBtn{
     position:fixed; top:calc(10px + env(safe-area-inset-top)); left:calc(10px + env(safe-area-inset-left));
-    z-index:60;
-    display:inline-flex; align-items:center; gap:8px;
-    padding:10px 12px; border-radius:12px; text-decoration:none;
-    font-weight:900; letter-spacing:.3px; color:#0c1220; background:#eaf2ff;
-    box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
+    z-index:60; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; text-decoration:none;
+    font-weight:900; letter-spacing:.3px; color:#0c1220; background:#eaf2ff; box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
     user-select:none;
   }
   .backBtn:active{ transform:translateY(1px) }
+
+  /* Estado bloqueado */
+  .island.locked{ filter:grayscale(.7) opacity(.7); pointer-events:none }
+  .lockTag{
+    position:absolute; right:10px; top:10px; z-index:4; font-weight:900; font-size:11px;
+    padding:6px 10px; border-radius:999px; background:#2a2a2a; color:#fff; border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 4px 12px rgba(0,0,0,.35);
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1 class="title">
-        <span class="small">Elige tus</span>
+        <span class="small">Escolha suas</span>
         <span class="big">RECOMPENSAS</span>
       </h1>
-      <div class="sub">Elige el camino que prefieras — desbloquea una sorpresa en el proceso.</div>
+      <div class="sub">Escolha o caminho que preferir — desbloqueie uma surpresa no processo.</div>
     </header>
 
     <div class="stage">
-      <a class="island" href="#" data-url="slot2.html" aria-label="Entrar a Slots">
-        <span class="ribbon hot">CALIENTE</span>
-        <span class="hint">🎁 Sorpresa adentro</span>
-        <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/5b55a687-d742-4c8d-bf41-1ba837f4e84f_1.png" alt="Icono Slots">
+      <a class="island" id="slotIsland" href="#" data-url="slot2.html" aria-label="Entrar em Slots">
+        <span class="ribbon hot">EM ALTA</span>
+        <span class="hint">🎁 Surpresa lá dentro</span>
+        <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/5b55a687-d742-4c8d-bf41-1ba837f4e84f_1.png" alt="Ícone Slots">
         <span class="cta">ENTRAR</span>
       </a>
 
-      <a class="island" href="#" data-url="live.html" aria-label="Entrar a Casino en Vivo">
-        <span class="ribbon live">EN VIVO</span>
-        <span class="hint">🎁 Se desbloquea tras algunas apuestas</span>
-        <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/df6b594c-e8bd-402d-b186-efca9501a635_2.png" alt="Icono Baccarat">
+      <a class="island" id="liveIsland" href="#" data-url="live.html" aria-label="Entrar no Cassino Ao Vivo">
+        <span class="ribbon live">AO VIVO</span>
+        <span class="hint">🎁 Desbloqueia após algumas apostas</span>
+        <img class="icon" src="https://ricomx.ft-crm.com/media-api/serve/df6b594c-e8bd-402d-b186-efca9501a635_2.png" alt="Ícone Baccarat">
         <span class="cta">ENTRAR</span>
       </a>
     </div>
   </div>
 
-  <!-- Música de fondo (se pausa al entrar al juego para evitar superposición) -->
+  <!-- Música de fundo (pausa ao abrir jogo) -->
   <audio id="bgm" src="theme.mp3" preload="auto" loop playsinline></audio>
-  <button id="soundToggle" aria-pressed="false" hidden>🔊 Sonido</button>
+  <button id="soundToggle" aria-pressed="false" hidden>🔊 Som</button>
 
-  <!-- Contenedor SPA para cargar los juegos sin salir del índice -->
+  <!-- SPA -->
   <div id="viewWrap" class="viewWrap" aria-live="polite">
-    <a href="#" id="closeView" class="backBtn" aria-label="Volver al menú">
+    <a href="#" id="closeView" class="backBtn" aria-label="Voltar ao menu">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="16" height="16">
         <path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Volver
+      Voltar
     </a>
-    <iframe id="view" title="Vista de juego" allow="autoplay; clipboard-write; fullscreen; encrypted-media"></iframe>
+    <iframe id="view" title="Vista do jogo" allow="autoplay; clipboard-write; fullscreen; encrypted-media"></iframe>
   </div>
 
 <script>
 (function(){
   const audio = document.getElementById('bgm');
   const btn   = document.getElementById('soundToggle');
-  const baseVol = 0.16; // volumen BGM (0.0–1.0)
+  const baseVol = 0.16;
+
+  const LOCK_KEY = 'game_lock_choice'; // 'slot' | 'live'
 
   function showBtn(){ btn.hidden = false; }
   function setUI(on){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
 
-  // Globos de ayuda (se muestran un momento)
   function hints(){
     const islands = document.querySelectorAll('.island');
-    setTimeout(()=>{
-      islands.forEach(i => i.classList.add('show-hint'));
+    setTimeout(()=>{ islands.forEach(i => i.classList.add('show-hint'));
       setTimeout(()=> islands.forEach(i => i.classList.remove('show-hint')), 4200);
     }, 1300);
     const clear = ()=> islands.forEach(i => i.classList.remove('show-hint'));
@@ -281,72 +220,81 @@
 
   async function unlockAudio(){
     try{
-      audio.muted = false;
-      audio.volume = baseVol;
-      audio.currentTime = 0;
-      await audio.play();
-      setUI(true);
-    }catch(e){
-      setUI(false);
-    }finally{
-      window.removeEventListener('pointerdown', unlockAudio, { once:true });
-      document.removeEventListener('keydown',  unlockAudio, { once:true });
-    }
+      audio.muted = false; audio.volume = baseVol; audio.currentTime = 0; await audio.play(); setUI(true);
+    }catch(e){ setUI(false); }
+    window.removeEventListener('pointerdown', unlockAudio, { once:true });
+    document.removeEventListener('keydown',  unlockAudio, { once:true });
   }
 
   async function boot(){
     try{ audio.muted = true; audio.volume = baseVol; await audio.play(); }catch(e){}
     showBtn(); setUI(!audio.paused); hints();
-
     window.addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
     document.addEventListener('keydown',  unlockAudio, { once:true });
+    btn.addEventListener('click', async ()=>{ try{
+      if(audio.paused){ audio.muted=false; await audio.play(); setUI(true); } else { audio.pause(); setUI(false); }
+    }catch(e){} }, { passive:false });
 
-    btn.addEventListener('click', async ()=>{
-      try{
-        if(audio.paused){ audio.muted=false; await audio.play(); setUI(true); }
-        else{ audio.pause(); setUI(false); }
-      }catch(e){ setUI(false); }
-    }, { passive:false });
+    updateLocks();
   }
   window.addEventListener('load', boot, { once:true });
 
-  /* ===== SPA: abrir/cerrar juegos en iframe ===== */
+  /* ===== Bloqueio entre jogos ===== */
+  function updateLocks(){
+    const locked = localStorage.getItem(LOCK_KEY); // 'slot' | 'live' | null
+    const slotIsland = document.getElementById('slotIsland');
+    const liveIsland = document.getElementById('liveIsland');
+
+    // Limpa tags anteriores
+    document.querySelectorAll('.lockTag').forEach(n=>n.remove());
+    slotIsland.classList.remove('locked'); liveIsland.classList.remove('locked');
+
+    if(locked === 'slot'){
+      // Slots liberado; Live bloqueado
+      lockIsland(liveIsland, 'Bloqueado');
+    }else if(locked === 'live'){
+      lockIsland(slotIsland, 'Bloqueado');
+    }
+  }
+  function lockIsland(node, label){
+    node.classList.add('locked');
+    const tag = document.createElement('span');
+    tag.className = 'lockTag';
+    tag.textContent = label;
+    node.appendChild(tag);
+  }
+
+  /* ===== SPA: abrir/cerrar jogos em iframe ===== */
   const viewWrap = document.getElementById('viewWrap');
   const view     = document.getElementById('view');
   const closeBtn = document.getElementById('closeView');
 
   function openView(url){
     if(!url) return;
-    // Pausar música del índice para evitar que se mezcle con la del juego
     try{ audio.pause(); setUI(false); }catch(e){}
     view.src = url;
     viewWrap.classList.add('show');
     document.documentElement.style.overflow = 'hidden';
-    // Al cargar el iframe, intentar silenciar su BGM si lo necesitases:
-    view.addEventListener('load', ()=>{
-      try{
-        const doc = view.contentDocument || view.contentWindow.document;
-        const bgm = doc && doc.getElementById && doc.getElementById('bgm');
-        if(bgm){ bgm.muted = false; } // deja que la música del juego suene (el índice ya está silenciado)
-      }catch(_){}
-    }, { once:true });
   }
-
   function closeView(e){
     if(e) e.preventDefault();
-    // Detener audio/vídeo del juego limpiando el src
     view.src = 'about:blank';
     viewWrap.classList.remove('show');
     document.documentElement.style.overflow = '';
-    // Reanudar música del índice
     (async ()=>{ try{ audio.muted=false; audio.volume=baseVol; await audio.play(); setUI(true); }catch(_){ setUI(false); } })();
+    updateLocks(); // reavaliar bloqueios ao retornar
   }
 
   document.querySelectorAll('.island').forEach(a=>{
     a.addEventListener('click', (e)=>{
       e.preventDefault();
-      const url = a.getAttribute('data-url');
-      openView(url);
+      const locked = localStorage.getItem(LOCK_KEY);
+      const isSlot = a.id === 'slotIsland';
+      if(locked && ((locked==='slot' && !isSlot) || (locked==='live' && isSlot))){
+        // Bloqueado – ignora clique
+        return;
+      }
+      openView(a.getAttribute('data-url'));
     }, {passive:false});
   });
   closeBtn.addEventListener('click', closeView);
