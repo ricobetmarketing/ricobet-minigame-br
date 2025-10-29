@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Raspadinha — VIP Day</title>
+<style>
+  :root{
+    --ink:#eaf2ff; --mut:#9fb0d9; --gold:#ffd86a; --win:#aef7c1;
+    --g1:#71e1ff; --g2:#25c3ff; --g3:#c06bff; --bg1:#0b0e22; --bg2:#090b1a;
+    --cardGlow: 0 0 40px rgba(113,225,255,.25), 0 0 80px rgba(192,107,255,.25), inset 0 0 50px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    background:
+      radial-gradient(1200px 800px at 50% -10%, rgba(120,115,245,.25), transparent 60%),
+      radial-gradient(1400px 900px at 50% 110%, rgba(255,216,106,.12), transparent 65%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    display:flex; align-items:center; justify-content:center; padding:10px;
+    overflow:hidden;
+  }
+
+  /* floating orbs (arcade vibe) */
+  .orbs{position:fixed; inset:-10% -10% -10% -10%; pointer-events:none; z-index:0; filter:blur(18px); opacity:.75}
+  .orb{position:absolute; width:220px; height:220px; border-radius:50%;
+       background:radial-gradient(circle at 35% 35%, #fff, #7af0ff 30%, rgba(122,240,255,.0) 65%);
+       mix-blend-mode:screen; animation:float 13s ease-in-out infinite}
+  .orb:nth-child(2){left:12%; top:18%; transform:scale(.7); animation-delay:-4s}
+  .orb:nth-child(3){right:8%; top:26%; transform:scale(.9); animation-delay:-7s}
+  .orb:nth-child(4){left:24%; bottom:10%; transform:scale(.8); animation-delay:-10s}
+  @keyframes float{0%,100%{transform:translateY(0) scale(var(--s,1))}50%{transform:translateY(-26px) scale(calc(var(--s,1)*1.02))}}
+
+  .wrap{ width:min(1100px,96vw); position:relative; z-index:1 }
+
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap }
+  .title{ font-weight:900; letter-spacing:.5px; text-shadow:0 0 18px rgba(113,225,255,.28) }
+  .badge{ padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.08); font-weight:800; box-shadow:0 0 18px rgba(255,255,255,.08) }
+
+  .stage{
+    position:relative; border-radius:24px; padding:16px;
+    background:linear-gradient(180deg,#151a43,#0d1232);
+    outline:1px solid rgba(255,255,255,.08);
+    box-shadow:0 24px 100px rgba(0,0,0,.7), inset 0 0 40px rgba(0,0,0,.45);
+  }
+
+  .card{
+    position:relative; border-radius:20px; overflow:hidden;
+    width:min(620px,92vw); margin:0 auto;
+    background:
+      radial-gradient(700px 260px at 50% -10%, rgba(255,255,255,.16), transparent 60%),
+      linear-gradient(180deg,#14183a,#0a0f26);
+    outline:1px solid rgba(255,255,255,.12);
+    box-shadow:var(--cardGlow);
+  }
+
+  /* prize background (animated gradient) */
+  .prize{
+    position:relative;
+    width:100%; aspect-ratio:16/9; display:grid; place-items:center;
+    background:
+      conic-gradient(from var(--h,0deg), #7af0ff, #c06bff, #ffd86a, #7af0ff);
+    animation:spinHue 12s linear infinite;
+  }
+  @keyframes spinHue{ to{ --h: 360deg } }
+  .prize::after{
+    content:"";
+    position:absolute; inset:0; pointer-events:none; border-radius:18px;
+    background:
+      radial-gradient(380px 140px at 50% -10%, rgba(255,255,255,.28), transparent 65%),
+      linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.25) 35%);
+    mix-blend-mode:screen;
+  }
+  .codeHold{
+    background:#0c1220; color:#eaf2ff; padding:12px 16px; border-radius:12px;
+    font:900 clamp(18px,5.2vw,22px)/1 ui-sans-serif; letter-spacing:.6px;
+    box-shadow:0 0 22px rgba(0,0,0,.5), 0 0 24px rgba(113,225,255,.3) inset;
+  }
+
+  /* scratch foil */
+  canvas#scratch{ position:absolute; inset:0; display:block; touch-action:none; cursor:grab }
+  canvas#scratch:active{ cursor:grabbing }
+
+  .controls{ display:flex; gap:10px; align-items:center; justify-content:center; margin-top:12px; flex-wrap:wrap }
+  .btn{ border:0; border-radius:14px; padding:12px 16px; font-weight:900; cursor:pointer;
+        background:linear-gradient(to right,#71e1ff,#25c3ff); color:#061018; box-shadow:0 0 18px rgba(113,225,255,.45), inset 0 -3px 0 rgba(0,0,0,.35) }
+
+  .hint{ text-align:center; color:var(--mut); font-weight:800; margin-top:6px }
+
+  /* particles canvas */
+  #fx{ position:absolute; inset:-10px; pointer-events:none; border-radius:24px }
+
+  /* voucher modal */
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,12,.86); display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px) }
+  .overlay.show{ display:grid }
+  .modal{ width:min(520px,92vw); border-radius:20px; padding:18px; text-align:center;
+          background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
+          outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75); color:#eaf2ff }
+  .voucher{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:clamp(16px,3.8vw,20px);
+            letter-spacing:.6px; padding:12px 14px; border-radius:12px; color:#d8b6ff; background:#0a0d1a;
+            display:inline-block; outline:1px dashed rgba(160,220,255,.4); margin:10px 0 6px }
+  .row{display:flex; gap:10px; justify-content:center; margin-top:10px; flex-wrap:wrap}
+  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900; font-size:clamp(13px,3.6vw,14px)}
+  .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
+
+  .backBtn{
+    position:fixed; top:calc(10px + env(safe-area-inset-top)); left:calc(10px + env(safe-area-inset-left));
+    z-index:99999; display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:12px; text-decoration:none; font-weight:900; letter-spacing:.3px;
+    color:#0c1220; background:#eaf2ff; box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
+    user-select:none;
+  }
+  .backBtn svg{ width:16px; height:16px }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="orbs">
+  <div class="orb" style="left:6%; top:8%; --s:.9"></div>
+  <div class="orb"></div><div class="orb"></div><div class="orb"></div>
+</div>
+
+<a class="backBtn" id="backBtn" href="index.html" aria-label="Voltar ao menu">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  Voltar
+</a>
+
+<div class="wrap">
+  <div class="top">
+    <div class="title"><b>Raspadinha</b> — Raspe a película, revele o prêmio!</div>
+    <div class="badge" id="status">Pronto</div>
+  </div>
+
+  <div class="stage">
+    <canvas id="fx"></canvas>
+
+    <div class="card" id="card">
+      <div class="prize">
+        <div class="codeHold" id="underCode">🎁 RASPE PARA REVELAR</div>
+      </div>
+      <canvas id="scratch" width="1280" height="720" aria-label="Área de raspadinha"></canvas>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+    <div class="hint">Arraste o dedo (ou mouse) para raspar. Quando revelar o suficiente, aparece o código.</div>
+  </div>
+</div>
+
+<!-- Voucher modal -->
+<div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div id="voucherHeader" style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Seu Código</div>
+    <div class="voucher" id="voucherText">VIPSCR20</div>
+    <div class="row">
+      <button class="copy" id="copyBtn" type="button">Copiar Código</button>
+      <button class="close" id="closeBtn" type="button">Fechar</button>
+    </div>
+    <div style="color:#a9b7d8;margin-top:8px; font-size:12px">Use este código na sua conta.</div>
+  </div>
+</div>
+
+<!-- SFX -->
+<audio id="sScratch" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3" preload="auto"></audio>
+<audio id="sWin"     src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
+
+<script>
+/* ===== Shared lock & state ===== */
+const LOCK_KEY='game_lock_choice'; // 'slot' | 'live' | 'wheel' | 'scratch' | 'plinko'
+const lockedChoice = localStorage.getItem(LOCK_KEY);
+if(lockedChoice && lockedChoice !== 'scratch'){ location.href='index.html'; }
+
+const CLAIM_KEY='scratch_claimed_v2';
+const VOUCHER_KEY='scratch_voucher_v2';
+const CODES=['VIPSCR10','VIPSCR20','VIPSCR50'];
+
+/* ===== Particles (celebration) ===== */
+const fx = document.getElementById('fx');
+const fctx = fx.getContext('2d');
+function sizeFX(){ fx.width = fx.parentElement.clientWidth; fx.height = fx.parentElement.clientHeight }
+addEventListener('resize', sizeFX); sizeFX();
+function confettiBurst(cx, cy, n=160){
+  const p=[];
+  for(let i=0;i<n;i++){
+    p.push({x:cx,y:cy,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6-2,life:120+Math.random()*60,h:Math.random()*360,r:2+Math.random()*3});
+  }
+  (function loop(){
+    fctx.clearRect(0,0,fx.width,fx.height);
+    let alive=false;
+    p.forEach(o=>{
+      o.x+=o.vx; o.y+=o.vy; o.vy+=0.06; o.life--;
+      if(o.life>0) alive=true;
+      fctx.globalAlpha=Math.max(0,o.life/180);
+      fctx.fillStyle=`hsl(${o.h},100%,60%)`;
+      fctx.fillRect(o.x,o.y,o.r,o.r);
+    });
+    fctx.globalAlpha=1;
+    if(alive) requestAnimationFrame(loop);
+  })();
+}
+
+/* ===== Scratch foil layer ===== */
+const cvs = document.getElementById('scratch');
+const ctx = cvs.getContext('2d');
+const statusEl = document.getElementById('status');
+const resetBtn = document.getElementById('resetBtn');
+const underCode = document.getElementById('underCode');
+const sScratch = document.getElementById('sScratch');
+const sWin = document.getElementById('sWin');
+
+function paintFoil(){
+  const g = ctx.createLinearGradient(0,0,cvs.width,cvs.height);
+  g.addColorStop(0,'#c9ced7'); g.addColorStop(.5,'#b2b8c6'); g.addColorStop(1,'#c9ced7');
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle=g; ctx.fillRect(0,0,cvs.width,cvs.height);
+  // metallic sheen bands
+  for(let i=0;i<10;i++){
+    const x = Math.random()*cvs.width;
+    const w = 20+Math.random()*120;
+    const grd = ctx.createLinearGradient(x,0,x+w,0);
+    grd.addColorStop(0,'rgba(255,255,255,.06)');
+    grd.addColorStop(.5,'rgba(255,255,255,.25)');
+    grd.addColorStop(1,'rgba(255,255,255,.06)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(x,0,w,cvs.height);
+  }
+  // glitter
+  for(let i=0;i<7000;i++){
+    const x=Math.random()*cvs.width, y=Math.random()*cvs.height;
+    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.08})`;
+    ctx.fillRect(x,y,1,1);
+  }
+}
+paintFoil();
+
+let scratching=false, revealed=0, firstTouch=false;
+function brushSize(){
+  // scale brush with viewport
+  return Math.max(24, Math.floor(Math.min(cvs.width,cvs.height)/22));
+}
+function scratchAt(x,y){
+  if(!firstTouch){
+    firstTouch=true;
+    if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'scratch');
+  }
+  ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath(); ctx.arc(x,y,brushSize(),0,Math.PI*2); ctx.fill();
+  // sfx (light)
+  try{ sScratch.currentTime=0; sScratch.volume=.1; sScratch.play(); }catch(_){}
+  navigator.vibrate?.(6);
+}
+function pos(ev){
+  const r=cvs.getBoundingClientRect();
+  const t = ev.touches?.[0] || ev;
+  return { x:(t.clientX-r.left)*(cvs.width/r.width), y:(t.clientY-r.top)*(cvs.height/r.height) };
+}
+cvs.addEventListener('pointerdown',e=>{ e.preventDefault(); scratching=true; const p=pos(e); scratchAt(p.x,p.y); }, {passive:false});
+['pointermove','touchmove','mousemove'].forEach(type=>{
+  cvs.addEventListener(type, e=>{ if(!scratching) return; const p=pos(e); scratchAt(p.x,p.y); }, {passive:false});
+});
+['pointerup','pointerleave','touchend','mouseup'].forEach(type=>{
+  cvs.addEventListener(type, ()=>{ if(!scratching) return; scratching=false; checkReveal(); }, {passive:true});
+});
+
+function revealPct(){
+  const img = ctx.getImageData(0,0,cvs.width,cvs.height).data;
+  let clear=0; for(let i=3;i<img.length;i+=4){ if(img[i]===0) clear++; }
+  return clear / (img.length/4);
+}
+function checkReveal(){
+  revealed = revealPct();
+  statusEl.textContent = `Revelado: ${(revealed*100|0)}%`;
+  if(revealed > 0.38){ revealWin(); }
+}
+function revealWin(){
+  if(localStorage.getItem(CLAIM_KEY)) return openVoucher(localStorage.getItem(VOUCHER_KEY));
+  const code = CODES[(Math.random()*CODES.length)|0];
+  localStorage.setItem(VOUCHER_KEY, code);
+  localStorage.setItem(CLAIM_KEY, '1');
+  try{ sWin.volume=.18; sWin.currentTime=0; sWin.play(); }catch(_){}
+  const card = document.getElementById('card');
+  const r = card.getBoundingClientRect();
+  confettiBurst(r.left + r.width/2, r.top + r.height*0.35, 200);
+  navigator.vibrate?.([14,40,14]);
+  openVoucher(code);
+  try{ track?.('voucher_shown','VIPDay','scratch', code); }catch(_){}
+}
+resetBtn.onclick = ()=>{
+  localStorage.removeItem(CLAIM_KEY);
+  localStorage.removeItem(VOUCHER_KEY);
+  firstTouch=false; revealed=0;
+  statusEl.textContent='Pronto';
+  ctx.globalCompositeOperation='source-over';
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  paintFoil();
+};
+
+/* Voucher modal */
+const voucherOverlay = document.getElementById('voucherOverlay');
+const voucherText = document.getElementById('voucherText');
+const voucherHeader = document.getElementById('voucherHeader');
+const copyBtn = document.getElementById('copyBtn');
+const closeBtn = document.getElementById('closeBtn');
+
+function openVoucher(code){
+  voucherText.textContent = code;
+  voucherHeader.textContent = "Resgate agora suas recompensas VIP Day!";
+  voucherOverlay.classList.add('show');
+}
+copyBtn.onclick = async ()=>{
+  const t=voucherText.textContent.trim(); if(!t) return;
+  try{ await navigator.clipboard.writeText(t); copyBtn.textContent='Copiado!'; setTimeout(()=>copyBtn.textContent='Copiar Código',1200);}catch(_){}
+};
+closeBtn.onclick = ()=> voucherOverlay.classList.remove('show');
+voucherOverlay.addEventListener('click', e=>{ if(!e.target.closest('.modal')) voucherOverlay.classList.remove('show'); });
+
+/* Auto-show if already claimed */
+if(localStorage.getItem(CLAIM_KEY)){
+  setTimeout(()=> openVoucher(localStorage.getItem(VOUCHER_KEY)||CODES[0]), 200);
+}
+
+/* Back behavior */
+(function setupBack(){
+  const backBtn=document.getElementById('backBtn');
+  const q=new URLSearchParams(location.search);
+  const backUrl=q.get('back');
+  backBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if(backUrl){ location.href = backUrl; return; }
+    if(history.length > 1){ history.back(); return; }
+    location.href = 'index.html';
+  }, {passive:false});
+})();
+
+/* Minimal Matomo shim */
+function track(){ /* no-op */ }
+</script>
+</body>
+</html>
