@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Raspadinha — VIP Day</title>
+<title>Raspadinha — VIP Day (12 Cartas)</title>
 <style>
   :root{
     --ink:#eaf2ff; --mut:#9fb0d9; --gold:#ffd86a; --win:#aef7c1;
     --g1:#71e1ff; --g2:#25c3ff; --g3:#c06bff; --bg1:#0b0e22; --bg2:#090b1a;
-    --cardGlow: 0 0 40px rgba(113,225,255,.25), 0 0 80px rgba(192,107,255,.25), inset 0 0 50px rgba(0,0,0,.6);
+    --edge:#ffffff18; --ring:#bfe2ff55;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -18,81 +18,71 @@
       radial-gradient(1200px 800px at 50% -10%, rgba(120,115,245,.25), transparent 60%),
       radial-gradient(1400px 900px at 50% 110%, rgba(255,216,106,.12), transparent 65%),
       linear-gradient(180deg,var(--bg1),var(--bg2));
-    font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-    display:flex; align-items:center; justify-content:center; padding:10px;
-    overflow:hidden;
+    font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    padding:12px; display:flex; align-items:center; justify-content:center;
   }
 
-  /* floating orbs (arcade vibe) */
-  .orbs{position:fixed; inset:-10% -10% -10% -10%; pointer-events:none; z-index:0; filter:blur(18px); opacity:.75}
-  .orb{position:absolute; width:220px; height:220px; border-radius:50%;
-       background:radial-gradient(circle at 35% 35%, #fff, #7af0ff 30%, rgba(122,240,255,.0) 65%);
-       mix-blend-mode:screen; animation:float 13s ease-in-out infinite}
-  .orb:nth-child(2){left:12%; top:18%; transform:scale(.7); animation-delay:-4s}
-  .orb:nth-child(3){right:8%; top:26%; transform:scale(.9); animation-delay:-7s}
-  .orb:nth-child(4){left:24%; bottom:10%; transform:scale(.8); animation-delay:-10s}
-  @keyframes float{0%,100%{transform:translateY(0) scale(var(--s,1))}50%{transform:translateY(-26px) scale(calc(var(--s,1)*1.02))}}
-
-  .wrap{ width:min(1100px,96vw); position:relative; z-index:1 }
-
-  .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap }
-  .title{ font-weight:900; letter-spacing:.5px; text-shadow:0 0 18px rgba(113,225,255,.28) }
-  .badge{ padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.08); font-weight:800; box-shadow:0 0 18px rgba(255,255,255,.08) }
+  .wrap{ width:min(1100px,96vw); position:relative }
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px }
+  .title{ font-weight:900; letter-spacing:.3px; text-shadow:0 0 18px rgba(113,225,255,.28) }
+  .stats{ display:flex; gap:8px; flex-wrap:wrap }
+  .pill{ padding:8px 12px; border-radius:12px; font-weight:900; background:rgba(255,255,255,.08); box-shadow:0 0 18px rgba(255,255,255,.08); }
+  .pill b{ color:var(--gold) }
 
   .stage{
-    position:relative; border-radius:24px; padding:16px;
+    position:relative; border-radius:20px; padding:14px;
     background:linear-gradient(180deg,#151a43,#0d1232);
     outline:1px solid rgba(255,255,255,.08);
     box-shadow:0 24px 100px rgba(0,0,0,.7), inset 0 0 40px rgba(0,0,0,.45);
   }
 
-  .card{
-    position:relative; border-radius:20px; overflow:hidden;
-    width:min(620px,92vw); margin:0 auto;
-    background:
-      radial-gradient(700px 260px at 50% -10%, rgba(255,255,255,.16), transparent 60%),
-      linear-gradient(180deg,#14183a,#0a0f26);
-    outline:1px solid rgba(255,255,255,.12);
-    box-shadow:var(--cardGlow);
+  .grid{
+    display:grid; gap:12px;
+    grid-template-columns:repeat(3,1fr);
+  }
+  @media (min-width:720px){
+    .grid{ grid-template-columns:repeat(4,1fr) }
   }
 
-  /* prize background (animated gradient) */
+  .card{
+    position:relative; border-radius:16px; overflow:hidden; isolation:isolate;
+    background:
+      radial-gradient(80% 60% at 50% -10%, rgba(255,255,255,.15), transparent 60%),
+      linear-gradient(180deg,#14183a,#0a0f26);
+    outline:1px solid var(--edge);
+    aspect-ratio: 16/10;
+    cursor:grab;
+    box-shadow:0 12px 40px rgba(0,0,0,.45);
+    transition: transform .15s ease;
+  }
+  .card.revealed{ cursor:default }
+  .card:active{ transform:scale(.995) }
+  .inner{ position:absolute; inset:0; display:grid; place-items:center; z-index:0 }
   .prize{
-    position:relative;
-    width:100%; aspect-ratio:16/9; display:grid; place-items:center;
+    display:grid; place-items:center; text-align:center; padding:10px;
     background:
       conic-gradient(from var(--h,0deg), #7af0ff, #c06bff, #ffd86a, #7af0ff);
-    animation:spinHue 12s linear infinite;
+    animation:spin 12s linear infinite; border-radius:14px; inset:6px; position:absolute;
   }
-  @keyframes spinHue{ to{ --h: 360deg } }
-  .prize::after{
-    content:"";
-    position:absolute; inset:0; pointer-events:none; border-radius:18px;
-    background:
-      radial-gradient(380px 140px at 50% -10%, rgba(255,255,255,.28), transparent 65%),
-      linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.25) 35%);
-    mix-blend-mode:screen;
-  }
-  .codeHold{
-    background:#0c1220; color:#eaf2ff; padding:12px 16px; border-radius:12px;
-    font:900 clamp(18px,5.2vw,22px)/1 ui-sans-serif; letter-spacing:.6px;
+  @keyframes spin{ to{ --h:360deg } }
+  .prize .pts{
+    background:#0c1220; color:#eaf2ff; padding:8px 12px; border-radius:12px;
+    font:900 clamp(16px,4vw,18px)/1 ui-sans-serif; letter-spacing:.4px;
     box-shadow:0 0 22px rgba(0,0,0,.5), 0 0 24px rgba(113,225,255,.3) inset;
   }
+  .foil{ position:absolute; inset:0; z-index:2; touch-action:none }
+  .flag{ position:absolute; top:6px; left:6px; z-index:3; background:#0a0f26; padding:4px 8px; border-radius:999px; font-weight:900; font-size:12px; letter-spacing:.3px; outline:1px solid var(--ring) }
+  .flag.done{ background:#0f1a10; color:var(--win); outline:1px solid rgba(174,247,193,.3) }
 
-  /* scratch foil */
-  canvas#scratch{ position:absolute; inset:0; display:block; touch-action:none; cursor:grab }
-  canvas#scratch:active{ cursor:grabbing }
-
-  .controls{ display:flex; gap:10px; align-items:center; justify-content:center; margin-top:12px; flex-wrap:wrap }
+  .controls{ display:flex; gap:10px; align-items:center; justify-content:center; margin-top:14px; flex-wrap:wrap; color:var(--mut) }
   .btn{ border:0; border-radius:14px; padding:12px 16px; font-weight:900; cursor:pointer;
-        background:linear-gradient(to right,#71e1ff,#25c3ff); color:#061018; box-shadow:0 0 18px rgba(113,225,255,.45), inset 0 -3px 0 rgba(0,0,0,.35) }
+        background:linear-gradient(to right,#71e1ff,#25c3ff); color:#061018;
+        box-shadow:0 0 18px rgba(113,225,255,.45), inset 0 -3px 0 rgba(0,0,0,.35) }
 
-  .hint{ text-align:center; color:var(--mut); font-weight:800; margin-top:6px }
+  /* FX canvas */
+  #fx{ position:absolute; inset:0; pointer-events:none; border-radius:20px }
 
-  /* particles canvas */
-  #fx{ position:absolute; inset:-10px; pointer-events:none; border-radius:24px }
-
-  /* voucher modal */
+  /* Voucher modal */
   .overlay{ position:fixed; inset:0; background:rgba(0,0,12,.86); display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px) }
   .overlay.show{ display:grid }
   .modal{ width:min(520px,92vw); border-radius:20px; padding:18px; text-align:center;
@@ -113,18 +103,9 @@
     user-select:none;
   }
   .backBtn svg{ width:16px; height:16px }
-
-  @media (prefers-reduced-motion: reduce){
-    *{animation:none !important; transition:none !important}
-  }
 </style>
 </head>
 <body>
-<div class="orbs">
-  <div class="orb" style="left:6%; top:8%; --s:.9"></div>
-  <div class="orb"></div><div class="orb"></div><div class="orb"></div>
-</div>
-
 <a class="backBtn" id="backBtn" href="index.html" aria-label="Voltar ao menu">
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   Voltar
@@ -132,32 +113,28 @@
 
 <div class="wrap">
   <div class="top">
-    <div class="title"><b>Raspadinha</b> — Raspe a película, revele o prêmio!</div>
-    <div class="badge" id="status">Pronto</div>
+    <div class="title"><b>Raspadinha VIP Day</b> — Raspe até 5 cartas e junte pontos!</div>
+    <div class="stats">
+      <div class="pill">Pontos: <b id="points">0</b></div>
+      <div class="pill">Tentativas: <b id="tries">5</b>/5</div>
+    </div>
   </div>
 
   <div class="stage">
     <canvas id="fx"></canvas>
-
-    <div class="card" id="card">
-      <div class="prize">
-        <div class="codeHold" id="underCode">🎁 RASPE PARA REVELAR</div>
-      </div>
-      <canvas id="scratch" width="1280" height="720" aria-label="Área de raspadinha"></canvas>
-    </div>
-
+    <div id="grid" class="grid"></div>
     <div class="controls">
-      <button class="btn" id="resetBtn" type="button">Reset</button>
+      <span>Dica: revele ~40% da película para abrir a carta.</span>
+      <button class="btn" id="resetDay" type="button" title="Limpar progresso do dia">Reset do Dia</button>
     </div>
-    <div class="hint">Arraste o dedo (ou mouse) para raspar. Quando revelar o suficiente, aparece o código.</div>
   </div>
 </div>
 
 <!-- Voucher modal -->
 <div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
   <div class="modal">
-    <div id="voucherHeader" style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Seu Código</div>
-    <div class="voucher" id="voucherText">VIPSCR20</div>
+    <div id="voucherHeader" style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Recompensa VIP Day</div>
+    <div class="voucher" id="voucherText">VIP10-ABCDE</div>
     <div class="row">
       <button class="copy" id="copyBtn" type="button">Copiar Código</button>
       <button class="close" id="closeBtn" type="button">Fechar</button>
@@ -171,21 +148,214 @@
 <audio id="sWin"     src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
 
 <script>
-/* ===== Shared lock & state ===== */
-const LOCK_KEY='game_lock_choice'; // 'slot' | 'live' | 'wheel' | 'scratch' | 'plinko'
+/* ========== CONFIG ========== */
+// Lock with your hub (kept from your previous version)
+const LOCK_KEY = 'game_lock_choice'; // 'scratch' etc.
 const lockedChoice = localStorage.getItem(LOCK_KEY);
-if(lockedChoice && lockedChoice !== 'scratch'){ location.href='index.html'; }
+if (lockedChoice && lockedChoice !== 'scratch') { location.href = 'index.html'; }
 
-const CLAIM_KEY='scratch_claimed_v2';
-const VOUCHER_KEY='scratch_voucher_v2';
-const CODES=['VIPSCR10','VIPSCR20','VIPSCR50'];
+// Daily namespace key
+const todayKey = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+const NS = 'vipday_scratch_' + todayKey;
 
-/* ===== Particles (celebration) ===== */
+// Attempts per day
+const DAILY_TRIES = 5;
+
+// 12 card points layout (total is purposely varied). You can edit or randomize.
+const POINT_DECK = [10, 0, 15, 25, 0, 20, 10, 30, 50, 5, 15, 0];
+
+// Tier rewards — edit codes/thresholds to your campaign.
+// First tier reached shows a voucher; reaching higher tier shows a new one (replaces previous).
+const TIERS = [
+  { threshold: 50,  label: 'Bronze',  code: 'VIP-BRONZE-50' },
+  { threshold: 100, label: 'Prata',   code: 'VIP-PRATA-100' },
+  { threshold: 180, label: 'Ouro',    code: 'VIP-OURO-180' },
+  { threshold: 260, label: 'Diamante',code: 'VIP-DIAMANTE-260' },
+];
+
+/* ========== STATE ========== */
+const state = {
+  points: +localStorage.getItem(NS+'_points') || 0,
+  tries:  +localStorage.getItem(NS+'_tries')  || DAILY_TRIES,
+  opened: JSON.parse(localStorage.getItem(NS+'_opened')||'{}'), // {index:true}
+  tierWon: localStorage.getItem(NS+'_tierWon') || null // last tier label
+};
+
+/* ========== UI BUILD ========== */
+const grid = document.getElementById('grid');
+const sScratch = document.getElementById('sScratch');
+const sWin = document.getElementById('sWin');
+const pointsEl = document.getElementById('points');
+const triesEl  = document.getElementById('tries');
+
+pointsEl.textContent = state.points;
+triesEl.textContent = state.tries;
+
+// Shuffle a stable daily order (seeded by todayKey)
+function seededShuffle(arr, seedStr){
+  const a = arr.slice();
+  let seed = 0; for (let i=0;i<seedStr.length;i++) seed = (seed*31 + seedStr.charCodeAt(i))>>>0;
+  for (let i=a.length-1;i>0;i--){
+    seed = (seed*1664525 + 1013904223)>>>0;
+    const j = seed % (i+1);
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+const deck = seededShuffle(POINT_DECK, todayKey);
+
+// Create 12 cards
+deck.forEach((pts, idx) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.index = idx;
+  card.dataset.points = pts;
+
+  const badge = document.createElement('div');
+  badge.className = 'flag';
+  badge.textContent = 'RASPE';
+  card.appendChild(badge);
+
+  const inner = document.createElement('div');
+  inner.className='inner';
+  inner.innerHTML = `
+    <div class="prize">
+      <div class="pts">${pts>0 ? `${pts} PONTOS` : '💤 NADA'}</div>
+    </div>`;
+  card.appendChild(inner);
+
+  const foil = document.createElement('canvas');
+  foil.width = 600; foil.height = 380; // good res; will scale
+  foil.className = 'foil';
+  card.appendChild(foil);
+
+  grid.appendChild(card);
+
+  // paint foil once mounted (needs size)
+  requestAnimationFrame(() => paintFoil(foil));
+
+  // restore revealed state
+  if (state.opened[idx]) revealCard(card, false);
+
+  // hook scratching
+  setupScratch(card, foil, badge, pts, idx);
+});
+
+/* ========== FOIL / SCRATCH ========== */
+function paintFoil(cvs){
+  const ctx = cvs.getContext('2d');
+  const {width:w, height:h} = cvs;
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,'#c9ced7'); g.addColorStop(.5,'#b2b8c6'); g.addColorStop(1,'#c9ced7');
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+
+  for(let i=0;i<8;i++){
+    const x = Math.random()*w, band = 18+Math.random()*110;
+    const grd = ctx.createLinearGradient(x,0,x+band,0);
+    grd.addColorStop(0,'rgba(255,255,255,.06)');
+    grd.addColorStop(.5,'rgba(255,255,255,.25)');
+    grd.addColorStop(1,'rgba(255,255,255,.06)');
+    ctx.fillStyle=grd; ctx.fillRect(x,0,band,h);
+  }
+  for(let i=0;i<2500;i++){
+    const x=Math.random()*w, y=Math.random()*h;
+    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.08})`;
+    ctx.fillRect(x,y,1,1);
+  }
+}
+
+function setupScratch(card, foil, badge, pts, idx){
+  const ctx = foil.getContext('2d');
+  let scratching=false, first=false;
+
+  function brush(){ return Math.max(16, Math.floor(Math.min(foil.width,foil.height)/18)); }
+  function pos(ev){
+    const r=foil.getBoundingClientRect();
+    const t = ev.touches?.[0] || ev;
+    return { x:(t.clientX-r.left)*(foil.width/r.width), y:(t.clientY-r.top)*(foil.height/r.height) };
+  }
+  function scratch(x,y){
+    if (!first){
+      first=true;
+      if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'scratch');
+    }
+    ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath(); ctx.arc(x,y,brush(),0,Math.PI*2); ctx.fill();
+    try{ sScratch.currentTime=0; sScratch.volume=.08; sScratch.play(); }catch(_){}
+    navigator.vibrate?.(5);
+  }
+  function revealedPct(){
+    const img = ctx.getImageData(0,0,foil.width,foil.height).data;
+    let clear=0; for(let i=3;i<img.length;i+=4){ if(img[i]===0) clear++; }
+    return clear/(img.length/4);
+  }
+
+  function handleReveal(){
+    if (state.opened[idx]) return; // already processed
+
+    if (state.tries <= 0){
+      foil.style.pointerEvents='none';
+      badge.textContent='ESGOTADO';
+      return;
+    }
+    const pct = revealedPct();
+    if (pct < 0.38) return;
+
+    // consume a try, award points, persist
+    state.tries--; state.opened[idx]=true;
+    localStorage.setItem(NS+'_tries', state.tries);
+    localStorage.setItem(NS+'_opened', JSON.stringify(state.opened));
+    triesEl.textContent = state.tries;
+
+    if (pts>0){
+      state.points += pts;
+      localStorage.setItem(NS+'_points', state.points);
+      pointsEl.textContent = state.points;
+      celebrate(card);
+      try{ sWin.volume=.18; sWin.currentTime=0; sWin.play(); }catch(_){}
+    }
+
+    revealCard(card, true, pts);
+
+    // check tier reward
+    maybeGiveTier();
+  }
+
+  foil.addEventListener('pointerdown', e=>{ if(state.opened[idx]) return; if(state.tries<=0)return;
+    e.preventDefault(); scratching=true; const p=pos(e); scratch(p.x,p.y);
+  }, {passive:false});
+  foil.addEventListener('pointermove', e=>{ if(!scratching) return; const p=pos(e); scratch(p.x,p.y); }, {passive:false});
+  ['pointerup','pointerleave'].forEach(ev=> foil.addEventListener(ev, ()=>{ if(!scratching) return; scratching=false; handleReveal(); }, {passive:true}));
+}
+
+function revealCard(card, animate=true, pts=0){
+  const foil = card.querySelector('.foil');
+  foil.style.opacity = 0;
+  foil.style.pointerEvents='none';
+  const badge = card.querySelector('.flag');
+  badge.textContent = 'REVELADO';
+  badge.classList.add('done');
+  card.classList.add('revealed');
+  if (animate){
+    card.animate([{transform:'scale(1)'},{transform:'scale(1.02)'},{transform:'scale(1)'}],{duration:320});
+  }
+}
+
+/* ========== CELEBRATION FX ========== */
 const fx = document.getElementById('fx');
 const fctx = fx.getContext('2d');
-function sizeFX(){ fx.width = fx.parentElement.clientWidth; fx.height = fx.parentElement.clientHeight }
+function sizeFX(){ fx.width = fx.clientWidth; fx.height = fx.clientHeight }
 addEventListener('resize', sizeFX); sizeFX();
-function confettiBurst(cx, cy, n=160){
+
+function celebrate(cardEl){
+  const r = cardEl.getBoundingClientRect();
+  const host = fx.getBoundingClientRect();
+  const cx = (r.left - host.left) + r.width/2;
+  const cy = (r.top  - host.top ) + r.height/2;
+  confetti(cx, cy, 160);
+}
+function confetti(cx, cy, n=160){
   const p=[];
   for(let i=0;i<n;i++){
     p.push({x:cx,y:cy,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6-2,life:120+Math.random()*60,h:Math.random()*360,r:2+Math.random()*3});
@@ -205,114 +375,32 @@ function confettiBurst(cx, cy, n=160){
   })();
 }
 
-/* ===== Scratch foil layer ===== */
-const cvs = document.getElementById('scratch');
-const ctx = cvs.getContext('2d');
-const statusEl = document.getElementById('status');
-const resetBtn = document.getElementById('resetBtn');
-const underCode = document.getElementById('underCode');
-const sScratch = document.getElementById('sScratch');
-const sWin = document.getElementById('sWin');
-
-function paintFoil(){
-  const g = ctx.createLinearGradient(0,0,cvs.width,cvs.height);
-  g.addColorStop(0,'#c9ced7'); g.addColorStop(.5,'#b2b8c6'); g.addColorStop(1,'#c9ced7');
-  ctx.globalCompositeOperation='source-over';
-  ctx.fillStyle=g; ctx.fillRect(0,0,cvs.width,cvs.height);
-  // metallic sheen bands
-  for(let i=0;i<10;i++){
-    const x = Math.random()*cvs.width;
-    const w = 20+Math.random()*120;
-    const grd = ctx.createLinearGradient(x,0,x+w,0);
-    grd.addColorStop(0,'rgba(255,255,255,.06)');
-    grd.addColorStop(.5,'rgba(255,255,255,.25)');
-    grd.addColorStop(1,'rgba(255,255,255,.06)');
-    ctx.fillStyle = grd;
-    ctx.fillRect(x,0,w,cvs.height);
-  }
-  // glitter
-  for(let i=0;i<7000;i++){
-    const x=Math.random()*cvs.width, y=Math.random()*cvs.height;
-    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.08})`;
-    ctx.fillRect(x,y,1,1);
-  }
-}
-paintFoil();
-
-let scratching=false, revealed=0, firstTouch=false;
-function brushSize(){
-  // scale brush with viewport
-  return Math.max(24, Math.floor(Math.min(cvs.width,cvs.height)/22));
-}
-function scratchAt(x,y){
-  if(!firstTouch){
-    firstTouch=true;
-    if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'scratch');
-  }
-  ctx.globalCompositeOperation='destination-out';
-  ctx.beginPath(); ctx.arc(x,y,brushSize(),0,Math.PI*2); ctx.fill();
-  // sfx (light)
-  try{ sScratch.currentTime=0; sScratch.volume=.1; sScratch.play(); }catch(_){}
-  navigator.vibrate?.(6);
-}
-function pos(ev){
-  const r=cvs.getBoundingClientRect();
-  const t = ev.touches?.[0] || ev;
-  return { x:(t.clientX-r.left)*(cvs.width/r.width), y:(t.clientY-r.top)*(cvs.height/r.height) };
-}
-cvs.addEventListener('pointerdown',e=>{ e.preventDefault(); scratching=true; const p=pos(e); scratchAt(p.x,p.y); }, {passive:false});
-['pointermove','touchmove','mousemove'].forEach(type=>{
-  cvs.addEventListener(type, e=>{ if(!scratching) return; const p=pos(e); scratchAt(p.x,p.y); }, {passive:false});
-});
-['pointerup','pointerleave','touchend','mouseup'].forEach(type=>{
-  cvs.addEventListener(type, ()=>{ if(!scratching) return; scratching=false; checkReveal(); }, {passive:true});
-});
-
-function revealPct(){
-  const img = ctx.getImageData(0,0,cvs.width,cvs.height).data;
-  let clear=0; for(let i=3;i<img.length;i+=4){ if(img[i]===0) clear++; }
-  return clear / (img.length/4);
-}
-function checkReveal(){
-  revealed = revealPct();
-  statusEl.textContent = `Revelado: ${(revealed*100|0)}%`;
-  if(revealed > 0.38){ revealWin(); }
-}
-function revealWin(){
-  if(localStorage.getItem(CLAIM_KEY)) return openVoucher(localStorage.getItem(VOUCHER_KEY));
-  const code = CODES[(Math.random()*CODES.length)|0];
-  localStorage.setItem(VOUCHER_KEY, code);
-  localStorage.setItem(CLAIM_KEY, '1');
-  try{ sWin.volume=.18; sWin.currentTime=0; sWin.play(); }catch(_){}
-  const card = document.getElementById('card');
-  const r = card.getBoundingClientRect();
-  confettiBurst(r.left + r.width/2, r.top + r.height*0.35, 200);
-  navigator.vibrate?.([14,40,14]);
-  openVoucher(code);
-  try{ track?.('voucher_shown','VIPDay','scratch', code); }catch(_){}
-}
-resetBtn.onclick = ()=>{
-  localStorage.removeItem(CLAIM_KEY);
-  localStorage.removeItem(VOUCHER_KEY);
-  firstTouch=false; revealed=0;
-  statusEl.textContent='Pronto';
-  ctx.globalCompositeOperation='source-over';
-  ctx.clearRect(0,0,cvs.width,cvs.height);
-  paintFoil();
-};
-
-/* Voucher modal */
+/* ========== TIERS / VOUCHERS ========== */
 const voucherOverlay = document.getElementById('voucherOverlay');
 const voucherText = document.getElementById('voucherText');
 const voucherHeader = document.getElementById('voucherHeader');
 const copyBtn = document.getElementById('copyBtn');
 const closeBtn = document.getElementById('closeBtn');
 
-function openVoucher(code){
-  voucherText.textContent = code;
-  voucherHeader.textContent = "Resgate agora suas recompensas VIP Day!";
+function maybeGiveTier(){
+  // find highest tier reached
+  let reached = null;
+  for (const t of TIERS){ if (state.points >= t.threshold) reached = t; }
+  if (!reached) return;
+
+  if (state.tierWon === reached.label) return; // already shown
+  state.tierWon = reached.label;
+  localStorage.setItem(NS+'_tierWon', state.tierWon);
+
+  openVoucher(reached);
+}
+
+function openVoucher(tier){
+  voucherHeader.textContent = `Parabéns! Você atingiu o nível ${tier.label}`;
+  voucherText.textContent = tier.code;
   voucherOverlay.classList.add('show');
 }
+
 copyBtn.onclick = async ()=>{
   const t=voucherText.textContent.trim(); if(!t) return;
   try{ await navigator.clipboard.writeText(t); copyBtn.textContent='Copiado!'; setTimeout(()=>copyBtn.textContent='Copiar Código',1200);}catch(_){}
@@ -320,12 +408,17 @@ copyBtn.onclick = async ()=>{
 closeBtn.onclick = ()=> voucherOverlay.classList.remove('show');
 voucherOverlay.addEventListener('click', e=>{ if(!e.target.closest('.modal')) voucherOverlay.classList.remove('show'); });
 
-/* Auto-show if already claimed */
-if(localStorage.getItem(CLAIM_KEY)){
-  setTimeout(()=> openVoucher(localStorage.getItem(VOUCHER_KEY)||CODES[0]), 200);
-}
+/* ========== RESET / BACK ========== */
+document.getElementById('resetDay').onclick = ()=>{
+  if(!confirm('Resetar o progresso de hoje?')) return;
+  localStorage.removeItem(NS+'_points');
+  localStorage.removeItem(NS+'_tries');
+  localStorage.removeItem(NS+'_opened');
+  localStorage.removeItem(NS+'_tierWon');
+  // simple refresh
+  location.reload();
+};
 
-/* Back behavior */
 (function setupBack(){
   const backBtn=document.getElementById('backBtn');
   const q=new URLSearchParams(location.search);
@@ -337,9 +430,6 @@ if(localStorage.getItem(CLAIM_KEY)){
     location.href = 'index.html';
   }, {passive:false});
 })();
-
-/* Minimal Matomo shim */
-function track(){ /* no-op */ }
 </script>
 </body>
 </html>
