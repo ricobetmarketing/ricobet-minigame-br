@@ -73,6 +73,7 @@
   .foil{ position:absolute; inset:0; z-index:2; touch-action:none }
   .flag{ position:absolute; top:6px; left:6px; z-index:3; background:#0a0f26; padding:4px 8px; border-radius:999px; font-weight:900; font-size:12px; letter-spacing:.3px; outline:1px solid var(--ring) }
   .flag.done{ background:#0f1a10; color:var(--win); outline:1px solid rgba(174,247,193,.3) }
+  .flag.playing{ background:#0a1322; color:#71e1ff; outline:1px solid rgba(113,225,255,.35) }
 
   .controls{ display:flex; gap:10px; align-items:center; justify-content:center; margin-top:14px; flex-wrap:wrap; color:var(--mut) }
   .btn{ border:0; border-radius:14px; padding:12px 16px; font-weight:900; cursor:pointer;
@@ -149,23 +150,15 @@
 
 <script>
 /* ========== CONFIG ========== */
-// Lock with your hub (kept from your previous version)
-const LOCK_KEY = 'game_lock_choice'; // 'scratch' etc.
+const LOCK_KEY = 'game_lock_choice';
 const lockedChoice = localStorage.getItem(LOCK_KEY);
 if (lockedChoice && lockedChoice !== 'scratch') { location.href = 'index.html'; }
 
-// Daily namespace key
-const todayKey = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+const todayKey = new Date().toISOString().slice(0,10);
 const NS = 'vipday_scratch_' + todayKey;
 
-// Attempts per day
 const DAILY_TRIES = 5;
-
-// 12 card points layout (total is purposely varied). You can edit or randomize.
 const POINT_DECK = [10, 0, 15, 25, 0, 20, 10, 30, 50, 5, 15, 0];
-
-// Tier rewards — edit codes/thresholds to your campaign.
-// First tier reached shows a voucher; reaching higher tier shows a new one (replaces previous).
 const TIERS = [
   { threshold: 50,  label: 'Bronze',  code: 'VIP-BRONZE-50' },
   { threshold: 100, label: 'Prata',   code: 'VIP-PRATA-100' },
@@ -177,8 +170,9 @@ const TIERS = [
 const state = {
   points: +localStorage.getItem(NS+'_points') || 0,
   tries:  +localStorage.getItem(NS+'_tries')  || DAILY_TRIES,
-  opened: JSON.parse(localStorage.getItem(NS+'_opened')||'{}'), // {index:true}
-  tierWon: localStorage.getItem(NS+'_tierWon') || null // last tier label
+  opened: JSON.parse(localStorage.getItem(NS+'_opened')||'{}'),  // {index:true}
+  started: JSON.parse(localStorage.getItem(NS+'_started')||'{}'),// {index:true} → consumed try
+  tierWon: localStorage.getItem(NS+'_tierWon') || null
 };
 
 /* ========== UI BUILD ========== */
@@ -191,7 +185,6 @@ const triesEl  = document.getElementById('tries');
 pointsEl.textContent = state.points;
 triesEl.textContent = state.tries;
 
-// Shuffle a stable daily order (seeded by todayKey)
 function seededShuffle(arr, seedStr){
   const a = arr.slice();
   let seed = 0; for (let i=0;i<seedStr.length;i++) seed = (seed*31 + seedStr.charCodeAt(i))>>>0;
@@ -204,7 +197,6 @@ function seededShuffle(arr, seedStr){
 }
 const deck = seededShuffle(POINT_DECK, todayKey);
 
-// Create 12 cards
 deck.forEach((pts, idx) => {
   const card = document.createElement('div');
   card.className = 'card';
@@ -213,31 +205,32 @@ deck.forEach((pts, idx) => {
 
   const badge = document.createElement('div');
   badge.className = 'flag';
-  badge.textContent = 'RASPE';
+  badge.textContent = state.started[idx] ? (state.opened[idx] ? 'REVELADO' : 'EM JOGO') : 'RASPE';
+  if (state.opened[idx]) badge.classList.add('done');
+  if (state.started[idx] && !state.opened[idx]) badge.classList.add('playing');
   card.appendChild(badge);
 
   const inner = document.createElement('div');
   inner.className='inner';
+  // show ??? until reveal; store real label in data
+  const label = (pts>0 ? `${pts} PONTOS` : '💤 NADA');
   inner.innerHTML = `
     <div class="prize">
-      <div class="pts">${pts>0 ? `${pts} PONTOS` : '💤 NADA'}</div>
+      <div class="pts" data-real="${label}">${state.opened[idx] ? label : '???'}</div>
     </div>`;
   card.appendChild(inner);
 
   const foil = document.createElement('canvas');
-  foil.width = 600; foil.height = 380; // good res; will scale
+  foil.width = 600; foil.height = 380;
   foil.className = 'foil';
   card.appendChild(foil);
 
   grid.appendChild(card);
 
-  // paint foil once mounted (needs size)
   requestAnimationFrame(() => paintFoil(foil));
 
-  // restore revealed state
   if (state.opened[idx]) revealCard(card, false);
 
-  // hook scratching
   setupScratch(card, foil, badge, pts, idx);
 });
 
@@ -267,7 +260,7 @@ function paintFoil(cvs){
 
 function setupScratch(card, foil, badge, pts, idx){
   const ctx = foil.getContext('2d');
-  let scratching=false, first=false;
+  let scratching=false, touched=false;
 
   function brush(){ return Math.max(16, Math.floor(Math.min(foil.width,foil.height)/18)); }
   function pos(ev){
@@ -276,10 +269,6 @@ function setupScratch(card, foil, badge, pts, idx){
     return { x:(t.clientX-r.left)*(foil.width/r.width), y:(t.clientY-r.top)*(foil.height/r.height) };
   }
   function scratch(x,y){
-    if (!first){
-      first=true;
-      if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'scratch');
-    }
     ctx.globalCompositeOperation='destination-out';
     ctx.beginPath(); ctx.arc(x,y,brush(),0,Math.PI*2); ctx.fill();
     try{ sScratch.currentTime=0; sScratch.volume=.08; sScratch.play(); }catch(_){}
@@ -291,22 +280,33 @@ function setupScratch(card, foil, badge, pts, idx){
     return clear/(img.length/4);
   }
 
-  function handleReveal(){
-    if (state.opened[idx]) return; // already processed
+  function consumeTryOnFirstTouch(){
+    if (state.opened[idx] || state.started[idx]) return true;
+    if (state.tries <= 0) return false;               // no tries left → block
+    state.tries--;
+    state.started[idx] = true;
+    localStorage.setItem(NS+'_tries', state.tries);
+    localStorage.setItem(NS+'_started', JSON.stringify(state.started));
+    document.getElementById('tries').textContent = state.tries;
+    badge.textContent = 'EM JOGO';
+    badge.classList.add('playing');
+    // lock game family on first ever touch
+    if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'scratch');
+    return true;
+  }
 
-    if (state.tries <= 0){
-      foil.style.pointerEvents='none';
-      badge.textContent='ESGOTADO';
-      return;
-    }
+  function handleReveal(){
+    if (state.opened[idx]) return;
+
     const pct = revealedPct();
     if (pct < 0.38) return;
 
-    // consume a try, award points, persist
-    state.tries--; state.opened[idx]=true;
-    localStorage.setItem(NS+'_tries', state.tries);
+    state.opened[idx]=true;
     localStorage.setItem(NS+'_opened', JSON.stringify(state.opened));
-    triesEl.textContent = state.tries;
+
+    // now reveal the real label
+    const ptsEl = card.querySelector('.pts');
+    ptsEl.textContent = pts>0 ? `${pts} PONTOS` : '💤 NADA';
 
     if (pts>0){
       state.points += pts;
@@ -317,24 +317,27 @@ function setupScratch(card, foil, badge, pts, idx){
     }
 
     revealCard(card, true, pts);
-
-    // check tier reward
     maybeGiveTier();
   }
 
-  foil.addEventListener('pointerdown', e=>{ if(state.opened[idx]) return; if(state.tries<=0)return;
-    e.preventDefault(); scratching=true; const p=pos(e); scratch(p.x,p.y);
+  foil.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    if (!consumeTryOnFirstTouch()) return; // no tries left → ignore
+    scratching=true; touched=true;
+    const p=pos(e); scratch(p.x,p.y);
   }, {passive:false});
+
   foil.addEventListener('pointermove', e=>{ if(!scratching) return; const p=pos(e); scratch(p.x,p.y); }, {passive:false});
-  ['pointerup','pointerleave'].forEach(ev=> foil.addEventListener(ev, ()=>{ if(!scratching) return; scratching=false; handleReveal(); }, {passive:true}));
+  ['pointerup','pointerleave'].forEach(ev=> foil.addEventListener(ev, ()=>{ if(!scratching) return; scratching=false; if(touched) handleReveal(); }, {passive:true}));
 }
 
-function revealCard(card, animate=true, pts=0){
+function revealCard(card, animate=true){
   const foil = card.querySelector('.foil');
   foil.style.opacity = 0;
   foil.style.pointerEvents='none';
   const badge = card.querySelector('.flag');
   badge.textContent = 'REVELADO';
+  badge.classList.remove('playing');
   badge.classList.add('done');
   card.classList.add('revealed');
   if (animate){
@@ -383,15 +386,12 @@ const copyBtn = document.getElementById('copyBtn');
 const closeBtn = document.getElementById('closeBtn');
 
 function maybeGiveTier(){
-  // find highest tier reached
   let reached = null;
   for (const t of TIERS){ if (state.points >= t.threshold) reached = t; }
   if (!reached) return;
-
-  if (state.tierWon === reached.label) return; // already shown
+  if (state.tierWon === reached.label) return;
   state.tierWon = reached.label;
   localStorage.setItem(NS+'_tierWon', state.tierWon);
-
   openVoucher(reached);
 }
 
@@ -411,11 +411,7 @@ voucherOverlay.addEventListener('click', e=>{ if(!e.target.closest('.modal')) vo
 /* ========== RESET / BACK ========== */
 document.getElementById('resetDay').onclick = ()=>{
   if(!confirm('Resetar o progresso de hoje?')) return;
-  localStorage.removeItem(NS+'_points');
-  localStorage.removeItem(NS+'_tries');
-  localStorage.removeItem(NS+'_opened');
-  localStorage.removeItem(NS+'_tierWon');
-  // simple refresh
+  ['_points','_tries','_opened','_started','_tierWon'].forEach(s=>localStorage.removeItem(NS+s));
   location.reload();
 };
 
