@@ -1,392 +1,523 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Plinko — VIP Day</title>
+<meta name="color-scheme" content="dark"/>
+<title>VIP Day — Beach Plinko (10-Ball Challenge)</title>
 <style>
-  :root{ --ink:#eaf2ff; --mut:#9fb0d9; --gold:#ffd86a; --g1:#71e1ff; --g2:#25c3ff; --g3:#c06bff;
-         --bg1:#0b0e22; --bg2:#090b1a; --winGlow:0 0 22px rgba(255,216,106,.55), 0 0 40px rgba(255,216,106,.35) }
+  :root{
+    --bg1:#140e2a; --bg2:#2a1a4a; --bg3:#3a2557; --ink:#f2f3ff; --mut:#cbd3ff;
+    --edge:#ffffff18; --acc:#ffd86a; --glow:0 0 22px rgba(255,216,106,.5);
+    --g3:#d16ba5; --g4:#86a8e7; --g5:#5ffbf1;
+    --CHAR_LEFT:url("https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=800&auto=format&fit=crop");
+    --CHAR_RIGHT:url("https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop");
+    --rows:12; --board-w:640px; --board-h:520px; --peg:#ffffffcc;
+  }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0; color:var(--ink);
+    margin:0;color:var(--ink);font:15px/1.5 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
     background:
-      radial-gradient(1200px 800px at 50% -10%, rgba(120,115,245,.25), transparent 60%),
-      radial-gradient(1400px 900px at 50% 110%, rgba(255,216,106,.12), transparent 65%),
-      linear-gradient(180deg,var(--bg1),var(--bg2));
-    font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-    display:flex; align-items:center; justify-content:center; padding:10px;
+      radial-gradient(1200px 700px at 50% -10%, #412a7a66 0%, transparent 60%),
+      linear-gradient(180deg,var(--bg1),var(--bg2) 60%, var(--bg3));
     overflow:hidden;
   }
 
-  .wrap{ width:min(1100px,96vw); position:relative; z-index:1 }
-  .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap }
-  .title{ font-weight:900; letter-spacing:.5px; text-shadow:0 0 18px rgba(113,225,255,.28) }
-  .badge{ padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.08); font-weight:800; box-shadow:0 0 18px rgba(255,255,255,.08) }
+  .scene{position:relative;min-height:100%;display:grid;place-items:center;padding:24px}
+  .horizon{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(1000px 400px at 50% 35%, rgba(255,148,210,.25), transparent 60%),
+               linear-gradient(180deg, transparent 0 64%, rgba(245,172,94,.25) 64% 70%, #eaa14e 70% 72%, #c97b35 72% 100%)}
 
-  .stage{
-    position:relative; border-radius:24px; padding:16px;
-    background:linear-gradient(180deg,#151a43,#0d1232);
-    outline:1px solid rgba(255,255,255,.08);
-    box-shadow:0 24px 100px rgba(0,0,0,.7), inset 0 0 40px rgba(0,0,0,.45);
-  }
+  .char{position:absolute;bottom:0;width:min(26vw,280px);height:min(78vh,900px);
+    background-size:cover;background-position:center bottom;filter:drop-shadow(0 12px 30px #0006);
+    opacity:.95;pointer-events:none;mask-image:linear-gradient(to top, black 70%, transparent 105%)}
+  .char.left{left:max(6px,3vw);background-image:var(--CHAR_LEFT);animation:idle 6s ease-in-out infinite}
+  .char.right{right:max(6px,3vw);background-image:var(--CHAR_RIGHT);animation:idle 6s ease-in-out infinite}
+  @keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
-  .boardWrap{
-    position:relative; width:min(620px,92vw); margin:0 auto;
-    border-radius:20px; padding:12px;
-    background:linear-gradient(180deg,#1a1d45,#0b0f2b);
-    outline:1px solid rgba(255,255,255,.12);
-    box-shadow:0 0 40px rgba(113,225,255,.25), 0 0 80px rgba(192,107,255,.25), inset 0 0 50px rgba(0,0,0,.6);
-  }
-  .boardGlass{
-    position:absolute; inset:12px; border-radius:16px; pointer-events:none;
+  .card{position:relative;width:min(980px,100%);border-radius:18px;
+    background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+    border:1px solid var(--edge);backdrop-filter:blur(10px);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+  .pad{padding:18px 18px 12px}
+  .title{display:flex;justify-content:center;gap:10px;align-items:center;font-weight:800;letter-spacing:.2px;margin:8px 0 2px}
+  .title .dot{width:10px;height:10px;border-radius:50%;background:conic-gradient(from 180deg,var(--g3),var(--g4),var(--g5),var(--g3));box-shadow:0 0 16px #8ad7ff}
+  .subtitle{color:var(--mut);text-align:center;margin:0 0 10px}
+
+  .board-wrap{position:relative;margin:6px auto 0;width:calc(var(--board-w) + 20px)}
+  .board{position:relative;margin:0 auto;border-radius:16px;overflow:hidden;width:var(--board-w);height:var(--board-h);
     background:
-      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0) 35%),
-      radial-gradient(520px 160px at 50% -15%, rgba(255,255,255,.18), transparent 65%);
-    mix-blend-mode:screen;
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)),
+      linear-gradient(to bottom, rgba(255,255,255,.06), transparent 30%),
+      linear-gradient(180deg, #10122d, #0f1733); border:1px solid var(--edge)}
+  .funnel{position:absolute;left:50%;transform:translateX(-50%);top:10px;width:46%;height:20%;opacity:.45;
+    background:linear-gradient(180deg,#b8c6ff1a,#ffffff05);clip-path:polygon(18% 0,82% 0,100% 100%,0 100%);filter:blur(.2px)}
+  svg{position:absolute;inset:0}
+
+  .ball{position:absolute;width:16px;height:16px;border-radius:50%;pointer-events:none;z-index:3;transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:0}
+  .ball, .ball::before, .ball::after{
+    background:radial-gradient(40% 40% at 30% 30%, #fff, #ffeccc 45%, #ffd676 62%, #a26b15 90%);
+    border-radius:50%;
   }
-  canvas#plinko{ display:block; width:100%; height:auto; aspect-ratio: 13/17; background:#090f22; border-radius:16px; outline:1px solid rgba(255,255,255,.12) }
+  .ball::before{content:"";position:absolute;inset:0;filter:blur(.25px)}
+  .ball::after{content:"";position:absolute;width:8px;height:8px;left:26%;top:24%;
+    background:radial-gradient(circle,#ffffff,#ffffff44 60%,transparent 61%);border-radius:50%}
+  .shadow{position:absolute;width:22px;height:6px;border-radius:50%;background:radial-gradient(closest-side,#0006,transparent);pointer-events:none;z-index:1;opacity:.4;transform:translate(-50%,-50%)}
 
-  .controls{ display:flex; gap:10px; align-items:center; justify-content:center; margin-top:12px; flex-wrap:wrap }
-  .btn{ border:0; border-radius:14px; padding:12px 16px; font-weight:900; cursor:pointer;
-        background:linear-gradient(to right,#71e1ff,#25c3ff); color:#061018; box-shadow:0 0 18px rgba(113,225,255,.45), inset 0 -3px 0 rgba(0,0,0,.35) }
+  .trail{position:absolute;width:12px;height:12px;border-radius:50%;pointer-events:none;opacity:.7;
+    background:radial-gradient(circle at 30% 30%, #fff, #ffd676 55%, #a26b15 95%);filter:blur(.6px);transform:translate(-50%,-50%);animation:fade .35s linear forwards}
+  @keyframes fade{to{opacity:0;transform:translate(-50%,-50%) scale(.7)}}
 
-  .hint{ text-align:center; color:var(--mut); font-weight:800; margin-top:6px }
+  /* Bins: show ONLY points */
+  .bins{position:relative;display:grid;gap:6px;grid-auto-flow:column;margin:10px auto 12px;width:var(--board-w)}
+  .bin{position:relative;height:38px;display:grid;place-items:center;font-weight:900;border-radius:10px;border:1px solid var(--edge);text-shadow:0 1px 0 rgba(0,0,0,.5);font-size:14px}
+  .bin[data-type="outer"]{background:linear-gradient(180deg,#ff9a3c,#ff7a00)}
+  .bin[data-type="mid"]{background:linear-gradient(180deg,#64e886,#2bd96f)}
+  .bin[data-type="center"]{background:linear-gradient(180deg,#e8ff6a,#a6ff3c)}
+  .bin.highlight{outline:3px solid #fff5;box-shadow:0 0 0 6px #fff2 inset,0 0 24px 6px #fff2}
 
-  /* win marquee */
-  .marquee{ position:absolute; left:18px; right:18px; top:12px; display:flex; gap:8px; justify-content:center; pointer-events:none }
-  .dot{ width:10px; height:10px; border-radius:50%; background:radial-gradient(circle at 40% 40%, #fff, #7af0ff 50%, rgba(122,240,255,0) 70%);
-        filter:drop-shadow(0 0 8px #7af0ff); opacity:.25; animation:chase 1.1s linear infinite }
-  .dot:nth-child(odd){ animation-delay:.2s } .dot:nth-child(3n){ animation-delay:.5s }
-  @keyframes chase{ 0%{opacity:.25} 12%{opacity:1} 24%,100%{opacity:.25} }
+  .hud{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 auto;width:min(980px,100%);flex-wrap:wrap;padding:6px 16px 14px}
+  .pill{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--edge);font-weight:700}
+  .btn{display:inline-grid;place-items:center;min-width:58px;height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--edge);cursor:pointer;user-select:none;background:linear-gradient(180deg,#ffd86a,#ffbd3c);color:#3a2700;font-weight:800;box-shadow:var(--glow)}
+  .btn:active{transform:translateY(1px)} .ghost{background:transparent;color:var(--ink)}
+  .num{min-width:78px;display:inline-block;text-align:right}
 
-  /* sparks canvas */
-  #fx{ position:absolute; inset:0; pointer-events:none; border-radius:24px }
+  .progress{display:flex;gap:6px;align-items:center}
+  .dot{width:14px;height:14px;border-radius:50%;border:1px solid var(--edge);background:linear-gradient(180deg,#2b2f59,#191d3a)}
+  .dot.done{background:radial-gradient(circle at 30% 30%, #fff, #ffeccc 45%, #ffd676 62%, #a26b15 90%);box-shadow:0 0 12px #ffd86a66}
 
-  /* voucher modal */
-  .overlay{ position:fixed; inset:0; background:rgba(0,0,12,.86); display:none; place-items:center; z-index:9999; backdrop-filter: blur(4px) }
-  .overlay.show{ display:grid }
-  .modal{ width:min(520px,92vw); border-radius:20px; padding:18px; text-align:center;
-          background:radial-gradient(120% 120% at 50% 0%, #1a1740 0%, #0d1230 60%);
-          outline:1px solid rgba(180,220,255,.25); box-shadow:0 24px 90px rgba(0,0,0,.75); color:#eaf2ff }
-  .voucher{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:clamp(16px,3.8vw,20px);
-            letter-spacing:.6px; padding:12px 14px; border-radius:12px; color:#d8b6ff; background:#0a0d1a;
-            display:inline-block; outline:1px dashed rgba(160,220,255,.4); margin:10px 0 6px }
-  .row{display:flex; gap:10px; justify-content:center; margin-top:10px; flex-wrap:wrap}
-  .copy,.close{cursor:pointer; border:0; border-radius:12px; padding:10px 14px; font-weight:900; font-size:clamp(13px,3.6vw,14px)}
-  .copy{background:#2b2b2b; color:#fff} .close{background:#fff; color:#111}
+  .meter{position:relative;flex:1;min-width:160px;height:12px;border-radius:999px;border:1px solid var(--edge);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03))}
+  .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:linear-gradient(90deg,#62ff7a,#e8ff6a,#ffd86a)}
 
-  .backBtn{
-    position:fixed; top:calc(10px + env(safe-area-inset-top)); left:calc(10px + env(safe-area-inset-left));
-    z-index:99999; display:inline-flex; align-items:center; gap:8px;
-    padding:10px 12px; border-radius:12px; text-decoration:none; font-weight:900; letter-spacing:.3px;
-    color:#0c1220; background:#eaf2ff; box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -2px 0 rgba(0,0,0,.25);
-    user-select:none;
-  }
-  .backBtn svg{ width:16px; height:16px }
+  .win{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;width:88%;height:52px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(180deg, rgba(255,216,106,.25), rgba(255,216,106,.05));border:1px solid var(--edge);font-size:18px;font-weight:900;letter-spacing:.3px;text-align:center;padding:0 10px;pointer-events:none}
+  .win.glow{box-shadow:0 0 0 999px inset rgba(255,216,106,.05), 0 0 42px 8px rgba(255,216,106,.35)}
 
-  @media (prefers-reduced-motion: reduce){
-    *{animation:none !important; transition:none !important}
+  .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(4,6,20,.6);backdrop-filter:blur(6px);z-index:50}
+  .modal.show{display:grid}
+  .sheet{width:min(560px,92vw);border-radius:16px;border:1px solid var(--edge);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));padding:20px 18px 18px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .sheet h3{margin:0 0 6px}
+  .badge{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--edge);background:linear-gradient(180deg,#ffd86a55,#ffd86a22);color:#4a3400;font-weight:900}
+  .code{margin:12px 0 8px;display:flex;gap:8px}
+  .code input{flex:1;background:#0f1333;border:1px dashed #ffffff33;color:#fff;font-weight:800;border-radius:10px;padding:12px}
+  .code .btn{height:44px}
+
+  @media (max-width:980px){
+    :root{--board-w:92vw;--board-h:74vw}
   }
 </style>
 </head>
 <body>
-<a class="backBtn" id="backBtn" href="index.html" aria-label="Voltar ao menu">
-  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 6l-6 6 6 6" stroke="#0c1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  Voltar
-</a>
+<div class="scene">
+  <div class="horizon"></div>
 
-<div class="wrap">
-  <div class="top">
-    <div class="title"><b>Plinko</b> — Derrube 6 bolas. Se cair no WIN, ganha código!</div>
-    <div class="badge" id="status">Bolas: 6</div>
-  </div>
+  <div class="char left" aria-hidden="true"></div>
+  <div class="char right" aria-hidden="true"></div>
 
-  <div class="stage">
-    <div class="boardWrap">
-      <div class="marquee" aria-hidden="true">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="card">
+    <div class="pad">
+      <div class="title"><span class="dot"></span> VIP DAY — BEACH PLINKO <span class="dot"></span></div>
+      <p class="subtitle">Drop <b>10 pearls</b>. Your <b>Total Points</b> decide the voucher tier.</p>
+
+      <div class="board-wrap">
+        <div class="board" id="board">
+          <div class="funnel"></div>
+          <svg id="pegLayer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+
+          <div class="shadow" id="shadow"></div>
+          <div class="ball" id="ball"></div>
+
+          <div class="win" id="win">Ready? Tap DROP.</div>
+        </div>
+        <div class="bins" id="bins"></div>
       </div>
-      <canvas id="plinko" width="520" height="680" aria-label="Tabuleiro Plinko"></canvas>
-      <div class="boardGlass" aria-hidden="true"></div>
     </div>
 
-    <canvas id="fx"></canvas>
+    <div class="hud">
+      <div class="pill">
+        BALLS
+        <div class="progress" id="ballsRow" style="margin-left:6px"></div>
+        <span style="margin-left:8px;font-weight:800" id="ballsText">0/10</span>
+      </div>
 
-    <div class="controls">
-      <button class="btn" id="dropBtn" type="button">Soltar no Centro</button>
-      <button class="btn" id="resetBtn" type="button">Reset</button>
+      <div class="pill" style="gap:12px">
+        TOTAL POINTS <span class="num" id="pts">0</span>
+        <div class="meter"><div class="fill" id="tierFill"></div></div>
+      </div>
+
+      <div style="flex:1"></div>
+
+      <button class="btn" id="dropBtn">DROP</button>
+      <button class="btn ghost" id="autoBtn">AUTO</button>
+      <button class="btn ghost" id="sndBtn" title="Sound">Sound: ON</button>
+      <button class="btn ghost" id="resetBtn" title="Reset">Reset</button>
     </div>
-    <div class="hint">Toque/click na coluna para soltar a bola — o centro tem mais bolsões “WIN”.</div>
   </div>
 </div>
 
-<!-- Voucher modal -->
-<div class="overlay" id="voucherOverlay" role="dialog" aria-modal="true">
-  <div class="modal">
-    <div id="voucherHeader" style="font-weight:900; font-size:clamp(16px,4.2vw,22px); margin-bottom:6px">Seu Código</div>
-    <div class="voucher" id="voucherText">VIPPL20</div>
-    <div class="row">
-      <button class="copy" id="copyBtn" type="button">Copiar Código</button>
-      <button class="close" id="closeBtn" type="button">Fechar</button>
+<div class="modal" id="rewardModal" aria-hidden="true">
+  <div class="sheet">
+    <h3 id="tierTitle">Your VIP Day Reward</h3>
+    <p id="tierDesc" style="margin:6px 0 10px;color:var(--mut)"></p>
+    <div class="badge" id="tierBadge">TIER</div>
+    <div class="code">
+      <input id="voucher" readonly value=""/>
+      <button class="btn" id="copyBtn">Copy Code</button>
     </div>
-    <div style="color:#a9b7d8;margin-top:8px; font-size:12px">Use este código na sua conta.</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn ghost" id="againBtn">Play Again</button>
+      <button class="btn" id="closeBtn">Close</button>
+    </div>
   </div>
 </div>
-
-<!-- SFX -->
-<audio id="sTick" src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/stop.mp3" preload="auto"></audio>
-<audio id="sWin"  src="https://cdn.jsdelivr.net/gh/naptha/tinyfiles@main/slot/win.mp3"  preload="auto"></audio>
 
 <script>
-/* ===== Lock & state ===== */
-const LOCK_KEY='game_lock_choice';
-const lockedChoice = localStorage.getItem(LOCK_KEY);
-if(lockedChoice && lockedChoice !== 'plinko'){ location.href='index.html'; }
+/* ---------- Config ---------- */
+const rows = 12;
+/* Points used for rewards (multipliers removed from UI) */
+const pointsPerBin = [17,6,3,1,0,0,0,1,3,6,17];
 
-const CLAIM_KEY='plinko_claimed_v2';
-const VOUCHER_KEY='plinko_voucher_v2';
-const CODES=['VIPPL10','VIPPL20','VIPPL50'];
+/* Tier plan */
+const TIERS = [
+  {name:"Consolation", min:0,  max:9,   reward:"10 Free Spins", code:"VIP-CONSO-"},
+  {name:"Bronze",      min:10, max:24,  reward:"20 Free Spins + 1 Lucky Sweet Spin", code:"VIP-BRONZE-"},
+  {name:"Silver",      min:25, max:39,  reward:"50 Free Spins + 1 Lucky Sweet Spin", code:"VIP-SILVER-"},
+  {name:"Gold",        min:40, max:59,  reward:"100 Free Spins + 2 Lucky Sweet Spins", code:"VIP-GOLD-"},
+  {name:"Platinum",    min:60, max:79,  reward:"150 Free Spins + 3 Lucky Sweet Spins + R$10 Bonus", code:"VIP-PLAT-"},
+  {name:"Diamond",     min:80, max:999, reward:"200 Free Spins + 5 Lucky Sweet Spins + R$20 Bonus", code:"VIP-DIAM-"},
+];
 
-/* ===== FX (sparks/confetti) ===== */
-const fx = document.getElementById('fx');
-const fctx = fx.getContext('2d');
-function sizeFX(){ fx.width = fx.parentElement.clientWidth; fx.height = fx.parentElement.clientHeight }
-addEventListener('resize', sizeFX); sizeFX();
-function confetti(cx, cy, n=160){
-  const p=[]; for(let i=0;i<n;i++) p.push({x:cx,y:cy,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6-2,life:140+Math.random()*60,h:Math.random()*360,r:2+Math.random()*3});
-  (function loop(){
-    fctx.clearRect(0,0,fx.width,fx.height);
-    let alive=false;
-    p.forEach(o=>{ o.x+=o.vx; o.y+=o.vy; o.vy+=0.06; o.life--; if(o.life>0) alive=true; fctx.globalAlpha=Math.max(0,o.life/200); fctx.fillStyle=`hsl(${o.h},100%,60%)`; fctx.fillRect(o.x,o.y,o.r,o.r); });
-    fctx.globalAlpha=1;
-    if(alive) requestAnimationFrame(loop);
-  })();
-}
+/* RTP shaping */
+const weights = normalizeWeights([1,2,4,6,7,8,7,6,4,2,1]);
 
-/* ===== Plinko board ===== */
-const cvs = document.getElementById('plinko');
-const ctx = cvs.getContext('2d');
-const W=cvs.width, H=cvs.height;
-const COLS = 9;     // pockets
-const ROWS = 9;     // peg rows
-const PEG_SPACING_X = W/(COLS);
-const PEG_SPACING_Y = 64;
-const PEG_R = 5.5;
-const BALL_R = 8.5;
+/* ---------- Elements ---------- */
+const board = document.getElementById('board');
+const pegLayer = document.getElementById('pegLayer');
+const ball = document.getElementById('ball');
+const shadow = document.getElementById('shadow');
+const winEl = document.getElementById('win');
+const binsEl = document.getElementById('bins');
+const dropBtn = document.getElementById('dropBtn');
+const autoBtn = document.getElementById('autoBtn');
+const sndBtn = document.getElementById('sndBtn');
+const resetBtn = document.getElementById('resetBtn');
 
-/* pockets — more WIN in middle */
-const pockets = new Array(COLS).fill(0).map((_,i)=>({
-  x:(i+0.5)*PEG_SPACING_X, w:PEG_SPACING_X, label: (i===4||i===3||i===5)?'WIN':'—'
-}));
+const ptsEl = document.getElementById('pts');
+const tierFill = document.getElementById('tierFill');
+const ballsRow = document.getElementById('ballsRow');
+const ballsText = document.getElementById('ballsText');
 
-/* build pegs in staggered rows */
-let pegs=[];
-for(let r=0;r<ROWS;r++){
-  const offset = (r%2? 0.5:0)*PEG_SPACING_X;
-  for(let c=0;c<COLS-1+(r%2);c++){
-    pegs.push({x:(c+0.5)*PEG_SPACING_X + offset, y: 90 + r*PEG_SPACING_Y});
-  }
-}
-
-/* state */
-let ballsLeft=6, ball=null, won=false;
-const statusEl=document.getElementById('status');
-const dropBtn=document.getElementById('dropBtn');
-const resetBtn=document.getElementById('resetBtn');
-const sTick=document.getElementById('sTick');
-const sWin=document.getElementById('sWin');
-
-function draw(){
-  ctx.clearRect(0,0,W,H);
-
-  // glowing gradient grid
-  const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#0f1a3a'); g.addColorStop(1,'#0b102a');
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-
-  // vertical neon lines
-  ctx.save();
-  ctx.globalAlpha = .08;
-  for(let x=0;x<=W;x+=PEG_SPACING_X/2){
-    ctx.fillStyle='#71e1ff';
-    ctx.fillRect(x,0,1,H);
-  }
-  ctx.restore();
-
-  // pegs (glowy)
-  pegs.forEach(p=>{
-    ctx.beginPath(); ctx.arc(p.x,p.y,PEG_R,0,Math.PI*2);
-    const rg = ctx.createRadialGradient(p.x,p.y,1,p.x,p.y,PEG_R*3);
-    rg.addColorStop(0,'#eaf2ff'); rg.addColorStop(1,'rgba(113,225,255,.0)');
-    ctx.fillStyle='#eaf2ff'; ctx.fill();
-    ctx.fillStyle=rg; ctx.globalAlpha=.7; ctx.beginPath(); ctx.arc(p.x,p.y,PEG_R*3,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha=1;
-  });
-
-  // pockets
-  pockets.forEach((p,i)=>{
-    const isWin = p.label==='WIN';
-    // pocket well
-    ctx.fillStyle = isWin ? 'rgba(255,216,106,.14)' : 'rgba(255,255,255,.06)';
-    ctx.fillRect(i*PEG_SPACING_X, H-90, PEG_SPACING_X, 90);
-    // rim
-    ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=2;
-    ctx.strokeRect(i*PEG_SPACING_X, H-90, PEG_SPACING_X, 90);
-    // label
-    ctx.font='900 14px system-ui,-apple-system,Segoe UI,Roboto'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillStyle = isWin ? '#ffd86a' : '#9fb0d9';
-    ctx.fillText(p.label, p.x, H-46);
-    if(isWin){
-      // glow
-      ctx.shadowColor='rgba(255,216,106,.6)'; ctx.shadowBlur=16;
-      ctx.fillText(p.label, p.x, H-46);
-      ctx.shadowBlur=0;
-    }
-  });
-
-  // ball
-  if(ball){
-    // trail
-    ctx.save(); ctx.globalAlpha=.25; ctx.fillStyle='#71e1ff';
-    for(let i=0;i<ball.trail.length;i++){
-      const t=ball.trail[i]; ctx.beginPath(); ctx.arc(t.x,t.y,BALL_R*(i/ball.trail.length),0,Math.PI*2); ctx.fill();
-    }
-    ctx.restore();
-
-    // actual ball
-    const rg=ctx.createRadialGradient(ball.x-3,ball.y-5,2, ball.x,ball.y,BALL_R+2);
-    rg.addColorStop(0,'#fff'); rg.addColorStop(1,'#71e1ff');
-    ctx.beginPath(); ctx.arc(ball.x,ball.y,BALL_R,0,Math.PI*2); ctx.fillStyle=rg; ctx.fill();
-  }
-}
-
-function step(){
-  if(ball){
-    ball.vy += 0.32; // gravity
-    ball.x += ball.vx; ball.y += ball.vy;
-
-    // keep short trail for glow
-    ball.trail.unshift({x:ball.x, y:ball.y}); if(ball.trail.length>10) ball.trail.pop();
-
-    // walls
-    if(ball.x < BALL_R){ ball.x=BALL_R; ball.vx*= -0.4; tick(); }
-    if(ball.x > W-BALL_R){ ball.x=W-BALL_R; ball.vx*= -0.4; tick(); }
-
-    // peg collisions
-    for(const p of pegs){
-      const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy);
-      if(d < PEG_R + BALL_R){
-        const ang = Math.atan2(dy,dx);
-        const speed = Math.hypot(ball.vx,ball.vy)*0.92;
-        const nAng = ang + (Math.random()<0.5? -1:1) * (Math.PI/2.6);
-        ball.vx = Math.cos(nAng)*speed*0.75;
-        ball.vy = Math.sin(nAng)*speed*0.95;
-        ball.x = p.x + Math.cos(ang)*(PEG_R+BALL_R+0.2);
-        ball.y = p.y + Math.sin(ang)*(PEG_R+BALL_R+0.2);
-        tick(0.07);
-      }
-    }
-
-    // ground
-    if(ball.y >= H-90-BALL_R){
-      const idx = Math.min(COLS-1, Math.max(0, Math.floor(ball.x / PEG_SPACING_X)));
-      const pk = pockets[idx];
-      ball.y = H-50; ball.vx=0; ball.vy=0;
-      if(pk.label==='WIN' && !won){
-        won=true;
-        const code=CODES[(Math.random()*CODES.length)|0];
-        localStorage.setItem(VOUCHER_KEY, code);
-        localStorage.setItem(CLAIM_KEY, '1');
-        try{ sWin.volume=.2; sWin.currentTime=0; sWin.play(); }catch(_){}
-        navigator.vibrate?.([18,40,18]);
-        // confetti at pocket center
-        const r = cvs.getBoundingClientRect();
-        const cx = r.left + pk.x*(r.width/W);
-        const cy = r.top + (H-70)*(r.height/H);
-        confetti(cx, cy, 180);
-        openVoucher(code);
-        try{ track?.('voucher_shown','VIPDay','plinko', code); }catch(_){}
-      }
-      ball=null;
-      updateStatus();
-    }
-  }
-  draw();
-  requestAnimationFrame(step);
-}
-
-function updateStatus(){ statusEl.textContent = `Bolas: ${ballsLeft}`; }
-
-function drop(x){
-  if(won) return; if(ballsLeft<=0) return; if(ball) return;
-  if(!localStorage.getItem(LOCK_KEY)) localStorage.setItem(LOCK_KEY,'plinko');
-  ballsLeft--; updateStatus();
-  const clamped = Math.min(W-10, Math.max(10, x));
-  ball = { x:clamped, y:20, vx:0, vy:0, trail:[] };
-}
-
-function tick(vol=.06){
-  try{ sTick.volume=vol; sTick.currentTime=0; sTick.play(); }catch(_){}
-  navigator.vibrate?.(4);
-}
-
-cvs.addEventListener('click', e=>{
-  const r=cvs.getBoundingClientRect();
-  const x=(e.clientX-r.left)*(W/r.width);
-  drop(x);
-});
-dropBtn.onclick=()=> drop(W/2);
-resetBtn.onclick=()=>{
-  localStorage.removeItem(CLAIM_KEY);
-  localStorage.removeItem(VOUCHER_KEY);
-  won=false; ballsLeft=6; updateStatus();
-};
-
-updateStatus(); draw(); requestAnimationFrame(step);
-
-/* Voucher modal */
-const voucherOverlay = document.getElementById('voucherOverlay');
-const voucherText = document.getElementById('voucherText');
-const voucherHeader = document.getElementById('voucherHeader');
+const modal = document.getElementById('rewardModal');
+const tierTitle = document.getElementById('tierTitle');
+const tierDesc = document.getElementById('tierDesc');
+const tierBadge = document.getElementById('tierBadge');
+const voucher = document.getElementById('voucher');
 const copyBtn = document.getElementById('copyBtn');
+const againBtn = document.getElementById('againBtn');
 const closeBtn = document.getElementById('closeBtn');
 
-function openVoucher(code){
-  voucherText.textContent = code;
-  voucherHeader.textContent = "Resgate agora suas recompensas VIP Day!";
-  voucherOverlay.classList.add('show');
+/* ---------- State ---------- */
+let dropping = false, auto = false, soundOn = true;
+let ballsUsed = 0, totalPoints = 0;
+
+/* ---------- Init HUD ---------- */
+for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='dot'; ballsRow.appendChild(d); }
+updateBallsHUD();
+updateTierFill();
+
+/* ---------- Bins: points only ---------- */
+pointsPerBin.forEach((pts,i)=>{
+  const b = document.createElement('div');
+  b.className = 'bin';
+  b.dataset.index = i;
+  b.dataset.type = (i===0 || i===pointsPerBin.length-1) ? 'outer'
+                 : (i===Math.floor(pointsPerBin.length/2) ? 'center' : 'mid');
+  b.textContent = `${pts} pts`;
+  binsEl.appendChild(b);
+});
+binsEl.style.gridTemplateColumns = `repeat(${pointsPerBin.length}, 1fr)`;
+
+/* ---------- Pegs ---------- */
+const pegs = [];
+function buildPegs(){
+  const W = board.clientWidth, H = board.clientHeight;
+  const leftPad = 30, rightPad = 30, topPad = 40, bottomPad = 80;
+  const usableW = W - leftPad - rightPad;
+  const usableH = H - topPad - bottomPad;
+
+  pegs.length = 0;
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  pegLayer.innerHTML = ''; pegLayer.appendChild(g);
+
+  for(let r=0;r<rows;r++){
+    const count = r+1;
+    for(let c=0;c<count;c++){
+      const x = leftPad + (usableW/(rows))* ( (rows-count)/2 + c );
+      const y = topPad + (usableH/(rows)) * r;
+      pegs.push({x,y,row:r,col:c});
+      const circ = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      const xx = (x/W)*100, yy=(y/H)*100;
+      circ.setAttribute('cx', xx); circ.setAttribute('cy', yy);
+      circ.setAttribute('r', (6/W)*100);
+      circ.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--peg') || '#fff');
+      circ.dataset.idx = pegs.length-1;
+      g.appendChild(circ);
+    }
+  }
 }
+buildPegs(); window.addEventListener('resize', buildPegs);
+
+/* ---------- RNG + Path ---------- */
+let seed = Date.now() & 0xffffffff;
+function rnd(){ seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; return ((seed>>>0)/4294967296); }
+function normalizeWeights(arr){ const s = arr.reduce((a,b)=>a+b,0); return arr.map(v=>v/s); }
+function pickIndex(w){ let t=rnd(),acc=0; for(let i=0;i<w.length;i++){acc+=w[i]; if(t<=acc) return i;} return w.length-1; }
+function pathForBin(binIndex){
+  let col = rows/2, steps=[];
+  for(let r=0;r<rows;r++){
+    const remaining = rows - r, need = binIndex - col;
+    let dir = 0;
+    if(Math.abs(need) >= remaining) dir = Math.sign(need);
+    else{ const p = 0.5 + Math.sign(need)*0.25*rnd(); dir = (rnd()<p) ? Math.sign(need) : -Math.sign(need); if(dir===0) dir = (rnd()<0.5)?-1:1; }
+    col += dir; steps.push({dir, row:r, col:Math.max(0,Math.min(r,col))});
+  }
+  return steps;
+}
+function pegAt(row, idx){ const start = row*(row+1)/2; return pegs[start + idx]; }
+
+/* ---------- Sound ---------- */
+let ctx, master, started = false;
+function ensureAudio(){
+  if(started) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  master = ctx.createGain(); master.gain.value = 0.6; master.connect(ctx.destination);
+  started = true;
+}
+function clickSound(pitch=600, dur=0.04){
+  if(!soundOn||!started) return;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type='square'; o.frequency.value=pitch;
+  g.gain.setValueAtTime(0.12, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur);
+  o.connect(g); g.connect(master); o.start(); o.stop(ctx.currentTime+dur);
+}
+function plopSound(){
+  if(!soundOn||!started) return;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(180, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(120, ctx.currentTime+0.18);
+  g.gain.setValueAtTime(0.18, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.22);
+  o.connect(g); g.connect(master); o.start(); o.stop(ctx.currentTime+0.24);
+}
+
+/* ---------- Helpers ---------- */
+function spawnTrail(x,y){
+  const t = document.createElement('div');
+  t.className = 'trail';
+  t.style.left = x+'px'; t.style.top = y+'px';
+  board.appendChild(t);
+  setTimeout(()=>t.remove(), 350);
+}
+function flashPeg(row,col){
+  const idx = row*(row+1)/2 + col;
+  const node = pegLayer.querySelector(`circle[data-idx="${idx}"]`);
+  if(!node) return;
+  const old = node.getAttribute('fill');
+  node.setAttribute('fill','#fff');
+  setTimeout(()=>node.setAttribute('fill', old), 60);
+}
+function updateBallsHUD(){
+  ballsText.textContent = `${ballsUsed}/10`;
+  for(let i=0;i<10;i++){
+    ballsRow.children[i].classList.toggle('done', i < ballsUsed);
+  }
+}
+function tierFor(points){ return TIERS.find(t=>points>=t.min && points<=t.max) || TIERS[0]; }
+function nextTierPercent(points){
+  const t = tierFor(points);
+  const idx = TIERS.indexOf(t);
+  const curMin = t.min, nextMin = (TIERS[idx+1]?.min) ?? t.max;
+  const span = Math.max(1, nextMin - curMin);
+  const prog = Math.min(1, (points - curMin)/span);
+  return {pct: idx===TIERS.length-1 ? 1 : prog, label: t.name};
+}
+function updateTierFill(){
+  const {pct} = nextTierPercent(totalPoints);
+  tierFill.style.width = `${pct*100}%`;
+}
+
+/* Easing + segment tween */
+function lerp(a,b,t){return a+(b-a)*t}
+function easeOutQuad(t){return 1-(1-t)*(1-t)}
+function easeGravity(t){return t*t}
+function tweenSegment(el, sh, a, b, dur, onPeg){
+  return new Promise(res=>{
+    const t0 = performance.now();
+    const rotStart = Math.random()*360;
+    const step = (t)=>{
+      const raw = Math.min(1, (t - t0)/dur);
+      const k = easeOutQuad(raw);
+      const yk = easeGravity(raw);
+      const x = lerp(a.x,b.x,k), y = lerp(a.y,b.y,yk);
+      el.style.transform = `translate(${x-8}px, ${y-8}px) rotate(${rotStart + raw*180}deg) scale(${raw<.1? 1+(0.12-raw):1})`;
+      sh.style.transform = `translate(${x-8}px, ${Math.min(y+10, b.y+12)-8}px) scale(${1 + raw*.2},1)`;
+      spawnTrail(x,y);
+      if(raw<1) requestAnimationFrame(step);
+      else{
+        if(onPeg){
+          el.animate([
+            {transform:`translate(${x-8}px, ${y-8}px) scale(1,1)`},
+            {transform:`translate(${x-8}px, ${y-8}px) scale(1.15,.85)`},
+            {transform:`translate(${x-8}px, ${y-8}px) scale(1,1)`}
+          ],{duration:90, easing:'ease-out'});
+        }
+        res();
+      }
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+/* ---------- Drop Flow ---------- */
+async function runDrop(){
+  if(dropping) return;
+  ensureAudio();
+  if(ballsUsed >= 10){ flash(winEl,"All balls used"); return; }
+
+  dropping = true; dropBtn.disabled = true;
+
+  const target = pickIndex(weights);
+  const path = pathForBin(target);
+  highlightBin(target);
+
+  const W = board.clientWidth, H = board.clientHeight;
+  const centers = [{x:W/2, y:10}];
+  let col = (rows/2);
+
+  for(let r=0;r<rows;r++){
+    const idx = Math.max(0, Math.min(r, col));
+    const peg = pegAt(r, idx);
+    centers.push({x: peg.x, y: peg.y, row:r, col:idx});
+    col += (path[r].dir<0 ? -1 : 1);
+  }
+
+  /* FINAL LANDING — push to the real bottom */
+  const finalPadX = 30;                 // side padding that bins use
+  const binXStep = (W - finalPadX*2) / rows;
+  const finalX = finalPadX + binXStep * target;
+  const finalY = H - 12;                // <- was too high before; now sits at the very bottom
+  centers.push({x:finalX, y:finalY, bin:true});
+
+  ball.style.opacity = 1; shadow.style.opacity = .45;
+
+  for(let i=0;i<centers.length-1;i++){
+    const A = centers[i], B = centers[i+1];
+    const onPeg = !!A.row || A.row===0;
+    await tweenSegment(ball, shadow, A, B, 230 + (i*5), onPeg);
+    if(onPeg && A.row!==undefined){
+      flashPeg(A.row, A.col);
+      clickSound(520 + (A.row*6), 0.035);
+    }
+  }
+
+  // landing bounce (on the bottom)
+  plopSound();
+  const last = centers.at(-1);
+  await new Promise(res=>{
+    const kf = [
+      {transform:`translate(${last.x-8}px, ${last.y-8}px) scale(1,1)`},
+      {transform:`translate(${last.x-8}px, ${last.y-12}px) scale(1.23,.82)`},
+      {transform:`translate(${last.x-8}px, ${last.y-6}px) scale(.95,1.05)`},
+      {transform:`translate(${last.x-8}px, ${last.y-8}px) scale(1,1)`}
+    ];
+    const a = ball.animate(kf,{duration:300,easing:'cubic-bezier(.2,.7,.2,1)'}); a.onfinish=res;
+  });
+
+  const pts = pointsPerBin[target];
+  totalPoints += pts; ptsEl.textContent = totalPoints; updateTierFill();
+  winEl.textContent = `+${pts} pts — Nice hit!`;
+  winEl.classList.add('glow'); setTimeout(()=>winEl.classList.remove('glow'), 900);
+
+  ballsUsed++; updateBallsHUD();
+
+  const SHEETS_URL = window.SHEETS_URL || "";
+  if(SHEETS_URL){
+    fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({game:'plinko',ball:ballsUsed,points:pts,totalPoints,bin:target,ts:Date.now()})
+    }).catch(()=>{});
+  }
+
+  if(ballsUsed>=10){
+    auto = false; autoBtn.textContent='AUTO';
+    showReward();
+  }
+
+  dropBtn.disabled = false; dropping = false;
+  if(auto && ballsUsed<10) runDrop();
+}
+
+/* ---------- Reward Modal ---------- */
+function randCode(prefix){
+  const s='ABCDEFGHJKMNPQRSTUVWXYZ23456789', n=6;
+  let out=''; for(let i=0;i<n;i++) out += s[Math.floor(Math.random()*s.length)];
+  return `${prefix}${out}`;
+}
+function showReward(){
+  const tier = tierFor(totalPoints);
+  const code = randCode(tier.code);
+  tierTitle.textContent = `🎉 ${tier.name} Reward`;
+  tierDesc.textContent = `Total Points: ${totalPoints} • You’ve unlocked: ${tier.reward}`;
+  tierBadge.textContent = tier.name.toUpperCase();
+  voucher.value = code;
+
+  const SHEETS_URL = window.SHEETS_URL || "";
+  if(SHEETS_URL){
+    fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({game:'plinko',final:true,totalPoints,tier:tier.name,voucher:code,ts:Date.now()})
+    }).catch(()=>{});
+  }
+
+  modal.classList.add('show');
+}
+
+/* ---------- Controls ---------- */
+dropBtn.addEventListener('click', ()=>{ ensureAudio(); runDrop(); });
+autoBtn.addEventListener('click', ()=>{
+  ensureAudio();
+  if(ballsUsed>=10) return;
+  auto = !auto; autoBtn.textContent = auto ? 'AUTO • ON' : 'AUTO';
+  if(auto && !dropping) runDrop();
+});
+sndBtn.addEventListener('click', ()=>{
+  soundOn = !soundOn;
+  sndBtn.textContent = `Sound: ${soundOn ? 'ON' : 'OFF'}`;
+});
+resetBtn.addEventListener('click', ()=>{
+  auto = false; autoBtn.textContent='AUTO';
+  ballsUsed = 0; totalPoints = 0;
+  ptsEl.textContent = 0; updateBallsHUD(); updateTierFill();
+  winEl.textContent = 'Ready? Tap DROP.';
+});
 copyBtn.onclick = async ()=>{
-  const t=voucherText.textContent.trim(); if(!t) return;
-  try{ await navigator.clipboard.writeText(t); copyBtn.textContent='Copiado!'; setTimeout(()=>copyBtn.textContent='Copiar Código',1200);}catch(_){}
+  try{ await navigator.clipboard.writeText(voucher.value); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Code',1200);}
+  catch{ alert('Copy failed'); }
 };
-closeBtn.onclick = ()=> voucherOverlay.classList.remove('show');
-voucherOverlay.addEventListener('click', e=>{ if(!e.target.closest('.modal')) voucherOverlay.classList.remove('show'); });
+againBtn.onclick = ()=>{
+  ballsUsed = 0; totalPoints = 0; ptsEl.textContent = 0;
+  updateBallsHUD(); updateTierFill(); modal.classList.remove('show');
+};
+closeBtn.onclick = ()=> modal.classList.remove('show');
 
-/* Auto-show if already claimed */
-if(localStorage.getItem(CLAIM_KEY)){
-  setTimeout(()=> openVoucher(localStorage.getItem(VOUCHER_KEY)||CODES[0]), 200);
+/* ---------- Build ---------- */
+function init(){ buildPegs(); }
+init(); window.addEventListener('resize', init);
+
+/* ---------- Utilities ---------- */
+function highlightBin(i){
+  document.querySelectorAll('.bin').forEach(b=>b.classList.remove('highlight'));
+  const el=document.querySelector(`.bin[data-index="${i}"]`); if(el) el.classList.add('highlight')
 }
-
-/* Back behavior */
-(function setupBack(){
-  const backBtn=document.getElementById('backBtn');
-  const q=new URLSearchParams(location.search);
-  const backUrl=q.get('back');
-  backBtn.addEventListener('click', (e)=>{
-    e.preventDefault();
-    if(backUrl){ location.href = backUrl; return; }
-    if(history.length > 1){ history.back(); return; }
-    location.href = 'index.html';
-  }, {passive:false});
-})();
-
-/* Minimal Matomo shim */
-function track(){ /* no-op */ }
+function normalizeWeights(arr){ const s = arr.reduce((a,b)=>a+b,0); return arr.map(v=>v/s); }
 </script>
 </body>
 </html>
